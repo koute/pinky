@@ -1,0 +1,126 @@
+; Tests things that an optimized emulator is likely get wrong
+
+     .include "prefix.a"
+
+test_name:
+     .db  "SPRITE OVERFLOW EMULATION",0
+     .code
+
+reset:
+     jsr  begin_sprite_overflow_tests
+     
+     jsr  clear_sprite_table
+     lda  #128
+     ldx  #0
+     ldy  #9
+     jsr  move_sprites
+     lda  #2;) Didn't calculate overflow when no $2002 read for frame
+     ldx  #$18
+     jsr  begin_overflow_test
+     ldy  #16
+     jsr  delay_y_scanlines
+     ldy  #240
+     jsr  delay_y_scanlines
+     ldy  #10
+     jsr  delay_y_scanlines
+     lda  $2002
+     and  #$20
+     jsr  error_if_eq
+     
+     lda  #3;) Disabling rendering didn't recalculate flag time
+     sta  result
+     jsr  clear_sprite_table
+     lda  #127      ; 9 sprites at 127, 9 at 230
+     ldx  #0
+     ldy  #9
+     jsr  move_sprites
+     lda  #230
+     ldy  #9
+     jsr  move_sprites
+     jsr  wait_vbl
+     lda  #$18      ; enable rendering
+     sta  $2001
+     jsr  dma_sprite_table ; 4.5 scanlines
+     ldy  #21
+     jsr  delay_y_scanlines
+     ldy  #121
+     jsr  delay_y_scanlines
+     lda  $2002     ; have emulator think it'll occur next
+     lda  #$00      ; disable rendering
+     sta  $2001
+     ldy  #12
+     jsr  delay_y_scanlines
+     lda  #$18      ; enable rendering
+     sta  $2001
+     ldy  #92
+     jsr  delay_y_scanlines
+     lda  $2002
+     pha
+     ldy  #4
+     jsr  delay_y_scanlines
+     ldx  $2002
+     pla
+     and  #$20
+     jsr  error_if_ne
+     txa
+     and  #$20
+     jsr  error_if_eq
+     
+     lda  #4;) Changing sprite RAM didn't recalculate flag time
+     sta  result
+     lda  #248
+     ldx  #0
+     ldy  #2
+     jsr  move_sprites
+     jsr  wait_vbl
+     lda  #$18      ; enable rendering
+     sta  $2001
+     ldy  #142
+     jsr  delay_y_scanlines
+     lda  $2002     ; have emulator think it'll occur next
+     lda  #$00      ; disable rendering
+     sta  $2001
+     jsr  dma_sprite_table
+     lda  #$18      ; enable rendering
+     sta  $2001
+     ldy  #104
+     jsr  delay_y_scanlines
+     lda  $2002
+     pha
+     ldy  #4
+     jsr  delay_y_scanlines
+     ldx  $2002
+     pla
+     and  #$20
+     jsr  error_if_ne
+     txa
+     and  #$20
+     jsr  error_if_eq
+     
+     jsr  clear_sprite_table
+     lda  #100
+     ldx  #0
+     ldy  #7
+     jsr  move_sprites
+     lda  #115
+     ldy  #2
+     jsr  move_sprites
+     lda  #200
+     ldy  #9
+     jsr  move_sprites
+     lda  #5;) Changing sprite height didn't recalculate time
+     ldx  #$18
+     jsr  begin_overflow_test
+     ldy  #66
+     jsr  delay_y_scanlines
+     lda  $2002     ; have emulator think it'll occur at 200
+     lda  #$20      ; change sprite height so it'll occur at 115
+     sta  $2000
+     ldy  #100
+     jsr  delay_y_scanlines
+     lda  $2002
+     and  #$20
+     jsr  error_if_eq
+
+     jmp  tests_passed
+     

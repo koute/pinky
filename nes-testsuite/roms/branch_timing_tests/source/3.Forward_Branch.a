@@ -1,0 +1,82 @@
+; Tests forward (positive) branch timing.
+; "Branch from $XX to $YY" means that the low byte of the
+; address of the branch opcode is $XX and the low byte of
+; the address of the branch destination is $YY.
+
+     .include "prefix.a"
+
+test_name:
+     .db  "FORWARD BRANCH TIMING",0
+     .code
+     
+reset:
+     jsr  init_tests
+     
+     lda  #2;) Branch from $E5FC to $E5FF is too long/3)short
+     jsr  begin_test
+     ldy  #15
+     ldx  #97
+:    jsr  loop_fc
+     dey
+     bne  -
+     jsr  end_test
+     
+     lda  #4;) Branch from $E6FD to $E700 is too long/5)short
+     jsr  begin_test
+     ldy  #13
+     ldx  #203
+:    jsr  loop_fd
+     dey
+     bne  -
+     nop
+     nop
+     jsr  end_test
+     
+     lda  #6;) Branch from $E7FE to $E801 is too long/7)short
+     jsr  begin_test
+     ldy  #15
+     ldx  #97
+:    jsr  loop_fe
+     dey
+     bne  -
+     jsr  end_test
+     
+     lda  #8;) Branch from $E8FF to $E902 is too long/9)short
+     jsr  begin_test
+     ldy  #15
+     ldx  #97
+:    jsr  loop_ff
+     dey
+     bne  -
+     jsr  end_test
+     
+     jmp  tests_passed
+
+     .org $E5FC
+loop_fc:
+     bne  +
+     rts
+:    dex
+     jmp  loop_fc
+
+     .org $E6FD
+loop_fd:
+     bne  +
+     rts
+:    dex
+     jmp  loop_fd
+
+     .org $E7FE
+loop_fe:
+     bne  +
+     rts
+:    dex
+     jmp  loop_fe
+
+     .org $E8FF
+loop_ff:
+     bne  +
+     rts
+:    dex
+     jmp  loop_ff
+

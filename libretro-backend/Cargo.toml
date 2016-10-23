@@ -1,0 +1,10 @@
+[package]
+name = "libretro-backend"
+version = "0.1.0"
+authors = ["Jan Bujak <j@exia.io>"]
+
+[dependencies]
+"libc" = "0.2"
+
+[dependencies.libretro-sys]
+path = "../libretro-sys"

@@ -1,0 +1,45 @@
+
+	.include "delays.a"
+	.include "console.a"
+	.include "debug.a"
+	.include "ppu_util.a"
+	
+console_ready = $7f1
+
+debug_char:
+	pha
+	lda #$a5
+	cmp console_ready
+	beq +
+	sta console_ready
+	txa
+	pha
+	tya
+	pha
+	jsr init_console
+	pla
+	tay
+	pla
+	tax
+:   pla
+	jmp print_char
+	
+debug_newline:
+	jsr console_newline
+	jmp console_newline
+	
+debug_char_no_wait:
+	jmp print_char_no_wait
+	
+init_runtime:
+clear_console_ready:
+	lda #0
+	sta console_ready
+	rts
+
+forever:
+	sei         ; disable interrupts
+	lda #0
+	sta $2000
+	jsr clear_console_ready
+	jmp exit

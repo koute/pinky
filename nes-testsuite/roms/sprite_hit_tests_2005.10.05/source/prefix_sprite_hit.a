@@ -1,0 +1,178 @@
+      .include "prefix_ppu.a"
+
+sprites     = $200
+sprite_y    = $200
+sprite_tile = $201
+sprite_attr = $202
+sprite_x    = $203
+
+; Clear sprite table
+clear_sprite_table:
+      lda   #$f8
+      ldx   #0
+:     sta   sprites,x
+      inx
+      bne   -
+      rts
+      .code
+
+; Use DMA to copy sprite table to PPU
+; Preserved: A, X, Y
+dma_sprite_table:
+      pha
+      lda   #0
+      sta   $2003
+      lda   #$02
+      sta   $4014
+      pla
+      rts
+      .code
+
+; Set sprite 0 X and Y in table
+; Preserved: A, X, Y
+set_sprite_xy:
+      stx   sprite_x
+      sty   sprite_y
+      rts
+      .code
+
+; Set sprite 0 X and Y in PPU
+; Preserved: A, X, Y
+set_sprite_xy_ppu:
+      pha
+      lda   #0
+      sta   $2003
+      sty   $2004
+      lda   #3
+      sta   $2003
+      stx   $2004
+      pla
+      rts
+      .code
+
+tiles:
+      ; 0-3 filled, color 0, 1/2, 2/1, 3 (not sure which of the 1/2)
+blank_tile = 0
+      .db   $00,$00,$00,$00,$00,$00,$00,$00 ; 0
+      .db   $00,$00,$00,$00,$00,$00,$00,$00
+
+      .db   $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+      .db   $00,$00,$00,$00,$00,$00,$00,$00
+      
+      .db   $00,$00,$00,$00,$00,$00,$00,$00
+      .db   $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+
+solid_tile = 3
+      .db   $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+      .db   $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+      
+      ; 4-7 upper-left, upper-right, lower-left, lower-right
+upper_left_tile = 4
+      .db   $80,$00,$00,$00,$00,$00,$00,$00
+      .db   $80,$00,$00,$00,$00,$00,$00,$00
+      
+upper_right_tile = 5
+      .db   $01,$00,$00,$00,$00,$00,$00,$00
+      .db   $01,$00,$00,$00,$00,$00,$00,$00
+      
+lower_left_tile = 6
+      .db   $00,$00,$00,$00,$00,$00,$00,$80
+      .db   $00,$00,$00,$00,$00,$00,$00,$80
+      
+lower_right_tile = 7
+      .db   $00,$00,$00,$00,$00,$00,$00,$01
+      .db   $00,$00,$00,$00,$00,$00,$00,$01
+      
+two_corners_tile = 8
+      .db   $80,$00,$00,$00,$00,$00,$00,$01
+      .db   $80,$00,$00,$00,$00,$00,$00,$01
+      
+      .code
+
+begin_sprite_hit_tests:
+      jsr   begin_ppu_test
+      jsr   clear_palette
+      jsr   clear_sprite_table
+      lda   #9
+      jsr   load_tiles
+      lda   #blank_tile
+      jsr   fill_nametable
+      rts
+      .code
+
+test_for_hit:
+      sta   <result
+      jsr   wait_vbl
+      stx   $2001       ; set ppu mode
+      lda   #0
+      sta   $2005
+      sta   $2005
+      jsr   dma_sprite_table
+      ldy   #153        ; 29240 delay
+      lda   #37         
+      jsr   delay_ya0
+      lda   $2002
+      ldx   #0          ; disable ppu
+      stx   $2001
+      rts
+      .code
+
+sprite_should_hit:
+      jsr   test_for_hit
+      and   #$40
+      jsr   error_if_eq
+      rts
+      .code
+
+sprite_should_miss:
+      jsr   test_for_hit
+      and   #$40
+      jsr   error_if_ne
+      rts
+      .code
+
+debug_sprite_hit_test:
+      jsr   wait_vbl
+      stx   $2001       ; set ppu mode
+      jsr   load_palette
+      lda   #0
+      sta   $2005
+      sta   $2005
+      jsr   dma_sprite_table
+      lda   #32
+      jsr   debug_char
+      lda   #250
+      jsr   delay_msec
+      lda   #250
+      jsr   delay_msec
+      jmp   forever
+      .code
+      
+begin_sprite_hit_timing:
+      sta   result
+      txa
+      pha
+      jsr   sync_ppu_20
+      lda   #0
+      sta   $2005
+      sta   $2005
+      pla
+      sta   $2001
+      jsr   dma_sprite_table
+      nop         ; 4 delay
+      nop
+      rts
+      .code
+
+check_sprite_hit_timing:
+      txa
+      and   #$40
+      jsr   error_if_ne
+      
+      inc   result
+      tya
+      and   #$40
+      jsr   error_if_eq
+      rts
+      .code
+

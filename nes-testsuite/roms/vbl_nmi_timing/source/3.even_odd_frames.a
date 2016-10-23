@@ -1,0 +1,136 @@
+; Test clock skipped when BG is enabled on odd PPU frames.
+; Tests enable/disable BG during 5 consecutive frames, then see
+; how many clocks were skipped. Patterns are shown as XXXXX, where
+; each X can either be B (BG enabled) or - (BG disabled).
+; Requires that alignment 1 special case be implemented. 
+
+      .include "prefix_ppu.a"
+
+test_name:
+      .db   "EVEN ODD FRAMES",0
+
+test:
+      sta   <2
+      stx   <3
+      sty   <4
+      lda   #0
+      sta   <5
+      jsr   sync_ppu_20
+      lda   <0          ; 6 bg
+      sta   $2001
+      ldy   #41         ; 29789 delay
+      lda   #144        
+      jsr   delay_ya6
+      lda   <1          ; 6 bg
+      sta   $2001
+      ldy   #86         ; 29773+ delay
+      lda   #68         
+      jsr   delay_ya1
+      lda   <2          ; 6 bg
+      sta   $2001
+      ldy   #86         ; 29773+ delay
+      lda   #68         
+      jsr   delay_ya0
+      lda   <3          ; 6 bg
+      sta   $2001
+      ldy   #86         ; 29773+ delay
+      lda   #68         
+      jsr   delay_ya1
+      lda   <4          ; 6 bg
+      sta   $2001
+      ldy   #86         ; 29773+ delay
+      lda   #68         
+      jsr   delay_ya1
+      lda   <5          ; 6 bg
+      sta   $2001
+      ldy   #86         ; 29773+ delay
+      lda   #68         
+      jsr   delay_ya1
+      lda   $2002       ; normally reads $00, $80
+      ldx   $2002       ; one ppu clock less reads $00, $00
+      rts               ; two ppu clocks less reads $80, $00
+
+reset:
+      jsr   begin_ppu_test
+      
+      lda   #2;) Pattern ----- should not skip any clocks
+      sta   <result
+      lda     #0
+      sta   <0
+      lda     #0
+      sta   <1
+      lda     #0
+      ldx     #0
+      ldy     #0
+      jsr   test
+      and   #$80
+      jsr   error_if_ne
+      txa
+      and   #$80
+      jsr   error_if_eq
+      
+      lda   #3;) Pattern BB--- should skip 1 clock
+      sta   <result
+      lda     #8
+      sta   <0
+      lda     #8
+      sta   <1
+      lda     #0
+      ldx     #0
+      ldy     #0
+      jsr   test
+      and   #$80
+      jsr   error_if_ne
+      txa
+      and   #$80
+      jsr   error_if_ne
+      
+      lda   #4;) Pattern B--B- (one even, one odd) should skip 1 clock
+      sta   <result
+      lda     #8
+      sta   <0
+      lda     #0
+      sta   <1
+      lda     #0
+      ldx     #8
+      ldy     #0
+      jsr   test
+      and   #$80
+      jsr   error_if_ne
+      txa
+      and   #$80
+      jsr   error_if_ne
+      
+      lda   #5;) Pattern -B--B (one odd, one even) should skip 1 clock
+      sta   <result
+      lda     #0
+      sta   <0
+      lda     #8
+      sta   <1
+      lda     #0
+      ldx     #0
+      ldy     #8
+      jsr   test
+      and   #$80
+      jsr   error_if_ne
+      txa
+      and   #$80
+      jsr   error_if_ne
+      
+      lda   #6;) Pattern BB-BB (two pairs) should skip 2 clocks
+      sta   <result
+      lda     #8
+      sta   <0
+      lda     #8
+      sta   <1
+      lda     #0
+      ldx     #8
+      ldy     #8
+      jsr   test
+      and   #$80
+      jsr   error_if_eq
+      txa
+      and   #$80
+      jsr   error_if_ne
+      
+      jmp   tests_passed

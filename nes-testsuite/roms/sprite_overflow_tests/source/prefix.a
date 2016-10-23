@@ -1,0 +1,145 @@
+     .include "prefix_ppu.a"
+
+sprites = $200
+
+; Clear sprite table with $F8
+clear_sprite_table:
+     lda  #$F8
+     ldx  #0
+:    sta  sprites,x
+     inx
+     bne  -
+     rts
+     .code
+
+; Set every 4th sprite byte starting at X
+; to A, modifying Y sprites in all.
+move_sprites:
+:    sta  sprites,x
+     inx
+     inx
+     inx
+     inx
+     dey
+     bne  -
+     rts
+
+; Use DMA to copy sprite table to PPU
+; Preserved: A, X, Y
+dma_sprite_table:
+     pha
+     lda  #0
+     sta  $2003
+     lda  #$02
+     sta  $4014
+     pla
+     rts
+     .code
+
+begin_sprite_overflow_tests:
+     sei
+     lda  #0
+     sta  $2000
+     sta  $2001
+     jsr  wait_vbl
+     jsr  wait_vbl
+     
+     ; black palette
+     lda  #$3F
+     jsr  set_vpage
+     ldy  #$40
+     lda  #$0F
+:    sta  $2007
+     dey
+     bne  -
+     
+     jsr  clear_sprite_table
+     rts
+     .code
+
+begin_overflow_test:
+     sta  <result
+     lda  #0
+     sta  $2001
+     jsr  wait_vbl
+     stx  $2001     ; set ppu mode
+     jmp  dma_sprite_table
+     .code
+
+test_for_overflow:
+     jsr  begin_overflow_test
+     ; read early in frame to help buggy emulator
+     ldy  #55       ; 9148 delay
+     lda  #32       
+     jsr  delay_ya1
+     lda  $2002     ; raw scanline 21 + 64
+     ldy  #12       ; 14549 delay
+     lda  #241      
+     jsr  delay_ya0
+     lda  $2002     ; raw scanline 21 + 192
+     ldy  #139      ; 7106 delay
+     lda  #9        
+     jsr  delay_ya0
+     lda  $2002     ; raw scanline 10 of next frame
+     ldx  #0        ; disable ppu
+     stx  $2001
+     rts
+     .code
+
+sprites_should_overflow:
+     jsr  test_for_overflow
+     and  #$20
+     jsr  error_if_eq
+     rts
+     .code
+
+sprites_should_not_overflow:
+     jsr  test_for_overflow
+     and  #$20
+     jsr  error_if_ne
+     rts
+     .code
+
+; Delay for 57 clocks (half a scanline)
+; Preserved: X, Y
+delay_half_scanline:; 6 jsr delay_half_scanline
+     lda  #8        ; 2
+     sec            ; 2
+:    adc  #-2       ; *2
+     bne  -         ; *3
+                    ; -1
+     nop            ; 2
+     rts            ; 6
+     .code
+
+delay_y_scanlines:
+     ;ldy #n        ; 2
+     ;jsr delay_y_scanlines ; 6
+     lda  #$24      ; 2
+     sec            ; 2
+     dey            ; 2
+     beq  one_line  ; 2
+scanline_delay:
+     php            ; *3
+     pha            ; *3
+     nop            ; *2
+     lda  #17       ; *2
+     sec            ; *2
+:    adc  #-2       ; **2
+     bne  -         ; **3
+                    ; *-1
+     pla            ; *4
+     plp            ; *4
+     ror  a         ; *2
+     bcc  extra     ; *3
+extra:
+     dey            ; *2
+     bne  scanline_delay; *3
+                    ; -1
+     sec            ; 2
+one_line:
+     lda  #18       ; 2
+:    adc  #-2       ; *2
+     bne  -         ; *3
+                    ; -1
+     rts            ; 6

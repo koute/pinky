@@ -1,0 +1,26 @@
+[package]
+name = "nes"
+version = "0.1.0"
+authors = ["Jan Bujak <j@exia.io>"]
+
+[dependencies]
+byteorder = "0.5"
+log = "0.3"
+bitflags = "0.7"
+
+[dependencies.emumisc]
+path = "../emumisc"
+
+[dependencies.mos6502]
+path = "../mos6502"
+
+[dev-dependencies.nes-testsuite]
+path = "../nes-testsuite"
+
+[profile.test]
+opt-level = 2
+debug = true
+rpath = false
+lto = false
+debug-assertions = true
+codegen-units = 4

@@ -1,0 +1,186 @@
+	.include "validation.a"
+	.include "ppu_sync.a"
+	
+	.default palette = default_palette
+	.default tiles = default_tiles
+
+begin_ppu_test:
+	lda #0
+	sta result
+	lda #40
+	jsr delay_msec
+	jsr wait_vbl
+	jsr disable_ppu
+	jsr clear_vram
+	jsr clear_sprites
+	rts
+	.code
+	
+default_palette:
+	.db $0f,$01,$02,$39
+	.db $0f,$03,$04,$38
+	.db $0f,$05,$06,$38
+	.db $0f,$11,$12,$38
+	
+	.db $0f,$32,$32,$21
+	.db $0f,$32,$32,$32
+	.db $0f,$32,$32,$32
+	.db $0f,$32,$32,$32
+	.code
+	
+default_tiles:
+	.db $00,$00,$00,$00,$00,$00,$00,$00
+	.db $00,$00,$00,$00,$00,$00,$00,$00
+
+	.db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	.db $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+
+	.db $f0,$0f,$f0,$0f,$f0,$0f,$f0,$0f
+	.db $f0,$0f,$f0,$0f,$f0,$0f,$f0,$0f
+	
+	.db $80,$00,$00,$00,$00,$00,$00,$00
+	.db $80,$00,$00,$00,$00,$00,$00,$00
+	
+	.db $81,$00,$00,$00,$00,$00,$00,$81
+	.db $81,$00,$00,$00,$00,$00,$00,$81
+	.code
+
+clear_palette:
+	jsr wait_vbl
+	lda #$3f
+	jsr set_vpage
+	lda #$0f
+	ldx #$20
+:   sta $2007
+	dex
+	bne -
+	rts
+	.code
+
+; A = # of tiles
+load_tiles:
+	asl a
+	asl a
+	asl a
+	asl a
+	tax
+	jsr wait_vbl
+	lda #0
+	jsr set_vpage
+	ldy #0
+:   lda tiles,y
+	sta $2007
+	iny
+	dex
+	bne -
+	rts
+	.code
+	
+load_test_chr:
+	jsr wait_vbl
+	lda #0
+	jsr set_vpage
+	ldy #0
+:   lda tiles,y
+	sta $2007
+	iny
+	cpy #$40
+	bne -
+	rts
+	.code
+
+load_palette:
+	lda #$3f
+	jsr set_vpage
+	ldy #0
+:   lda palette,y
+	sta $2007
+	iny
+	cpy #$20
+	bne -
+	rts
+	.code
+
+load_graphics:
+	jsr wait_vbl
+	lda #0
+	sta $2000
+	sta $2001
+	jsr load_palette
+	jsr load_test_chr
+	jsr clear_nametable
+	rts
+	.code
+
+; Determine current sprite addr by clearing sprite RAM
+; modifying it and finding the modified byte.
+; Returns address in Y, or $88 if search failed.
+determine_spr_addr:
+	lda #$ff
+	ldy #0
+:   sta $2004
+	dey
+	bne -
+	sty $2004
+:   sty $2003
+	bit $2004
+	bpl spr_addr_found
+	dey
+	bne -
+	ldy #$88
+spr_addr_found:
+	rts
+	.code
+	
+; Determine current VADDR by clearing VRAM then
+; modifying it and finding the modified byte.
+; Return address as $YYXX.
+determine_vaddr:
+	lda #0
+	ldx #$40
+	ldy #0
+:   sta $2007
+	dey
+	bne -
+	dex
+	bne -
+	lda #$12
+	sta $2007
+	lda #0
+	jmp find_changed_vram
+	.code
+	
+; Find first byte in VRAM which doesn't match A.
+; Return address as $YYXX.
+find_changed_vram:
+	pha
+	lda #0
+	jsr set_vpage
+	bit $2007
+	pla
+	ldx #0
+	ldy #0
+:   cmp $2007
+	bne found
+	inx
+	bne -
+	iny
+	cpy #$24
+	bne -
+found:
+	rts
+	.code
+
+delay_29781:
+	ldy #141        ; 29769 delay
+	lda #41     
+	jsr delay_ya1
+	rts
+	.code
+
+delay_29780:
+	ldy #141        ; 29768 delay
+	lda #41     
+	jsr delay_ya0
+	rts
+	.code

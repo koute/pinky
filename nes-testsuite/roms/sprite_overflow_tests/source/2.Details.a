@@ -1,0 +1,108 @@
+; Tests details of sprite overflow flag
+
+     .include "prefix.a"
+
+test_name:
+     .db  "SPRITE OVERFLOW DETAILS",0
+     .code
+
+reset:
+     jsr  begin_sprite_overflow_tests
+     
+     ; Move first 9 sprites to Y = 128, X = 0
+     jsr  clear_sprite_table
+     lda  #128
+     ldx  #0
+     ldy  #9
+     jsr  move_sprites
+     lda  #0
+     ldx  #3
+     ldy  #9
+     jsr  move_sprites
+     lda  #2;) Should be set even when sprites are under left clip (X = 0)
+     ldx  #$18
+     jsr  sprites_should_overflow
+     
+     lda  #3;) Disabling rendering shouldn't clear flag
+     ldx  #$18
+     jsr  test_for_overflow
+     lda  #0
+     sta  $2001
+     lda  $2002     ; raw scanline 10 of next frame
+     and  #$20
+     jsr  error_if_eq
+     lda  #4;) Should be cleared at the end of VBL even when rendering is off
+     ldy  #20
+     jsr  delay_y_scanlines
+     lda  $2002     ; raw scanline 30 of next frame
+     and  #$20
+     jsr  error_if_ne
+     
+     jsr  clear_sprite_table
+     lda  #239
+     ldx  #0
+     ldy  #9
+     jsr  move_sprites
+     lda  #5;) Should be set when sprite Y coordinates are 239
+     ldx  #$18
+     jsr  sprites_should_overflow
+     
+     jsr  clear_sprite_table
+     lda  #240
+     ldx  #0
+     ldy  #64
+     jsr  move_sprites
+     lda  #6;) Shouldn't be set when sprite Y coordinates are 240 (off screen)
+     ldx  #$18
+     jsr  sprites_should_not_overflow
+     
+     jsr  clear_sprite_table
+     lda  #255
+     ldx  #0
+     ldy  #64
+     jsr  move_sprites
+     lda  #7;) Shouldn't be set when sprite Y coordinates are 255 (off screen)
+     ldx  #$18
+     jsr  sprites_should_not_overflow
+     
+     jsr  clear_sprite_table
+     ldx  #0
+     ldy  #11
+     lda  #128
+     jsr  move_sprites
+     lda  #240
+     sta  sprites + 0
+     sta  sprites + 8
+     lda  #8;) Should be set regardless of which sprites are involved
+     ldx  #$18
+     jsr  sprites_should_overflow
+     
+     ldy  #0
+     lda  #0
+:    sta  sprites,y
+     clc
+     adc  #1
+     iny
+     iny
+     iny
+     iny
+     bne  -
+     lda  #9;) Shouldn't be set when all scanlines have 7 or fewer sprites
+     ldx  #$18
+     jsr  sprites_should_not_overflow
+     
+     jsr  clear_sprite_table
+     ldx  #8
+     ldy  #7
+     lda  #128
+     jsr  move_sprites
+     lda  #113
+     sta  sprites + 0
+     sta  sprites + 4
+     lda  #10;) Double-height sprites aren't handled properly
+     ldy  #$20
+     sty  $2000
+     ldx  #$18
+     jsr  sprites_should_overflow
+     
+     jmp  tests_passed

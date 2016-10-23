@@ -1,0 +1,154 @@
+# This file carries information about what exactly the RP2C02 does on each cycle.
+# Data contained here is used to autogenerate PPU execution logic for the emulator.
+#
+# The meaning of each column is as follows:
+#   1. On which scanlines?
+#   2. On which dots?
+#   3. Piece of code that will be run on specified dots on specified scanlines.
+#
+# Each section is more-or-less independent of each other.
+
+##################
+# SCANLINE ALIASES
+##################
+
+# Visible scanlines
+%define vis       0..239
+%define vis_last  239
+
+# Postrender scanline
+%define post      240
+
+# Vertical blanking scanlines
+%define vbl_0     241
+%define vbl_1     242
+%define vbl_last  260
+
+# Prerender scanline
+%define pre       261
+
+##################
+# SPRITE HANDLING
+##################
+
+# Some initialization code.
+000         000                      ppu.state_mut().n_scanline = 0;
+vis, pre    000                      ppu.state_mut().n_dot = 0;
+vis         000                      ppu.state_mut().odd_cycle_flag = true;
+                                     ppu.state_mut().auxiliary_sprite_list_address = 0;
+                                     ppu.state_mut().secondary_sprite_list_address = 0;
+                                     ppu.state_mut().sprite_evaluation_mode = SpriteEvaluationMode::Search;
+                                     ppu.state_mut().first_sprite_is_sprite_zero_on_current_scanline = ppu.state().first_sprite_is_sprite_zero_on_next_scanline;
+                                     ppu.state_mut().first_sprite_is_sprite_zero_on_next_scanline = false;
+                                     if ppu.state().ppumask.show_sprites() {
+                                         ppu.state_mut().sprite_list_address = 0;
+                                     }
+
+vis, pre    000                      ppu.state_mut().sprite_index = 0;
+pre         001                      ppu.state_mut().ppustatus.modify_sprite_0_hit( false );
+
+vis         001..064                 ppu.clear_secondary_sprite_ram_cell();
+vis         065..256                 ppu.sprite_evaluation();
+vis         340                      ppu.state_mut().n_scanline += 1;
+
+vis         257                      ppu.state_mut().secondary_sprite_list_address = 0;
+
+# On every cycle from 257 to 320 the PPU fetches something from the secondary sprite list RAM.
+vis         257..320                 ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
+
+# The Y-coordinate is fetched here.
+vis         257..265..313            ppu.state_mut().sprite_vertical_position_latch = ppu.state().sprite_list_data_latch;
+                                     ppu.state_mut().secondary_sprite_list_address += 1;
+
+# The tile number is fetched here.
+vis         258..266..314            ppu.state_mut().sprite_pattern_index_latch = ppu.state().sprite_list_data_latch;
+                                     ppu.state_mut().secondary_sprite_list_address += 1;
+
+# The attribute byte is fetched here.
+vis         259..267..315            ppu.state_mut().sprite_attributes_latch = ppu.state().sprite_list_data_latch & 0b11100011;
+                                     ppu.current_sprite_mut().attributes_latch = ppu.state().sprite_attributes_latch;
+                                     ppu.state_mut().secondary_sprite_list_address += 1;
+
+# The X-coordinate is fetched here.
+vis         260..268..316            ppu.current_sprite_mut().dots_until_is_displayed = ppu.state().sprite_list_data_latch;
+
+# On cycles:
+#   261..269..317, 262..270..318, 263..271..319, 264..272..320
+# the X-coordinate is fetched over and over again.
+
+vis         264..272..320            ppu.state_mut().secondary_sprite_list_address += 1;
+
+vis, pre    261..269..317            set_lo!( ppu.state_mut().address, ppu.sprite_tile_lo_address_lo() );
+vis, pre    262..270..318            set_hi!( ppu.state_mut().address, ppu.sprite_tile_lo_address_hi() );
+                                     let mut value = ppu.fetch();
+                                     let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
+                                     if should_flip_horizontally {
+                                         value = reverse_bits( value );
+                                     }
+                                     ppu.current_sprite_mut().pattern_lo_shift_register = value;
+
+vis, pre    263..271..319            set_lo!( ppu.state_mut().address, ppu.sprite_tile_hi_address_lo() );
+vis, pre    264..272..320            set_hi!( ppu.state_mut().address, ppu.sprite_tile_hi_address_hi() );
+                                     let mut value = ppu.fetch();
+                                     let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
+                                     if should_flip_horizontally {
+                                         value = reverse_bits( value );
+                                     }
+                                     ppu.current_sprite_mut().pattern_hi_shift_register = value;
+                                     ppu.state_mut().sprite_index += 1;
+
+#######################
+# BACKGROUND HANDLING
+#######################
+
+# For dots 257..320 the background pattern index and packed palette index fetches are garbage.
+vis, pre    001..009..329, 337, 339  set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+vis, pre    002..010..330, 338, 340  set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
+                                     ppu.state_mut().background_pattern_index_latch = ppu.fetch();
+
+vis, pre    003..011..331            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+vis, pre    004..012..332            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
+                                     let packed_palette_indexes = ppu.fetch();
+                                     let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
+                                     ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
+
+vis, pre    005..013..253, 325, 333  set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+vis, pre    006..014..254, 326, 334  set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+                                     ppu.state_mut().tile_lo_latch = ppu.fetch();
+
+vis, pre    007..015..255, 327, 335  set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+vis, pre    008..016..256, 328, 336  set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+                                     ppu.state_mut().tile_hi_latch = ppu.fetch();
+
+vis, pre    008..016..256, 328, 336  if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+vis, pre    256                      if ppu.state().ppumask.show_background() { ppu.increment_vertical_counters(); }
+vis, pre    257                      if ppu.state().ppumask.show_background() { ppu.reset_horizontal_counters(); }
+pre         280..304                 if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+
+############
+# RENDERING
+############
+
+000         000                      ppu.state_mut().n_pixel = 0;
+vis         001..255                 ppu.update_sprite_registers();
+vis         000..255                 ppu.output_pixel();
+#vis         000..255                ppu.shift_sprite_registers();
+#vis         001..255                ppu.decrement_sprite_horizontal_counters();
+vis, pre    000..255, 321..335       ppu.shift_background_registers();
+vis, pre    008..016..256, 328, 336  ppu.reload_background_shift_registers();
+vis_last    255                      ppu.on_frame_was_generated();
+
+#############
+# NMI TIMING
+#############
+
+post        340                      ppu.state_mut().vblank_flag_was_cleared = false;
+vbl_0       000                      if ppu.state().vblank_flag_was_cleared == false {
+                                         ppu.state_mut().ppustatus.modify_vblank_has_occured( true );
+                                     }
+vbl_0       002..340                 ppu.try_trigger_vblank_nmi();
+vbl_1..pre  000..340                 ppu.try_trigger_vblank_nmi();
+vbl_last    340                      ppu.state_mut().odd_frame_flag = !ppu.state().odd_frame_flag;
+pre         000                      ppu.state_mut().ppustatus.0 = 0;
+pre         336                      ppu.state_mut().skip_cycle_flag = ppu.state().odd_frame_flag && ppu.state().ppumask.show_background();
+pre         340                      if ppu.state().skip_cycle_flag { ppu.state_mut().skip_next_cycle = true; }

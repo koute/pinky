@@ -1,0 +1,11 @@
+[package]
+name = "mos6502"
+version = "0.1.0"
+authors = ["Jan Bujak <j@exia.io>"]
+
+[dependencies]
+bitflags = "0.7"
+
+[dependencies.emumisc]
+path = "../emumisc"
+

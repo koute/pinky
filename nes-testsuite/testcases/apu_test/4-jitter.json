@@ -1,0 +1,7 @@
+{
+  "romfile_md5sum": "e5b922f9f33fd5f508ec918f2c0696e7",
+  "test": {
+    "elapsed_frames": 18,
+    "expected_framebuffer_md5sum": "1916d2178cc8bc3ed66df23ec137c2d8"
+  }
+}

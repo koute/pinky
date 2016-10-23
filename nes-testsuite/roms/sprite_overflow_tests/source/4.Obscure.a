@@ -1,0 +1,144 @@
+; Tests the pathological behavior when 8 sprites are on a scanline
+; and the one just after the 8th is not on the scanline. After that,
+; the PPU interprets different bytes of each following sprite as
+; its Y coordinate. 1 2 3 4 5 6 7 8 9 10 11 12 13 14: If 1-8 are
+; on the same scanline, 9 isn't, then the second byte of 10, the
+; third byte of 11, fourth byte of 12, first byte of 13, second byte
+; of 14, etc. are treated as those sprites' Y coordinates for the
+; purpose of setting the overflow flag. This search continues until
+; all sprites have been scanned or one of the (erroneously interpreted)
+; Y coordinates places the sprite within the scanline.
+
+     .include "prefix.a"
+
+test_name:
+     .db  "SPRITE OVERFLOW OBSCURE",0
+     .code
+
+reset:
+     jsr  begin_sprite_overflow_tests
+     
+     jsr  clear_sprite_table
+     lda  #2;) Checks that second byte of sprite #10 is treated as its Y 
+     ldx  #128
+     stx  sprites + 0
+     stx  sprites + 4
+     stx  sprites + 8
+     stx  sprites + 12
+     stx  sprites + 16
+     stx  sprites + 20
+     stx  sprites + 24
+     stx  sprites + 28
+     ; leave sprites + 32 off screen
+     stx  sprites + 37
+     ldx  #$18
+     jsr  sprites_should_overflow
+     
+     jsr  clear_sprite_table
+     lda  #3;) Checks that third byte of sprite #11 is treated as its Y 
+     ldx  #128
+     stx  sprites + 0
+     stx  sprites + 4
+     stx  sprites + 8
+     stx  sprites + 12
+     stx  sprites + 16
+     stx  sprites + 20
+     stx  sprites + 24
+     stx  sprites + 28
+     ; leave sprites + 32 off screen
+     ; leave sprites + 37 off screen
+     stx  sprites + 42
+     ldx  #$18
+     jsr  sprites_should_overflow
+     
+     jsr  clear_sprite_table
+     lda  #4;) Checks that fourth byte of sprite #12 is treated as its Y 
+     ldx  #128
+     stx  sprites + 0
+     stx  sprites + 4
+     stx  sprites + 8
+     stx  sprites + 12
+     stx  sprites + 16
+     stx  sprites + 20
+     stx  sprites + 24
+     stx  sprites + 28
+     ; leave sprites + 32 off screen
+     ; leave sprites + 37 off screen
+     ; leave sprites + 42 off screen
+     stx  sprites + 47
+     ldx  #$18
+     jsr  sprites_should_overflow
+     
+     jsr  clear_sprite_table
+     lda  #5;) Checks that first byte of sprite #13 is treated as its Y 
+     ldx  #128
+     stx  sprites + 0
+     stx  sprites + 4
+     stx  sprites + 8
+     stx  sprites + 12
+     stx  sprites + 16
+     stx  sprites + 20
+     stx  sprites + 24
+     stx  sprites + 28
+     ; leave sprites + 32 off screen
+     ; leave sprites + 37 off screen
+     ; leave sprites + 42 off screen
+     ; leave sprites + 47 off screen
+     stx  sprites + 48
+     ldx  #$18
+     jsr  sprites_should_overflow
+     
+     jsr  clear_sprite_table
+     lda  #6;) Checks that second byte of sprite #14 is treated as its Y 
+     ldx  #128
+     stx  sprites + 0
+     stx  sprites + 4
+     stx  sprites + 8
+     stx  sprites + 12
+     stx  sprites + 16
+     stx  sprites + 20
+     stx  sprites + 24
+     stx  sprites + 28
+     ; leave sprites + 32 off screen
+     ; leave sprites + 37 off screen
+     ; leave sprites + 42 off screen
+     ; leave sprites + 47 off screen
+     ; leave sprites + 48 off screen
+     stx  sprites + 53
+     ldx  #$18
+     jsr  sprites_should_overflow
+     
+     jsr  clear_sprite_table
+     lda  #7;) Checks that search stops at the last (64th) sprite
+     ldx  #128
+     stx  sprites + 1    ; if search erroneously wraps,
+     stx  sprites + 2    ; it will grab one of these
+     stx  sprites + 3
+     stx  sprites + 8
+     stx  sprites + 12
+     stx  sprites + 16
+     stx  sprites + 20
+     stx  sprites + 24
+     stx  sprites + 28
+     stx  sprites + 32
+     stx  sprites + 36
+     ldx  #$18
+     jsr  sprites_should_not_overflow
+     
+     jsr  clear_sprite_table
+     lda  #8;) Same as test #2 but using a different range of sprites
+     ldx  #128
+     stx  sprites + 4
+     stx  sprites + 8
+     stx  sprites + 12
+     stx  sprites + 16
+     stx  sprites + 20
+     stx  sprites + 24
+     stx  sprites + 28
+     stx  sprites + 32
+     ; leave sprites + 36 off screen
+     stx  sprites + 41
+     ldx  #$18
+     jsr  sprites_should_overflow
+     
+     jmp  tests_passed

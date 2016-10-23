@@ -1,0 +1,89 @@
+; Tests timing of NMI suppression when reading VBL flag just as it's set,
+; and that this doesn't occur when reading one clock before or after.
+
+      .include "prefix_ppu.a"
+
+test_name:
+      .db   "NMI SUPPRESSION",0
+
+nmi:  cpx   #1          ; if x isn't 1, interrupt wasn't expected
+      bne   +
+      ldx   #2          ; x = 2 signals that interrupt occurred
+      rti
+:     lda   #0
+      sta   $2001
+      jmp   report_final_result
+      .code
+      
+test_too_late:
+      nop               ; 2
+test_too_soon:
+      ldx   #1          ; 5 interrupt should occur
+      jmp   test_common
+test_on_time:
+      ldx   #0          ; 6
+      nop
+      nop
+test_common:
+      lda   #$80        ; 6 enable nmi
+      sta   $2000
+      pha               ; 9 delay
+      pla
+      nop
+      bit   $2002       ; read and clear flag
+      lda   #$00        ; disable nmi
+      sta   $2000
+      cpx   #1          ; be sure nmi occurred if it should have
+      jsr   error_if_eq
+      rts
+      .code
+      
+reset:
+      jsr   begin_ppu_test
+      
+      lda   #2;) Reading flag 3 PPU clocks before set shouldn't suppress NMI
+      sta   <result
+      jsr   sync_ppu_align0_30
+      jsr   test_too_soon
+      
+      lda   #3;) Reading flag when it's set should suppress NMI
+      sta   <result
+      jsr   sync_ppu_align0_30
+      jsr   test_on_time
+      
+      lda   #4;) Reading flag 3 PPU clocks after set shouldn't suppress NMI
+      sta   <result
+      jsr   sync_ppu_align0_30
+      jsr   test_too_late
+      
+      lda   #5;) Reading flag 2 PPU clocks before set shouldn't suppress NMI
+      sta   <result
+      jsr   sync_ppu_align2_30
+      jsr   test_too_soon
+      
+      lda   #6;) Reading flag 1 PPU clock after set should suppress NMI
+      sta   <result
+      jsr   sync_ppu_align2_30
+      jsr   test_on_time
+      
+      lda   #7;) Reading flag 4 PPU clocks after set shouldn't suppress NMI
+      sta   <result
+      jsr   sync_ppu_align2_30
+      jsr   test_too_late
+      
+      lda   #8;) Reading flag 4 PPU clocks before set shouldn't suppress NMI
+      sta   <result
+      jsr   sync_ppu_align1_31
+      jsr   test_too_soon
+      
+      lda   #9;) Reading flag 1 PPU clock before set should suppress NMI
+      sta   <result
+      jsr   sync_ppu_align1_31
+      jsr   test_on_time
+      
+      lda   #10;) Reading flag 2 PPU clocks after set shouldn't suppress NMI
+      sta   <result
+      jsr   sync_ppu_align1_31
+      jsr   test_too_late
+      
+      jmp   tests_passed

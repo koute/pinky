@@ -1,0 +1,40 @@
+     .include "validation.a"
+
+nmi_count = 10
+
+nmi: inc  <nmi_count
+     rti
+
+init_tests:
+     sei
+     lda  #0
+     sta  $2000
+     sta  $2001
+     jsr  wait_vbl
+     jsr  wait_vbl
+     lda  #$80           ; enable nmi
+     sta  $2000
+     rts
+     .code
+
+begin_test:
+     sta  <result
+     
+     ; synchronize with nmi and clear
+     lda  #-1
+     sta  <nmi_count
+:    cmp  <nmi_count
+     beq  -
+     
+     rts
+     .code
+
+end_test:
+     lda  <nmi_count
+     jsr  error_if_ne    ; too soon
+     inc  <result
+     lda  <nmi_count
+     jsr  error_if_eq    ; too late
+     rts
+     .code
+

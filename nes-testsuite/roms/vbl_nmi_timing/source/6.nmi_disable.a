@@ -1,0 +1,69 @@
+; Tests NMI occurrence when disabling NMI just as VBL flag is set,
+; and just after.
+
+      .include "prefix_ppu.a"
+
+test_name:
+      .db   "NMI DISABLE",0
+
+nmi:  cpx   #1          ; if x isn't 1, interrupt wasn't expected
+      bne   +
+      ldx   #2          ; x = 2 signals that interrupt occurred
+      rti
+:     lda   #0
+      sta   $2001
+      jmp   report_final_result
+      
+test_disable_after_set: ; 6 jsr
+      ldx   #1          ; 5
+      jmp   +
+test_disable_when_set:  ; 6 jsr
+      ldx   #0          ; 4
+      nop
+:     lda   #$80        ; 6 enable nmi
+      sta   $2000
+      pha               ; 9 delay
+      pla
+      nop
+      lda   #$00        ; 2 disable nmi
+      sta   $2000
+      nop
+      nop
+      cpx   #1
+      jmp   error_if_eq
+
+      .code
+reset:
+      jsr   begin_ppu_test
+      
+      lda   #2;) NMI shouldn't occur when disabled 0 PPU clocks after VBL
+      sta   result
+      jsr   sync_ppu_align0_30
+      jsr   test_disable_when_set
+
+      lda   #3;) NMI should occur when disabled 3 PPU clocks after VBL
+      sta   result
+      jsr   sync_ppu_align0_30
+      jsr   test_disable_after_set
+
+      lda   #4;) NMI shouldn't occur when disabled 1 PPU clock after VBL
+      sta   result
+      jsr   sync_ppu_align2_30
+      jsr   test_disable_when_set
+
+      lda   #5;) NMI should occur when disabled 4 PPU clocks after VBL
+      sta   result
+      jsr   sync_ppu_align2_30
+      jsr   test_disable_after_set
+
+      lda   #6;) NMI shouldn't occur when disabled 1 PPU clock before VBL
+      sta   result
+      jsr   sync_ppu_align1_31
+      jsr   test_disable_when_set
+
+      lda   #7;) NMI should occur when disabled 2 PPU clocks after VBL
+      sta   result
+      jsr   sync_ppu_align1_31
+      jsr   test_disable_after_set
+      
+      jmp   tests_passed

@@ -1,0 +1,127 @@
+; Tests timing of NMI and immediate occurrence when enabled with
+; VBL flag already set.
+
+      .include "prefix_ppu.a"
+
+test_name:
+      .db   "NMI TIMING",0
+
+nmi:  cpx   #1          ; if x isn't 1, interrupt wasn't expected
+      bne   +
+      ldx   #2          ; x = 2 signals that interrupt occurred
+      rti
+:     lda   #0
+      sta   $2001
+      jmp   report_final_result
+
+test_too_soon:
+      jmp   test_common ; 3
+test_too_late:
+      nop               ; 2
+test_common:
+      ldx   #0          ; 2 nmi shouldn't occur
+      lda   #$80        ; 6 enable nmi
+      sta   $2000
+      pha               ; 14 delay
+      pla
+      pha
+      pla
+      ldx   #1          ; 2
+                        ; nmi should occur here
+      dex               ; 0 if didn't occur, 1 if did
+      lda   #$00        ; disable nmi
+      sta   $2000
+      cpx   #1          ; nmi should have occurred
+      jsr   error_if_ne
+      rts
+      
+      .code
+reset:
+      jsr   begin_ppu_test
+      
+      lda   #2;) NMI occurred 3 or more PPU clocks too early
+      sta   <result
+      jsr   sync_ppu_align1_31
+      jsr   test_too_soon
+      
+      lda   #3;) NMI occurred 2 PPU clocks too early
+      sta   <result
+      jsr   sync_ppu_align0_30
+      jsr   test_too_soon
+      
+      lda   #4;) NMI occurred 1 PPU clock too early
+      sta   <result
+      jsr   sync_ppu_align2_30
+      jsr   test_too_soon
+      
+      lda   #5;) NMI occurred 3 or more PPU clocks too late
+      sta   <result
+      jsr   sync_ppu_align2_30
+      jsr   test_too_late
+      
+      lda   #6;) NMI occurred 2 PPU clocks too late
+      sta   <result
+      jsr   sync_ppu_align0_30
+      jsr   test_too_late
+      
+      lda   #7;) NMI occurred 1 PPU clock too late
+      sta   <result
+      jsr   sync_ppu_align1_31
+      jsr   test_too_late
+      
+      lda   #8;) NMI should occur if enabled when VBL already set
+      sta   <result
+      jsr   wait_vbl
+      ldy   #25         ; 29800 delay
+      lda   #237        
+      jsr   delay_ya8
+      ldx   #1
+      lda   #$80        ; enable nmi
+      sta   $2000
+      nop
+      nop
+      nop
+      dex               ; 0 if didn't occur, 1 if did
+      lda   #$00        ; disable nmi
+      sta   $2000
+      cpx   #1          ; nmi should have occurred
+      jsr   error_if_ne
+      
+      lda   #9;) NMI enabled when VBL already set should delay 1 instruction
+      sta   <result
+      jsr   wait_vbl
+      ldy   #25         ; 29800 delay
+      lda   #237        
+      jsr   delay_ya8
+      ldx   #0
+      lda   #$80        ; enable nmi
+      sta   $2000
+      ldx   #1          
+                        ; nmi should occur here
+      dex               ; 0 if didn't occur, 1 if did
+      lda   #$00        ; disable nmi
+      sta   $2000
+      cpx   #1          ; nmi should have occurred
+      jsr   error_if_ne
+      
+      lda   #10;) NMI should be possible multiple times in VBL
+      sta   <result
+      jsr   wait_vbl
+      ldy   #25         ; 29800 delay
+      lda   #237        
+      jsr   delay_ya8
+      ldx   #0
+      lda   #$80        ; enable nmi
+      sta   $2000
+      ldx   #1          
+                        ; nmi should occur here
+      dex               ; 0 if didn't occur, 1 if did
+      stx   $2000
+      sta   $2000
+                        ; nmi should occur here
+      lda   #$00        ; disable nmi
+      sta   $2000
+      cpx   #2          ; nmi should have occurred twice
+      jsr   error_if_ne
+      
+      jmp   tests_passed

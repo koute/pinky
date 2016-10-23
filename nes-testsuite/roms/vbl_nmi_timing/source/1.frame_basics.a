@@ -1,0 +1,104 @@
+; Tests basic VBL flag operation and general timing of PPU frames.
+
+      .include "prefix_ppu.a"
+
+test_name:
+      .db   "PPU FRAME BASICS",0
+
+delay_119121:
+      ldy   #100        ; 119118 delay
+      lda   #237        
+      jmp   delay_ya1
+
+begin_and_wait:
+:     bit   $2002
+      bpl   -
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      jsr   delay_119121
+      rts
+
+reset:
+      jsr   begin_ppu_test
+      
+      jsr   wait_vbl
+      ldy   #25         ; 29800 delay
+      lda   #237        
+      jsr   delay_ya8
+      lda   #2;) VBL flag isn't being set
+      lda   $2002
+      and   #$80
+      jsr   error_if_eq
+      
+      lda   #3;) VBL flag should be cleared after being read
+      lda   $2002
+      and   #$80
+      jsr   error_if_ne
+      
+      jsr   wait_vbl
+      lda   #$08        ; 6 enable bg
+      sta   $2001
+      jsr   begin_and_wait
+      ldx   $2002
+      nop
+      nop
+      ldy   $2002
+      
+      lda   #4;) PPU frame with BG enabled is too short
+      sta   result
+      txa
+      and   #$80
+      jsr   error_if_ne
+      
+      lda   #5;) PPU frame with BG enabled is too long
+      sta   result
+      tya
+      and   #$80
+      jsr   error_if_eq
+      
+      jsr   wait_vbl
+      lda   #$00        ; 6 disable bg
+      sta   $2001
+      jsr   begin_and_wait
+      nop
+      nop
+      nop
+      nop
+      nop
+      nop
+      nop
+      ldx   $2002
+      nop
+      nop
+      ldy   $2002
+      
+      lda   #6;) PPU frame with BG disabled is too short
+      sta   result
+      txa
+      and   #$80
+      jsr   error_if_ne
+      
+      lda   #7;) PPU frame with BG disabled is too long
+      sta   result
+      tya
+      and   #$80
+      jsr   error_if_eq
+      
+      jmp   tests_passed

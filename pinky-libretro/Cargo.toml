@@ -1,0 +1,32 @@
+[package]
+name = "pinky-libretro"
+version = "0.1.0"
+authors = ["Jan Bujak <j@exia.io>"]
+
+[lib]
+crate-type = ["dylib"]
+
+[dependencies.libretro-backend]
+path = "../libretro-backend"
+
+[dependencies.nes]
+path = "../nes"
+
+[dependencies.emumisc]
+path = "../emumisc"
+
+[profile.dev]
+opt-level = 2
+debug = true
+rpath = false
+lto = false
+debug-assertions = true
+codegen-units = 4
+
+[profile.release]
+opt-level = 3
+debug = false
+rpath = false
+lto = true
+debug-assertions = false
+codegen-units = 1

@@ -1,0 +1,142 @@
+; Tests sprite overflow flag timing
+
+     .include "prefix.a"
+
+test_name:
+     .db  "SPRITE OVERFLOW TIMING",0
+     .code
+
+begin_timing:
+     sta  result
+     jsr  sync_ppu_20
+     lda  #$18
+     sta  $2001
+     jsr  dma_sprite_table
+     pha  ; 14 delay for later expansion
+     pla
+     pha
+     pla
+     rts
+     
+check_sprite_overflow_timing:
+     txa
+     and  #$20
+     jsr  error_if_ne
+     inc  result
+     tya
+     and  #$20
+     jsr  error_if_eq
+     rts
+
+reset:
+     jsr  begin_sprite_overflow_tests
+     
+     lda  #128
+     ldx  #0
+     ldy  #9
+     jsr  move_sprites
+     lda  #2;) Cleared too late/3)too early at end of VBL
+     jsr  begin_timing
+     ldy  #61       ; 31497 delay
+     lda  #102      
+     jsr  delay_ya4
+     ldy  $2002
+     ldx  $2002
+     jsr  check_sprite_overflow_timing
+     
+     jsr  clear_sprite_table
+     lda  #0
+     ldx  #0
+     ldy  #9
+     jsr  move_sprites
+     lda  #0
+     ldx  #3
+     ldy  #9
+     jsr  move_sprites
+     lda  #4;) Set too early/5)too late for first scanline
+     jsr  begin_timing
+     ldy  #2        ; 1874 delay (1873 and 1875 work reliably,
+     lda  #184      ; 1872 and 1876 fail part of the time)
+     jsr  delay_ya5
+     ldx  $2002
+     ldy  $2002
+     jsr  check_sprite_overflow_timing
+     
+     lda  #255
+     ldx  #3
+     ldy  #9
+     jsr  move_sprites
+     lda  #6;) Sprite horizontal positions should have no effect on timing
+     jsr  begin_timing
+     ldy  #2        ; 1874 delay (1873 and 1875 work reliably,
+     lda  #184      ; 1872 and 1876 fail part of the time)
+     jsr  delay_ya5
+     lda  $2002
+     ldx  $2002
+     and  #$20
+     jsr  error_if_ne
+     txa
+     and  #$20
+     jsr  error_if_eq
+     
+     jsr  clear_sprite_table
+     lda  #0
+     ldx  #220
+     ldy  #9
+     jsr  move_sprites
+     lda  #7;) Set too early/ 8)late for last sprites on first scanline
+     jsr  begin_timing
+     ldy  #8        ; 1911 delay (1909 fails often and 1912 fails occasionally)
+     lda  #46       
+     jsr  delay_ya6
+     ldx  $2002
+     ldy  $2002
+     jsr  check_sprite_overflow_timing
+
+     jsr  clear_sprite_table
+     lda  #239
+     ldx  #0
+     ldy  #9
+     jsr  move_sprites
+     lda  #9;) Set too early/10)too late for last scanline
+     jsr  begin_timing
+     ldy  #26       ; 29040 delay (29038 and 29042 fail sometimes)
+     lda  #222      
+     jsr  delay_ya7
+     ldx  $2002
+     ldy  $2002
+     jsr  check_sprite_overflow_timing
+     
+     jsr  clear_sprite_table
+     lda  #0
+     ldx  #0
+     ldy  #8
+     jsr  move_sprites
+     lda  #0
+     sta  sprites + 255
+     lda  #11;) Set too early/12)too late when 9th sprite # is way after 8th
+     jsr  begin_timing
+     ldy  #8        ; 1911 delay (1909 fails often and 1912 fails occasionally)
+     lda  #46       
+     jsr  delay_ya6
+     ldx  $2002
+     ldy  $2002
+     jsr  check_sprite_overflow_timing
+     
+     jsr  clear_sprite_table
+     lda  #0
+     ldx  #4
+     ldy  #8
+     jsr  move_sprites
+     lda  #1
+     sta  sprites + 0
+     lda  #13;) Overflow on second scanline occurs too early/14)too late
+     jsr  begin_timing
+     ldy  #3        ; 1987 delay (1986 & 1988 work too)
+     lda  #130      
+     jsr  delay_ya2
+     ldx  $2002
+     ldy  $2002
+     jsr  check_sprite_overflow_timing
+     
+     jmp  tests_passed

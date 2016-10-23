@@ -1,0 +1,78 @@
+; Tests branch timing basics
+
+     .include "prefix.a"
+
+test_name:
+     .db  "BRANCH TIMING BASICS",0
+     .code
+     
+delay7 = $20
+
+delay1:
+     jsr  delay2
+     jsr  delay2
+delay2:
+     jsr  delay3
+     jsr  delay3
+delay3:
+     jsr  delay4
+     jsr  delay4
+delay4:
+     jsr  delay5
+     jsr  delay5
+delay5:
+     jsr  delay6
+     jsr  delay6
+delay6:
+     jsr  delay7
+     jsr  delay7
+     jmp  delay7
+     .code
+
+reset:
+     jsr  init_tests
+     
+     lda  #$EA      ; nop
+     sta  delay7
+     lda  #$60      ; rts
+     sta  delay7 + 1     
+     lda  #2;) NMI period is too short/3)too long
+     jsr  begin_test
+     jsr  delay7
+     jsr  delay7
+     jsr  delay5
+     jsr  delay4
+     jsr  delay2
+     jsr  delay2
+     jsr  delay1
+     jsr  delay1
+     jsr  end_test
+     
+     lda  #$B0      ; bcs
+     sta  delay7
+     lda  #$60      ; rts
+     sta  delay7 + 2     
+     lda  #4;) Branch not taken is too long/5)too short
+     jsr  begin_test
+     clc
+     jsr  delay7
+     jsr  delay7
+     jsr  delay5
+     jsr  delay4
+     jsr  delay2
+     jsr  delay2
+     jsr  delay1
+     jsr  delay1
+     jsr  end_test
+     
+     lda  #6;) Branch taken is too long/7)too short
+     jsr  begin_test
+     ldy  #24
+     ldx  #39
+:    dex
+     bne  -
+     dey
+     bne  -
+     jsr  end_test
+     
+     jmp  tests_passed

@@ -1,0 +1,67 @@
+; Tests basic operation of sprite overflow flag (bit 5 of $2002).
+
+     .include "prefix.a"
+
+test_name:
+     .db  "SPRITE OVERFLOW BASICS",0
+     .code
+
+reset:
+     jsr  begin_sprite_overflow_tests
+     
+     ; move first 9 sprites to Y = 128
+     jsr  clear_sprite_table
+     lda  #128
+     ldx  #0
+     ldy  #9
+     jsr  move_sprites
+     
+     ; read $2002 at various times
+     jsr  wait_vbl
+     lda  #$18
+     sta  $2001
+     jsr  dma_sprite_table
+     ldy  #208
+     jsr  delay_y_scanlines
+     
+     lda  #2;) Should be set when 9 sprites are on a scanline
+     sta  result
+     lda  $2002     ; raw scanline 21 + 128 + 64
+     and  #$20
+     jsr  error_if_eq
+     
+     lda  #3;) Reading $2002 shouldn't clear flag
+     sta  result
+     lda  $2002
+     and  #$20
+     jsr  error_if_eq
+     ldy  #59
+     jsr  delay_y_scanlines
+     
+     lda  #4;) Shouldn't be cleared at the beginning of VBL
+     sta  result
+     lda  $2002     ; raw scanline 10 of next frame
+     and  #$20
+     jsr  error_if_eq
+     ldy  #20
+     jsr  delay_y_scanlines
+     
+     lda  #5;) Should be cleared at the end of VBL
+     sta  result
+     lda  $2002     ; raw scanline 30 of next frame
+     and  #$20
+     jsr  error_if_ne
+     
+     lda  #6;) Shouldn't be set when all rendering is off
+     ldx  #$00
+     jsr  sprites_should_not_overflow
+     
+     lda  #7;) Should work normally when $2001 = $08 (bg rendering only)
+     ldx  #$08
+     jsr  sprites_should_overflow
+     
+     lda  #8;) Should work normally when $2001 = $10 (sprite rendering only)
+     ldx  #$10
+     jsr  sprites_should_overflow
+     
+     jmp  tests_passed

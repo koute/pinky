@@ -1,0 +1,74 @@
+; Tests timing of VBL being set, and special case where reading VBL flag
+; as it would be set causes it to not be set for that frame.
+
+      .include "prefix_ppu.a"
+
+test_name:
+      .db   "VBL TIMING",0
+
+test_too_soon:
+      jsr   delay_20
+      lda   $2002
+      and   #$80
+      jsr   error_if_ne
+      lda   $2002
+      and   #$80
+      jsr   error_if_eq
+      rts
+
+test_too_late:
+      jsr   delay_21
+      lda   $2002
+      and   #$80
+      jsr   error_if_eq
+      lda   $2002
+      and   #$80
+      jsr   error_if_ne
+      rts
+      .code
+      
+reset:
+      jsr   begin_ppu_test
+      
+      lda   #2;) Flag should read as clear 3 PPU clocks before VBL
+      sta   <result
+      jsr   sync_ppu_align0_30
+      jsr   test_too_soon
+      
+      lda   #3;) Flag should read as set 0 PPU clocks after VBL
+      sta   <result
+      jsr   sync_ppu_align0_30
+      jsr   test_too_late
+      
+      lda   #4;) Flag should read as clear 2 PPU clocks before VBL
+      sta   <result
+      jsr   sync_ppu_align2_30
+      jsr   test_too_soon
+      
+      lda   #5;) Flag should read as set 1 PPU clock after VBL
+      sta   <result
+      jsr   sync_ppu_align2_30
+      jsr   test_too_late
+      
+      lda   #6;) Flag should read as clear 1 PPU clock before VBL
+      sta   <result
+      jsr   sync_ppu_align1_31
+      jsr   test_too_soon
+      
+      lda   #7;) Flag should read as set 2 PPU clocks after VBL
+      sta   <result
+      jsr   sync_ppu_align1_30
+      jsr   test_too_late
+      
+      lda   #8;) Reading 1 PPU clock before VBL should suppress setting
+      sta   <result
+      jsr   sync_ppu_align1_30
+      jsr   delay_26
+      lda   $2002
+      and   #$80
+      jsr   error_if_ne
+      lda   $2002
+      and   #$80
+      jsr   error_if_ne
+      
+      jmp   tests_passed

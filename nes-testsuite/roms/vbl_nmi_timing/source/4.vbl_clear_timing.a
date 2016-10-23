@@ -1,0 +1,69 @@
+; Tests timing of VBL flag clearing.
+
+      .include "prefix_ppu.a"
+
+test_name:
+      .db   "VBL CLEAR TIMING",0
+
+test_too_soon:
+      ldy   #2          ; 2291 delay
+      lda   #226        
+      jsr   delay_ya2
+      lda   $2002
+      and   #$80
+      jsr   error_if_eq
+      lda   $2002
+      and   #$80
+      jsr   error_if_ne
+      rts
+
+test_too_late:
+      ldy   #2          ; 2292 delay
+      lda   #226        
+      jsr   delay_ya3
+      lda   $2002
+      and   #$80
+      jsr   error_if_ne
+      rts
+      .code
+      
+reset:
+      jsr   begin_ppu_test
+      
+      lda   #2;) Cleared 3 or more PPU clocks too early
+      sta   <result
+      jsr   sync_ppu_align2_30
+      nop
+      jsr   test_too_soon
+      
+      lda   #3;) Cleared 2 PPU clocks too early
+      sta   <result
+      jsr   sync_ppu_align1_30
+      nop
+      jsr   test_too_soon
+      
+      lda   #4;) Cleared 1 PPU clock too early 
+      sta   <result
+      jsr   sync_ppu_align0_30
+      pha
+      jsr   test_too_soon
+      
+      lda   #5;) Cleared 3 or more PPU clocks too late
+      sta   <result
+      jsr   sync_ppu_align0_30
+      pha
+      jsr   test_too_late
+      
+      lda   #6;) Cleared 2 PPU clocks too late
+      sta   <result
+      jsr   sync_ppu_align1_30
+      nop
+      jsr   test_too_late
+      
+      lda   #7;) Cleared 1 PPU clock too late
+      sta   <result
+      jsr   sync_ppu_align2_30
+      nop
+      jsr   test_too_late
+      
+      jmp   tests_passed
