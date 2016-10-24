@@ -51,8 +51,7 @@ which could be easily hooked to any other emulator simply by implementing
 a single trait (see `nes/src/testsuite.rs`).
 
 The `nes` contains the emulator itself. `mos6502` has the 6502 interpreter,
-which could be useful for emulating other 6502-based machines. The `libretro-backend`
-is a work-in-progress Rust binding to the libretro API.
+which could be useful for emulating other 6502-based machines.
 
 ## There are already hundreds of NES emulators out there; why another?
 
