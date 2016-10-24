@@ -6,8 +6,8 @@ authors = ["Jan Bujak <j@exia.io>"]
 [lib]
 crate-type = ["dylib"]
 
-[dependencies.libretro-backend]
-path = "../libretro-backend"
+[dependencies]
+libretro-backend = "0.1"
 
 [dependencies.nes]
 path = "../nes"

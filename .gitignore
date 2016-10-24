@@ -8,9 +8,5 @@ mos6502/target
 mos6502/Cargo.lock
 nes/target
 nes/Cargo.lock
-libretro-sys/target
-libretro-sys/Cargo.lock
-libretro-backend/target
-libretro-backend/Cargo.lock
 emumisc/target
 emumisc/Cargo.lock
