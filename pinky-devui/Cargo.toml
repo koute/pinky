@@ -13,6 +13,7 @@ name = "pinky-devui"
 clock_ticks = "0.1"
 serde_json = "0.7"
 md5 = "0.1"
+env_logger = "0.3"
 
 [dependencies.emumisc]
 path = "../emumisc"
