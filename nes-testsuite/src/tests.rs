@@ -189,6 +189,21 @@ pub mod sprite_hit_tests_2005_10_05 {
 
         harness::standard_testcase::< T >( ROM, "6e946157b0a4575ad28dd77d6a0998bd", 24 );
     }
+    pub fn testcase_08_double_height< T: harness::EmulatorInterface >() {
+        static ROM: &'static [u8] = include_bytes!( "../roms/sprite_hit_tests_2005.10.05/08.double_height.nes" );
+
+        harness::standard_testcase::< T >( ROM, "b8cb45dfdf1c7fed572aa910d03c48db", 20 );
+    }
+    pub fn testcase_09_timing_basics< T: harness::EmulatorInterface >() {
+        static ROM: &'static [u8] = include_bytes!( "../roms/sprite_hit_tests_2005.10.05/09.timing_basics.nes" );
+
+        harness::standard_testcase::< T >( ROM, "ab27927fd0393001a12acd99d13020cc", 63 );
+    }
+    pub fn testcase_10_timing_order< T: harness::EmulatorInterface >() {
+        static ROM: &'static [u8] = include_bytes!( "../roms/sprite_hit_tests_2005.10.05/10.timing_order.nes" );
+
+        harness::standard_testcase::< T >( ROM, "1fa4915b3c7ef833bdc5b7a1c7d77055", 59 );
+    }
     pub fn testcase_11_edge_timing< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/sprite_hit_tests_2005.10.05/11.edge_timing.nes" );
 
@@ -424,6 +439,21 @@ macro_rules! nes_testsuite {
             fn testcase_07_screen_bottom() {
                 use super::$interface;
                 $crate::tests::sprite_hit_tests_2005_10_05::testcase_07_screen_bottom::< $interface >();
+            }
+            #[test]
+            fn testcase_08_double_height() {
+                use super::$interface;
+                $crate::tests::sprite_hit_tests_2005_10_05::testcase_08_double_height::< $interface >();
+            }
+            #[test]
+            fn testcase_09_timing_basics() {
+                use super::$interface;
+                $crate::tests::sprite_hit_tests_2005_10_05::testcase_09_timing_basics::< $interface >();
+            }
+            #[test]
+            fn testcase_10_timing_order() {
+                use super::$interface;
+                $crate::tests::sprite_hit_tests_2005_10_05::testcase_10_timing_order::< $interface >();
             }
             #[test]
             fn testcase_11_edge_timing() {
