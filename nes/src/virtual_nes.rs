@@ -317,6 +317,8 @@ trait Private: Sized + Context {
 
     fn load_rom< T: Read + Seek >( &mut self, stream: &mut T ) -> Result< (), LoadError > {
         let rom = try!( NesRom::load( stream ) );
+        info!( "Loaded ROM: {:?}", rom );
+
         let mapper = try!( create_mapper( rom ) );
 
         self.state_mut().mapper = mapper;
