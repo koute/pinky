@@ -165,7 +165,7 @@ impl State {
             write_toggle: false,
 
             n_pixel: 0,
-            n_scanline: 0,
+            n_scanline: 261, // We start on the prerender scanline.
             n_dot: 0,
             bg_pattern_lo_shift_register: 0,
             bg_pattern_hi_shift_register: 0,
@@ -191,11 +191,11 @@ impl State {
             background_palette_index_latch: 0,
             tile_lo_latch: 0,
             tile_hi_latch: 0,
-            scanline_index: 0,
+            scanline_index: SCANLINES.len() as u8 - 1, // Point at the prerender scanline.
             scanline_counter: 0,
-            chunk_index: 0,
+            chunk_index: SCANLINES.last().unwrap().first_chunk_index,
             chunk_counter: 0,
-            action_index: 0,
+            action_index: CHUNKS[ SCANLINES.last().unwrap().first_chunk_index as usize ].first_action_index,
             auxiliary_sprite_list_address: 0,
             secondary_sprite_list_address: 0,
             sprite_list_data_latch: 0,
