@@ -748,13 +748,61 @@ trait Private: Sized + Context {
     #[inline]
     fn sprite_tile_lo_address( &self ) -> u16 {
         let flip_vertically = is_b7_set( self.state().sprite_attributes_latch );
-        let index = self.state().sprite_pattern_index_latch;
-        let mut offset_y = (self.state().n_scanline as i16 - (self.state().sprite_vertical_position_latch as i16 & (8 - 1)) & (8 - 1)) as u16;
-        debug_assert!( offset_y <= 7 );
-        if flip_vertically {
-            offset_y = 7 - offset_y;
+
+        if self.state().ppuctrl.big_sprite_mode() == false {
+            let index = self.state().sprite_pattern_index_latch;
+            let mut tile_y = (self.state().n_scanline as i16 - self.state().sprite_vertical_position_latch as i16) & 7;
+            debug_assert!( tile_y < 8 );
+
+            if flip_vertically {
+                tile_y = (8 - 1) - tile_y;
+            }
+
+            self.state().ppuctrl.sprite_pattern_table_address() + index as u16 * 16 + tile_y as u16
+        } else {
+            // In double height sprite mode the pattern table is not selected
+            // by the ppuctrl; it's taken from the least significant bit of
+            // the sprite's index attribute.
+            let pattern_table_address = if self.state().sprite_pattern_index_latch & 1 == 0 {
+                0x0000
+            } else {
+                0x1000
+            };
+
+            // The top and the bottom 8x8 sprite patterns that compose a single
+            // 8x16 sprite are laid out in memory interleaved, e.g.:
+            //     sprite0_top, sprite0_bottom, sprite1_top, sprite1_bottom, ...
+            // so we mask out the least significant bit of the index to get
+            // the index of the top sprite.
+            let top_sprite_index = self.state().sprite_pattern_index_latch & (!1);
+            let bottom_sprite_index = top_sprite_index + 1;
+
+            let sprite_y = (self.state().n_scanline as i16 - self.state().sprite_vertical_position_latch as i16) & 15;
+            let mut is_upper_sprite = sprite_y < 8;
+
+            if flip_vertically {
+                // The top and the bottom tiles of the sprite are swapped.
+                is_upper_sprite = !is_upper_sprite;
+            }
+
+            let mut tile_y = if sprite_y < 8 {
+                sprite_y
+            } else {
+                sprite_y - 8
+            };
+
+            let index = if is_upper_sprite {
+                top_sprite_index
+            } else {
+                bottom_sprite_index
+            };
+
+            if flip_vertically {
+                tile_y = (8 - 1) - tile_y;
+            }
+
+            pattern_table_address + index as u16 * 16 + tile_y as u16
         }
-        self.state().ppuctrl.sprite_pattern_table_address() + index as u16 * 16 + offset_y
     }
 
     #[inline]
