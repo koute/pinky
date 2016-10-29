@@ -4,7 +4,7 @@ def output( code = '' )
     $output ||= ""
     $indentation = 0 if $indentation == nil
     lines = code.strip.split( "\n" ).map do |line|
-        balanced_braces = line.count("{") == line.count("}")
+        balanced_braces = line.count("{") > 0 && line.count("{") == line.count("}")
 
         if balanced_braces == false && (line.strip.end_with?( '}' ) || line.strip.end_with?( '];' ) || line.strip.end_with?( '},' ))
             $indentation -= 4
