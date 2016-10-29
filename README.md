@@ -1,3 +1,5 @@
+[![Build Status](https://api.travis-ci.org/koute/pinky.svg)](https://travis-ci.org/koute/pinky)
+
 # Pinky
 
 Pinky is an [NES] emulator written in [Rust] completely from scratch
