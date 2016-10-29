@@ -40,1161 +40,1254 @@ macro_rules! ppu_scheduling_logic {
             Scanline {
                 times: 1,
                 first_chunk_index: 26,
-                last_chunk_index: 27
-            },
-            Scanline {
-                times: 18,
-                first_chunk_index: 28,
                 last_chunk_index: 28
             },
             Scanline {
-                times: 1,
+                times: 18,
                 first_chunk_index: 29,
                 last_chunk_index: 30
             },
             Scanline {
                 times: 1,
                 first_chunk_index: 31,
-                last_chunk_index: 40
+                last_chunk_index: 32
             },
-            ];
-
-            static CHUNKS: &'static [Chunk] = &[
-                Chunk {
-                    times: 1,
-                    first_action_index: 0,
-                    last_action_index: 0
-                },
-                Chunk {
-                    times: 8,
-                    first_action_index: 1,
-                    last_action_index: 8
-                },
-                Chunk {
-                    times: 23,
-                    first_action_index: 9,
-                    last_action_index: 16
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 17,
-                    last_action_index: 25
-                },
-                Chunk {
-                    times: 7,
-                    first_action_index: 26,
-                    last_action_index: 33
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 34,
-                    last_action_index: 40
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 41,
-                    last_action_index: 56
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 57,
-                    last_action_index: 60
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 61,
-                    last_action_index: 61
-                },
-                Chunk {
-                    times: 8,
-                    first_action_index: 62,
-                    last_action_index: 69
-                },
-                Chunk {
-                    times: 23,
-                    first_action_index: 70,
-                    last_action_index: 77
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 78,
-                    last_action_index: 86
-                },
-                Chunk {
-                    times: 7,
-                    first_action_index: 87,
-                    last_action_index: 94
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 95,
-                    last_action_index: 101
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 102,
-                    last_action_index: 117
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 118,
-                    last_action_index: 121
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 122,
-                    last_action_index: 122
-                },
-                Chunk {
-                    times: 8,
-                    first_action_index: 123,
-                    last_action_index: 130
-                },
-                Chunk {
-                    times: 23,
-                    first_action_index: 131,
-                    last_action_index: 138
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 139,
-                    last_action_index: 147
-                },
-                Chunk {
-                    times: 7,
-                    first_action_index: 148,
-                    last_action_index: 155
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 156,
-                    last_action_index: 162
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 163,
-                    last_action_index: 178
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 179,
-                    last_action_index: 182
-                },
-                Chunk {
-                    times: 340,
-                    first_action_index: 183,
-                    last_action_index: 183
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 184,
-                    last_action_index: 184
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 185,
-                    last_action_index: 186
-                },
-                Chunk {
-                    times: 339,
-                    first_action_index: 187,
-                    last_action_index: 187
-                },
-                Chunk {
-                    times: 341,
-                    first_action_index: 188,
-                    last_action_index: 188
-                },
-                Chunk {
-                    times: 340,
-                    first_action_index: 189,
-                    last_action_index: 189
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 190,
-                    last_action_index: 190
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 191,
-                    last_action_index: 192
-                },
-                Chunk {
-                    times: 31,
-                    first_action_index: 193,
-                    last_action_index: 200
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 201,
-                    last_action_index: 208
-                },
-                Chunk {
-                    times: 2,
-                    first_action_index: 209,
-                    last_action_index: 216
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 217,
-                    last_action_index: 222
-                },
-                Chunk {
-                    times: 3,
-                    first_action_index: 223,
-                    last_action_index: 230
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 231,
-                    last_action_index: 231
-                },
-                Chunk {
-                    times: 2,
-                    first_action_index: 232,
-                    last_action_index: 239
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 240,
-                    last_action_index: 255
-                },
-                Chunk {
-                    times: 1,
-                    first_action_index: 256,
-                    last_action_index: 259
-                },
-                ];
-
-                #[allow(unused_variables)]
-                fn action_00< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().n_scanline = 0;
-                    ppu.state_mut().n_pixel = 0;
-                    ppu.state_mut().n_dot = 0;
-                    ppu.state_mut().sprite_index = 0;
-                    ppu.state_mut().odd_cycle_flag = true;
-                    ppu.state_mut().auxiliary_sprite_list_address = 0;
-                    ppu.state_mut().secondary_sprite_list_address = 0;
-                    ppu.state_mut().sprite_evaluation_mode = SpriteEvaluationMode::Search;
-                    ppu.state_mut().first_sprite_is_sprite_zero_on_current_scanline = ppu.state().first_sprite_is_sprite_zero_on_next_scanline;
-                    ppu.state_mut().first_sprite_is_sprite_zero_on_next_scanline = false;
-                    if ppu.state().ppumask.show_sprites() {
-                        ppu.state_mut().sprite_list_address = 0;
-                    }
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_01< T: Private >( ppu: &mut T ) {
-                    ppu.clear_secondary_sprite_ram_cell();
-                    set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_02< T: Private >( ppu: &mut T ) {
-                    ppu.clear_secondary_sprite_ram_cell();
-                    set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
-                    ppu.state_mut().background_pattern_index_latch = ppu.fetch();
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_03< T: Private >( ppu: &mut T ) {
-                    ppu.clear_secondary_sprite_ram_cell();
-                    set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_04< T: Private >( ppu: &mut T ) {
-                    ppu.clear_secondary_sprite_ram_cell();
-                    set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
-                    let packed_palette_indexes = ppu.fetch();
-                    let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
-                    ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_05< T: Private >( ppu: &mut T ) {
-                    ppu.clear_secondary_sprite_ram_cell();
-                    set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_06< T: Private >( ppu: &mut T ) {
-                    ppu.clear_secondary_sprite_ram_cell();
-                    set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                    ppu.state_mut().tile_lo_latch = ppu.fetch();
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_07< T: Private >( ppu: &mut T ) {
-                    ppu.clear_secondary_sprite_ram_cell();
-                    set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_08< T: Private >( ppu: &mut T ) {
-                    ppu.clear_secondary_sprite_ram_cell();
-                    set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                    ppu.state_mut().tile_hi_latch = ppu.fetch();
-                    if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
-                    ppu.reload_background_shift_registers();
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_09< T: Private >( ppu: &mut T ) {
-                    ppu.sprite_evaluation();
-                    set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_10< T: Private >( ppu: &mut T ) {
-                    ppu.sprite_evaluation();
-                    set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
-                    ppu.state_mut().background_pattern_index_latch = ppu.fetch();
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_11< T: Private >( ppu: &mut T ) {
-                    ppu.sprite_evaluation();
-                    set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_12< T: Private >( ppu: &mut T ) {
-                    ppu.sprite_evaluation();
-                    set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
-                    let packed_palette_indexes = ppu.fetch();
-                    let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
-                    ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_13< T: Private >( ppu: &mut T ) {
-                    ppu.sprite_evaluation();
-                    set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_14< T: Private >( ppu: &mut T ) {
-                    ppu.sprite_evaluation();
-                    set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                    ppu.state_mut().tile_lo_latch = ppu.fetch();
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_15< T: Private >( ppu: &mut T ) {
-                    ppu.sprite_evaluation();
-                    set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_16< T: Private >( ppu: &mut T ) {
-                    ppu.sprite_evaluation();
-                    set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                    ppu.state_mut().tile_hi_latch = ppu.fetch();
-                    if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
-                    ppu.reload_background_shift_registers();
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_17< T: Private >( ppu: &mut T ) {
-                    ppu.sprite_evaluation();
-                    set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                    ppu.state_mut().tile_hi_latch = ppu.fetch();
-                    if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
-                    ppu.reload_background_shift_registers();
-                    if ppu.state().ppumask.show_background() { ppu.increment_vertical_counters(); };
-                }
-
-                #[allow(unused_variables)]
-                fn action_18< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().secondary_sprite_list_address = 0;
-                    ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
-                    ppu.state_mut().sprite_vertical_position_latch = ppu.state().sprite_list_data_latch;
-                    ppu.state_mut().secondary_sprite_list_address += 1;
-                    set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-                    if ppu.state().ppumask.show_background() { ppu.reset_horizontal_counters(); };
-                }
-
-                #[allow(unused_variables)]
-                fn action_19< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
-                    ppu.state_mut().sprite_pattern_index_latch = ppu.state().sprite_list_data_latch;
-                    ppu.state_mut().secondary_sprite_list_address += 1;
-                    set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
-                    ppu.state_mut().background_pattern_index_latch = ppu.fetch();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_20< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
-                    ppu.state_mut().sprite_attributes_latch = ppu.state().sprite_list_data_latch & 0b11100011;
-                    ppu.current_sprite_mut().attributes_latch = ppu.state().sprite_attributes_latch;
-                    ppu.state_mut().secondary_sprite_list_address += 1;
-                    set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );;
-                }
-
-                #[allow(unused_variables)]
-                fn action_21< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
-                    ppu.current_sprite_mut().dots_until_is_displayed = ppu.state().sprite_list_data_latch;
-                    set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
-                    let packed_palette_indexes = ppu.fetch();
-                    let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
-                    ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;;
-                }
-
-                #[allow(unused_variables)]
-                fn action_22< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
-                    set_lo!( ppu.state_mut().address, ppu.sprite_tile_lo_address_lo() );;
-                }
-
-                #[allow(unused_variables)]
-                fn action_23< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
-                    set_hi!( ppu.state_mut().address, ppu.sprite_tile_lo_address_hi() );
-                    let mut value = ppu.fetch();
-                    let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
-                    if should_flip_horizontally {
-                        value = reverse_bits( value );
-                    }
-                    ppu.current_sprite_mut().pattern_lo_shift_register = value;;
-                }
-
-                #[allow(unused_variables)]
-                fn action_24< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
-                    set_lo!( ppu.state_mut().address, ppu.sprite_tile_hi_address_lo() );;
-                }
-
-                #[allow(unused_variables)]
-                fn action_25< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
-                    ppu.state_mut().secondary_sprite_list_address += 1;
-                    set_hi!( ppu.state_mut().address, ppu.sprite_tile_hi_address_hi() );
-                    let mut value = ppu.fetch();
-                    let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
-                    if should_flip_horizontally {
-                        value = reverse_bits( value );
-                    }
-                    ppu.current_sprite_mut().pattern_hi_shift_register = value;
-                    ppu.state_mut().sprite_index += 1;;
-                }
-
-                #[allow(unused_variables)]
-                fn action_26< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
-                    ppu.state_mut().sprite_vertical_position_latch = ppu.state().sprite_list_data_latch;
-                    ppu.state_mut().secondary_sprite_list_address += 1;
-                    set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );;
-                }
-
-                #[allow(unused_variables)]
-                fn action_27< T: Private >( ppu: &mut T ) {
-                    set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_28< T: Private >( ppu: &mut T ) {
-                    set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
-                    ppu.state_mut().background_pattern_index_latch = ppu.fetch();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_29< T: Private >( ppu: &mut T ) {
-                    set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_30< T: Private >( ppu: &mut T ) {
-                    set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
-                    let packed_palette_indexes = ppu.fetch();
-                    let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
-                    ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_31< T: Private >( ppu: &mut T ) {
-                    set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_32< T: Private >( ppu: &mut T ) {
-                    set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                    ppu.state_mut().tile_lo_latch = ppu.fetch();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_33< T: Private >( ppu: &mut T ) {
-                    set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_34< T: Private >( ppu: &mut T ) {
-                    set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                    ppu.state_mut().tile_hi_latch = ppu.fetch();
-                    if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
-                    ppu.reload_background_shift_registers();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_35< T: Private >( ppu: &mut T ) {
-                    set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                    ppu.state_mut().tile_hi_latch = ppu.fetch();
-                    if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
-                    ppu.reload_background_shift_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_36< T: Private >( ppu: &mut T ) {
-                    set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );;
-                }
-
-                #[allow(unused_variables)]
-                fn action_37< T: Private >( ppu: &mut T ) {
-                    set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
-                    ppu.state_mut().background_pattern_index_latch = ppu.fetch();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_38< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().n_scanline += 1;
-                    set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
-                    ppu.state_mut().background_pattern_index_latch = ppu.fetch();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_39< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().n_dot = 0;
-                    ppu.state_mut().sprite_index = 0;
-                    ppu.state_mut().odd_cycle_flag = true;
-                    ppu.state_mut().auxiliary_sprite_list_address = 0;
-                    ppu.state_mut().secondary_sprite_list_address = 0;
-                    ppu.state_mut().sprite_evaluation_mode = SpriteEvaluationMode::Search;
-                    ppu.state_mut().first_sprite_is_sprite_zero_on_current_scanline = ppu.state().first_sprite_is_sprite_zero_on_next_scanline;
-                    ppu.state_mut().first_sprite_is_sprite_zero_on_next_scanline = false;
-                    if ppu.state().ppumask.show_sprites() {
-                        ppu.state_mut().sprite_list_address = 0;
-                    }
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_40< T: Private >( ppu: &mut T ) {
-                    ppu.sprite_evaluation();
-                    set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
-                    ppu.update_sprite_registers();
-                    ppu.output_pixel();
-                    ppu.shift_background_registers();
-                    ppu.on_frame_was_generated();;
-                }
-
-                #[allow(unused_variables)]
-                fn action_41< T: Private >( ppu: &mut T ) {
-                    ;
-                }
-
-                #[allow(unused_variables)]
-                fn action_42< T: Private >( ppu: &mut T ) {
-                    ppu.state_mut().vblank_flag_was_cleared = false;;
-                }
-
-                #[allow(unused_variables)]
-                fn action_43< T: Private >( ppu: &mut T ) {
-                    if ppu.state().vblank_flag_was_cleared == false {
-                        ppu.state_mut().ppustatus.modify_vblank_has_occured( true );
-                        };
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_44< T: Private >( ppu: &mut T ) {
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_45< T: Private >( ppu: &mut T ) {
-                        ppu.try_trigger_vblank_nmi();
-                        ppu.state_mut().odd_frame_flag = !ppu.state().odd_frame_flag;;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_46< T: Private >( ppu: &mut T ) {
-                        ppu.state_mut().n_dot = 0;
-                        ppu.state_mut().sprite_index = 0;
-                        ppu.shift_background_registers();
-                        ppu.try_trigger_vblank_nmi();
-                        ppu.state_mut().ppustatus.0 = 0;;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_47< T: Private >( ppu: &mut T ) {
-                        ppu.state_mut().ppustatus.modify_sprite_0_hit( false );
-                        set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-                        ppu.shift_background_registers();
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_48< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
-                        ppu.state_mut().background_pattern_index_latch = ppu.fetch();
-                        ppu.shift_background_registers();
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_49< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
-                        ppu.shift_background_registers();
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_50< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
-                        let packed_palette_indexes = ppu.fetch();
-                        let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
-                        ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
-                        ppu.shift_background_registers();
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_51< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
-                        ppu.shift_background_registers();
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_52< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                        ppu.state_mut().tile_lo_latch = ppu.fetch();
-                        ppu.shift_background_registers();
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_53< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
-                        ppu.shift_background_registers();
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_54< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                        ppu.state_mut().tile_hi_latch = ppu.fetch();
-                        if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
-                        ppu.reload_background_shift_registers();
-                        ppu.shift_background_registers();
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_55< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-                        ppu.shift_background_registers();
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_56< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                        ppu.state_mut().tile_hi_latch = ppu.fetch();
-                        if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
-                        ppu.reload_background_shift_registers();
-                        if ppu.state().ppumask.show_background() { ppu.increment_vertical_counters(); }
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_57< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-                        if ppu.state().ppumask.show_background() { ppu.reset_horizontal_counters(); }
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_58< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
-                        ppu.state_mut().background_pattern_index_latch = ppu.fetch();
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_59< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_60< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
-                        let packed_palette_indexes = ppu.fetch();
-                        let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
-                        ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_61< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.sprite_tile_lo_address_lo() );
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_62< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, ppu.sprite_tile_lo_address_hi() );
-                        let mut value = ppu.fetch();
-                        let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
-                        if should_flip_horizontally {
-                            value = reverse_bits( value );
-                        }
-                        ppu.current_sprite_mut().pattern_lo_shift_register = value;
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_63< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.sprite_tile_hi_address_lo() );
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_64< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, ppu.sprite_tile_hi_address_hi() );
-                        let mut value = ppu.fetch();
-                        let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
-                        if should_flip_horizontally {
-                            value = reverse_bits( value );
-                        }
-                        ppu.current_sprite_mut().pattern_hi_shift_register = value;
-                        ppu.state_mut().sprite_index += 1;
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_65< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_66< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, ppu.sprite_tile_hi_address_hi() );
-                        let mut value = ppu.fetch();
-                        let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
-                        if should_flip_horizontally {
-                            value = reverse_bits( value );
-                        }
-                        ppu.current_sprite_mut().pattern_hi_shift_register = value;
-                        ppu.state_mut().sprite_index += 1;
-                        if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_67< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-                        if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_68< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
-                        ppu.state_mut().background_pattern_index_latch = ppu.fetch();
-                        if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_69< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
-                        if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_70< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
-                        let packed_palette_indexes = ppu.fetch();
-                        let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
-                        ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
-                        if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_71< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.sprite_tile_lo_address_lo() );
-                        if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_72< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, ppu.sprite_tile_lo_address_hi() );
-                        let mut value = ppu.fetch();
-                        let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
-                        if should_flip_horizontally {
-                            value = reverse_bits( value );
-                        }
-                        ppu.current_sprite_mut().pattern_lo_shift_register = value;
-                        if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_73< T: Private >( ppu: &mut T ) {
-                        set_lo!( ppu.state_mut().address, ppu.sprite_tile_hi_address_lo() );
-                        if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
-                        ppu.try_trigger_vblank_nmi();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_74< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                        ppu.state_mut().tile_hi_latch = ppu.fetch();
-                        if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
-                        ppu.reload_background_shift_registers();
-                        ppu.try_trigger_vblank_nmi();
-                        ppu.state_mut().skip_cycle_flag = ppu.state().odd_frame_flag && ppu.state().ppumask.show_background();;
-                    }
-
-                    #[allow(unused_variables)]
-                    fn action_75< T: Private >( ppu: &mut T ) {
-                        set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
-                        ppu.state_mut().background_pattern_index_latch = ppu.fetch();
-                        ppu.try_trigger_vblank_nmi();
-                        if ppu.state().skip_cycle_flag { ppu.state_mut().skip_next_cycle = true; };
-                    }
-
-                    unsafe fn get_action< T: Private >( index: usize ) -> fn( &mut T ) {
-                        match index {
-                            0 => action_00::< T > as fn( &mut T ),
-                            1 => action_01::< T > as fn( &mut T ),
-                            2 => action_02::< T > as fn( &mut T ),
-                            3 => action_03::< T > as fn( &mut T ),
-                            4 => action_04::< T > as fn( &mut T ),
-                            5 => action_05::< T > as fn( &mut T ),
-                            6 => action_06::< T > as fn( &mut T ),
-                            7 => action_07::< T > as fn( &mut T ),
-                            8 => action_08::< T > as fn( &mut T ),
-                            9 => action_09::< T > as fn( &mut T ),
-                            10 => action_10::< T > as fn( &mut T ),
-                            11 => action_11::< T > as fn( &mut T ),
-                            12 => action_12::< T > as fn( &mut T ),
-                            13 => action_13::< T > as fn( &mut T ),
-                            14 => action_14::< T > as fn( &mut T ),
-                            15 => action_15::< T > as fn( &mut T ),
-                            16 => action_16::< T > as fn( &mut T ),
-                            17 => action_09::< T > as fn( &mut T ),
-                            18 => action_10::< T > as fn( &mut T ),
-                            19 => action_11::< T > as fn( &mut T ),
-                            20 => action_12::< T > as fn( &mut T ),
-                            21 => action_13::< T > as fn( &mut T ),
-                            22 => action_14::< T > as fn( &mut T ),
-                            23 => action_15::< T > as fn( &mut T ),
-                            24 => action_17::< T > as fn( &mut T ),
-                            25 => action_18::< T > as fn( &mut T ),
-                            26 => action_19::< T > as fn( &mut T ),
-                            27 => action_20::< T > as fn( &mut T ),
-                            28 => action_21::< T > as fn( &mut T ),
-                            29 => action_22::< T > as fn( &mut T ),
-                            30 => action_23::< T > as fn( &mut T ),
-                            31 => action_24::< T > as fn( &mut T ),
-                            32 => action_25::< T > as fn( &mut T ),
-                            33 => action_26::< T > as fn( &mut T ),
-                            34 => action_19::< T > as fn( &mut T ),
-                            35 => action_20::< T > as fn( &mut T ),
-                            36 => action_21::< T > as fn( &mut T ),
-                            37 => action_22::< T > as fn( &mut T ),
-                            38 => action_23::< T > as fn( &mut T ),
-                            39 => action_24::< T > as fn( &mut T ),
-                            40 => action_25::< T > as fn( &mut T ),
-                            41 => action_27::< T > as fn( &mut T ),
-                            42 => action_28::< T > as fn( &mut T ),
-                            43 => action_29::< T > as fn( &mut T ),
-                            44 => action_30::< T > as fn( &mut T ),
-                            45 => action_31::< T > as fn( &mut T ),
-                            46 => action_32::< T > as fn( &mut T ),
-                            47 => action_33::< T > as fn( &mut T ),
-                            48 => action_34::< T > as fn( &mut T ),
-                            49 => action_27::< T > as fn( &mut T ),
-                            50 => action_28::< T > as fn( &mut T ),
-                            51 => action_29::< T > as fn( &mut T ),
-                            52 => action_30::< T > as fn( &mut T ),
-                            53 => action_31::< T > as fn( &mut T ),
-                            54 => action_32::< T > as fn( &mut T ),
-                            55 => action_33::< T > as fn( &mut T ),
-                            56 => action_35::< T > as fn( &mut T ),
-                            57 => action_36::< T > as fn( &mut T ),
-                            58 => action_37::< T > as fn( &mut T ),
-                            59 => action_36::< T > as fn( &mut T ),
-                            60 => action_38::< T > as fn( &mut T ),
-                            61 => action_39::< T > as fn( &mut T ),
-                            62 => action_01::< T > as fn( &mut T ),
-                            63 => action_02::< T > as fn( &mut T ),
-                            64 => action_03::< T > as fn( &mut T ),
-                            65 => action_04::< T > as fn( &mut T ),
-                            66 => action_05::< T > as fn( &mut T ),
-                            67 => action_06::< T > as fn( &mut T ),
-                            68 => action_07::< T > as fn( &mut T ),
-                            69 => action_08::< T > as fn( &mut T ),
-                            70 => action_09::< T > as fn( &mut T ),
-                            71 => action_10::< T > as fn( &mut T ),
-                            72 => action_11::< T > as fn( &mut T ),
-                            73 => action_12::< T > as fn( &mut T ),
-                            74 => action_13::< T > as fn( &mut T ),
-                            75 => action_14::< T > as fn( &mut T ),
-                            76 => action_15::< T > as fn( &mut T ),
-                            77 => action_16::< T > as fn( &mut T ),
-                            78 => action_09::< T > as fn( &mut T ),
-                            79 => action_10::< T > as fn( &mut T ),
-                            80 => action_11::< T > as fn( &mut T ),
-                            81 => action_12::< T > as fn( &mut T ),
-                            82 => action_13::< T > as fn( &mut T ),
-                            83 => action_14::< T > as fn( &mut T ),
-                            84 => action_15::< T > as fn( &mut T ),
-                            85 => action_17::< T > as fn( &mut T ),
-                            86 => action_18::< T > as fn( &mut T ),
-                            87 => action_19::< T > as fn( &mut T ),
-                            88 => action_20::< T > as fn( &mut T ),
-                            89 => action_21::< T > as fn( &mut T ),
-                            90 => action_22::< T > as fn( &mut T ),
-                            91 => action_23::< T > as fn( &mut T ),
-                            92 => action_24::< T > as fn( &mut T ),
-                            93 => action_25::< T > as fn( &mut T ),
-                            94 => action_26::< T > as fn( &mut T ),
-                            95 => action_19::< T > as fn( &mut T ),
-                            96 => action_20::< T > as fn( &mut T ),
-                            97 => action_21::< T > as fn( &mut T ),
-                            98 => action_22::< T > as fn( &mut T ),
-                            99 => action_23::< T > as fn( &mut T ),
-                            100 => action_24::< T > as fn( &mut T ),
-                            101 => action_25::< T > as fn( &mut T ),
-                            102 => action_27::< T > as fn( &mut T ),
-                            103 => action_28::< T > as fn( &mut T ),
-                            104 => action_29::< T > as fn( &mut T ),
-                            105 => action_30::< T > as fn( &mut T ),
-                            106 => action_31::< T > as fn( &mut T ),
-                            107 => action_32::< T > as fn( &mut T ),
-                            108 => action_33::< T > as fn( &mut T ),
-                            109 => action_34::< T > as fn( &mut T ),
-                            110 => action_27::< T > as fn( &mut T ),
-                            111 => action_28::< T > as fn( &mut T ),
-                            112 => action_29::< T > as fn( &mut T ),
-                            113 => action_30::< T > as fn( &mut T ),
-                            114 => action_31::< T > as fn( &mut T ),
-                            115 => action_32::< T > as fn( &mut T ),
-                            116 => action_33::< T > as fn( &mut T ),
-                            117 => action_35::< T > as fn( &mut T ),
-                            118 => action_36::< T > as fn( &mut T ),
-                            119 => action_37::< T > as fn( &mut T ),
-                            120 => action_36::< T > as fn( &mut T ),
-                            121 => action_38::< T > as fn( &mut T ),
-                            122 => action_39::< T > as fn( &mut T ),
-                            123 => action_01::< T > as fn( &mut T ),
-                            124 => action_02::< T > as fn( &mut T ),
-                            125 => action_03::< T > as fn( &mut T ),
-                            126 => action_04::< T > as fn( &mut T ),
-                            127 => action_05::< T > as fn( &mut T ),
-                            128 => action_06::< T > as fn( &mut T ),
-                            129 => action_07::< T > as fn( &mut T ),
-                            130 => action_08::< T > as fn( &mut T ),
-                            131 => action_09::< T > as fn( &mut T ),
-                            132 => action_10::< T > as fn( &mut T ),
-                            133 => action_11::< T > as fn( &mut T ),
-                            134 => action_12::< T > as fn( &mut T ),
-                            135 => action_13::< T > as fn( &mut T ),
-                            136 => action_14::< T > as fn( &mut T ),
-                            137 => action_15::< T > as fn( &mut T ),
-                            138 => action_16::< T > as fn( &mut T ),
-                            139 => action_09::< T > as fn( &mut T ),
-                            140 => action_10::< T > as fn( &mut T ),
-                            141 => action_11::< T > as fn( &mut T ),
-                            142 => action_12::< T > as fn( &mut T ),
-                            143 => action_13::< T > as fn( &mut T ),
-                            144 => action_14::< T > as fn( &mut T ),
-                            145 => action_40::< T > as fn( &mut T ),
-                            146 => action_17::< T > as fn( &mut T ),
-                            147 => action_18::< T > as fn( &mut T ),
-                            148 => action_19::< T > as fn( &mut T ),
-                            149 => action_20::< T > as fn( &mut T ),
-                            150 => action_21::< T > as fn( &mut T ),
-                            151 => action_22::< T > as fn( &mut T ),
-                            152 => action_23::< T > as fn( &mut T ),
-                            153 => action_24::< T > as fn( &mut T ),
-                            154 => action_25::< T > as fn( &mut T ),
-                            155 => action_26::< T > as fn( &mut T ),
-                            156 => action_19::< T > as fn( &mut T ),
-                            157 => action_20::< T > as fn( &mut T ),
-                            158 => action_21::< T > as fn( &mut T ),
-                            159 => action_22::< T > as fn( &mut T ),
-                            160 => action_23::< T > as fn( &mut T ),
-                            161 => action_24::< T > as fn( &mut T ),
-                            162 => action_25::< T > as fn( &mut T ),
-                            163 => action_27::< T > as fn( &mut T ),
-                            164 => action_28::< T > as fn( &mut T ),
-                            165 => action_29::< T > as fn( &mut T ),
-                            166 => action_30::< T > as fn( &mut T ),
-                            167 => action_31::< T > as fn( &mut T ),
-                            168 => action_32::< T > as fn( &mut T ),
-                            169 => action_33::< T > as fn( &mut T ),
-                            170 => action_34::< T > as fn( &mut T ),
-                            171 => action_27::< T > as fn( &mut T ),
-                            172 => action_28::< T > as fn( &mut T ),
-                            173 => action_29::< T > as fn( &mut T ),
-                            174 => action_30::< T > as fn( &mut T ),
-                            175 => action_31::< T > as fn( &mut T ),
-                            176 => action_32::< T > as fn( &mut T ),
-                            177 => action_33::< T > as fn( &mut T ),
-                            178 => action_35::< T > as fn( &mut T ),
-                            179 => action_36::< T > as fn( &mut T ),
-                            180 => action_37::< T > as fn( &mut T ),
-                            181 => action_36::< T > as fn( &mut T ),
-                            182 => action_38::< T > as fn( &mut T ),
-                            183 => action_41::< T > as fn( &mut T ),
-                            184 => action_42::< T > as fn( &mut T ),
-                            185 => action_43::< T > as fn( &mut T ),
-                            186 => action_41::< T > as fn( &mut T ),
-                            187 => action_44::< T > as fn( &mut T ),
-                            188 => action_44::< T > as fn( &mut T ),
-                            189 => action_44::< T > as fn( &mut T ),
-                            190 => action_45::< T > as fn( &mut T ),
-                            191 => action_46::< T > as fn( &mut T ),
-                            192 => action_47::< T > as fn( &mut T ),
-                            193 => action_48::< T > as fn( &mut T ),
-                            194 => action_49::< T > as fn( &mut T ),
-                            195 => action_50::< T > as fn( &mut T ),
-                            196 => action_51::< T > as fn( &mut T ),
-                            197 => action_52::< T > as fn( &mut T ),
-                            198 => action_53::< T > as fn( &mut T ),
-                            199 => action_54::< T > as fn( &mut T ),
-                            200 => action_55::< T > as fn( &mut T ),
-                            201 => action_48::< T > as fn( &mut T ),
-                            202 => action_49::< T > as fn( &mut T ),
-                            203 => action_50::< T > as fn( &mut T ),
-                            204 => action_51::< T > as fn( &mut T ),
-                            205 => action_52::< T > as fn( &mut T ),
-                            206 => action_53::< T > as fn( &mut T ),
-                            207 => action_56::< T > as fn( &mut T ),
-                            208 => action_57::< T > as fn( &mut T ),
-                            209 => action_58::< T > as fn( &mut T ),
-                            210 => action_59::< T > as fn( &mut T ),
-                            211 => action_60::< T > as fn( &mut T ),
-                            212 => action_61::< T > as fn( &mut T ),
-                            213 => action_62::< T > as fn( &mut T ),
-                            214 => action_63::< T > as fn( &mut T ),
-                            215 => action_64::< T > as fn( &mut T ),
-                            216 => action_65::< T > as fn( &mut T ),
-                            217 => action_58::< T > as fn( &mut T ),
-                            218 => action_59::< T > as fn( &mut T ),
-                            219 => action_60::< T > as fn( &mut T ),
-                            220 => action_61::< T > as fn( &mut T ),
-                            221 => action_62::< T > as fn( &mut T ),
-                            222 => action_63::< T > as fn( &mut T ),
-                            223 => action_66::< T > as fn( &mut T ),
-                            224 => action_67::< T > as fn( &mut T ),
-                            225 => action_68::< T > as fn( &mut T ),
-                            226 => action_69::< T > as fn( &mut T ),
-                            227 => action_70::< T > as fn( &mut T ),
-                            228 => action_71::< T > as fn( &mut T ),
-                            229 => action_72::< T > as fn( &mut T ),
-                            230 => action_73::< T > as fn( &mut T ),
-                            231 => action_66::< T > as fn( &mut T ),
-                            232 => action_65::< T > as fn( &mut T ),
-                            233 => action_58::< T > as fn( &mut T ),
-                            234 => action_59::< T > as fn( &mut T ),
-                            235 => action_60::< T > as fn( &mut T ),
-                            236 => action_61::< T > as fn( &mut T ),
-                            237 => action_62::< T > as fn( &mut T ),
-                            238 => action_63::< T > as fn( &mut T ),
-                            239 => action_64::< T > as fn( &mut T ),
-                            240 => action_55::< T > as fn( &mut T ),
-                            241 => action_48::< T > as fn( &mut T ),
-                            242 => action_49::< T > as fn( &mut T ),
-                            243 => action_50::< T > as fn( &mut T ),
-                            244 => action_51::< T > as fn( &mut T ),
-                            245 => action_52::< T > as fn( &mut T ),
-                            246 => action_53::< T > as fn( &mut T ),
-                            247 => action_54::< T > as fn( &mut T ),
-                            248 => action_55::< T > as fn( &mut T ),
-                            249 => action_48::< T > as fn( &mut T ),
-                            250 => action_49::< T > as fn( &mut T ),
-                            251 => action_50::< T > as fn( &mut T ),
-                            252 => action_51::< T > as fn( &mut T ),
-                            253 => action_52::< T > as fn( &mut T ),
-                            254 => action_53::< T > as fn( &mut T ),
-                            255 => action_74::< T > as fn( &mut T ),
-                            256 => action_65::< T > as fn( &mut T ),
-                            257 => action_58::< T > as fn( &mut T ),
-                            258 => action_65::< T > as fn( &mut T ),
-                            259 => action_75::< T > as fn( &mut T ),
-                            _ => fast_unreachable!()
-                        }
-                    }
-                }
+            Scanline {
+                times: 1,
+                first_chunk_index: 33,
+                last_chunk_index: 42
+            },
+        ];
+
+        static CHUNKS: &'static [Chunk] = &[
+            Chunk {
+                times: 1,
+                first_action_index: 0,
+                last_action_index: 0
+            },
+            Chunk {
+                times: 8,
+                first_action_index: 1,
+                last_action_index: 8
+            },
+            Chunk {
+                times: 23,
+                first_action_index: 9,
+                last_action_index: 16
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 17,
+                last_action_index: 25
+            },
+            Chunk {
+                times: 7,
+                first_action_index: 26,
+                last_action_index: 33
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 34,
+                last_action_index: 40
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 41,
+                last_action_index: 56
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 57,
+                last_action_index: 60
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 61,
+                last_action_index: 61
+            },
+            Chunk {
+                times: 8,
+                first_action_index: 62,
+                last_action_index: 69
+            },
+            Chunk {
+                times: 23,
+                first_action_index: 70,
+                last_action_index: 77
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 78,
+                last_action_index: 86
+            },
+            Chunk {
+                times: 7,
+                first_action_index: 87,
+                last_action_index: 94
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 95,
+                last_action_index: 101
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 102,
+                last_action_index: 117
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 118,
+                last_action_index: 121
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 122,
+                last_action_index: 122
+            },
+            Chunk {
+                times: 8,
+                first_action_index: 123,
+                last_action_index: 130
+            },
+            Chunk {
+                times: 23,
+                first_action_index: 131,
+                last_action_index: 138
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 139,
+                last_action_index: 147
+            },
+            Chunk {
+                times: 7,
+                first_action_index: 148,
+                last_action_index: 155
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 156,
+                last_action_index: 162
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 163,
+                last_action_index: 178
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 179,
+                last_action_index: 182
+            },
+            Chunk {
+                times: 340,
+                first_action_index: 183,
+                last_action_index: 183
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 184,
+                last_action_index: 184
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 185,
+                last_action_index: 186
+            },
+            Chunk {
+                times: 338,
+                first_action_index: 187,
+                last_action_index: 187
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 188,
+                last_action_index: 188
+            },
+            Chunk {
+                times: 340,
+                first_action_index: 189,
+                last_action_index: 189
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 190,
+                last_action_index: 190
+            },
+            Chunk {
+                times: 340,
+                first_action_index: 191,
+                last_action_index: 191
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 192,
+                last_action_index: 192
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 193,
+                last_action_index: 194
+            },
+            Chunk {
+                times: 31,
+                first_action_index: 195,
+                last_action_index: 202
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 203,
+                last_action_index: 210
+            },
+            Chunk {
+                times: 2,
+                first_action_index: 211,
+                last_action_index: 218
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 219,
+                last_action_index: 224
+            },
+            Chunk {
+                times: 3,
+                first_action_index: 225,
+                last_action_index: 232
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 233,
+                last_action_index: 233
+            },
+            Chunk {
+                times: 2,
+                first_action_index: 234,
+                last_action_index: 241
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 242,
+                last_action_index: 257
+            },
+            Chunk {
+                times: 1,
+                first_action_index: 258,
+                last_action_index: 261
+            },
+        ];
+
+        #[allow(unused_variables)]
+        fn action_00< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().odd_cycle_flag = true;
+            ppu.state_mut().auxiliary_sprite_list_address = 0;
+            ppu.state_mut().secondary_sprite_list_address = 0;
+            ppu.state_mut().sprite_evaluation_mode = SpriteEvaluationMode::Search;
+            ppu.state_mut().first_sprite_is_sprite_zero_on_current_scanline = ppu.state().first_sprite_is_sprite_zero_on_next_scanline;
+            ppu.state_mut().first_sprite_is_sprite_zero_on_next_scanline = false;
+            if ppu.state().ppumask.show_sprites() {
+                ppu.state_mut().sprite_list_address = 0;
             }
+            ppu.state_mut().sprite_index = 0;
+            ppu.state_mut().n_pixel = 0;
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_01< T: Private >( ppu: &mut T ) {
+            ppu.clear_secondary_sprite_ram_cell();
+            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_02< T: Private >( ppu: &mut T ) {
+            ppu.clear_secondary_sprite_ram_cell();
+            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
+            ppu.state_mut().background_pattern_index_latch = ppu.fetch();
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_03< T: Private >( ppu: &mut T ) {
+            ppu.clear_secondary_sprite_ram_cell();
+            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_04< T: Private >( ppu: &mut T ) {
+            ppu.clear_secondary_sprite_ram_cell();
+            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
+            let packed_palette_indexes = ppu.fetch();
+            let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
+            ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_05< T: Private >( ppu: &mut T ) {
+            ppu.clear_secondary_sprite_ram_cell();
+            set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_06< T: Private >( ppu: &mut T ) {
+            ppu.clear_secondary_sprite_ram_cell();
+            set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+            ppu.state_mut().tile_lo_latch = ppu.fetch();
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_07< T: Private >( ppu: &mut T ) {
+            ppu.clear_secondary_sprite_ram_cell();
+            set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_08< T: Private >( ppu: &mut T ) {
+            ppu.clear_secondary_sprite_ram_cell();
+            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+            ppu.state_mut().tile_hi_latch = ppu.fetch();
+            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.reload_background_shift_registers();
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_09< T: Private >( ppu: &mut T ) {
+            ppu.sprite_evaluation();
+            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_10< T: Private >( ppu: &mut T ) {
+            ppu.sprite_evaluation();
+            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
+            ppu.state_mut().background_pattern_index_latch = ppu.fetch();
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_11< T: Private >( ppu: &mut T ) {
+            ppu.sprite_evaluation();
+            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_12< T: Private >( ppu: &mut T ) {
+            ppu.sprite_evaluation();
+            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
+            let packed_palette_indexes = ppu.fetch();
+            let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
+            ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_13< T: Private >( ppu: &mut T ) {
+            ppu.sprite_evaluation();
+            set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_14< T: Private >( ppu: &mut T ) {
+            ppu.sprite_evaluation();
+            set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+            ppu.state_mut().tile_lo_latch = ppu.fetch();
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_15< T: Private >( ppu: &mut T ) {
+            ppu.sprite_evaluation();
+            set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_16< T: Private >( ppu: &mut T ) {
+            ppu.sprite_evaluation();
+            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+            ppu.state_mut().tile_hi_latch = ppu.fetch();
+            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.reload_background_shift_registers();
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_17< T: Private >( ppu: &mut T ) {
+            ppu.sprite_evaluation();
+            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+            ppu.state_mut().tile_hi_latch = ppu.fetch();
+            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.reload_background_shift_registers();
+            if ppu.state().ppumask.show_background() { ppu.increment_vertical_counters(); }
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_18< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().secondary_sprite_list_address = 0;
+            ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
+            ppu.state_mut().sprite_vertical_position_latch = ppu.state().sprite_list_data_latch;
+            ppu.state_mut().secondary_sprite_list_address += 1;
+            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            if ppu.state().ppumask.show_background() { ppu.reset_horizontal_counters(); }
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_19< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
+            ppu.state_mut().sprite_pattern_index_latch = ppu.state().sprite_list_data_latch;
+            ppu.state_mut().secondary_sprite_list_address += 1;
+            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
+            ppu.state_mut().background_pattern_index_latch = ppu.fetch();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_20< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
+            ppu.state_mut().sprite_attributes_latch = ppu.state().sprite_list_data_latch & 0b11100011;
+            ppu.current_sprite_mut().attributes_latch = ppu.state().sprite_attributes_latch;
+            ppu.state_mut().secondary_sprite_list_address += 1;
+            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_21< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
+            ppu.current_sprite_mut().dots_until_is_displayed = ppu.state().sprite_list_data_latch;
+            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
+            let packed_palette_indexes = ppu.fetch();
+            let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
+            ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_22< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
+            set_lo!( ppu.state_mut().address, ppu.sprite_tile_lo_address_lo() );
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_23< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
+            set_hi!( ppu.state_mut().address, ppu.sprite_tile_lo_address_hi() );
+            let mut value = ppu.fetch();
+            let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
+            if should_flip_horizontally {
+                value = reverse_bits( value );
+            }
+            ppu.current_sprite_mut().pattern_lo_shift_register = value;
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_24< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
+            set_lo!( ppu.state_mut().address, ppu.sprite_tile_hi_address_lo() );
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_25< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
+            ppu.state_mut().secondary_sprite_list_address += 1;
+            set_hi!( ppu.state_mut().address, ppu.sprite_tile_hi_address_hi() );
+            let mut value = ppu.fetch();
+            let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
+            if should_flip_horizontally {
+                value = reverse_bits( value );
+            }
+            ppu.current_sprite_mut().pattern_hi_shift_register = value;
+            ppu.state_mut().sprite_index += 1;
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_26< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
+            ppu.state_mut().sprite_vertical_position_latch = ppu.state().sprite_list_data_latch;
+            ppu.state_mut().secondary_sprite_list_address += 1;
+            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_27< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_28< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
+            ppu.state_mut().background_pattern_index_latch = ppu.fetch();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_29< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_30< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
+            let packed_palette_indexes = ppu.fetch();
+            let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
+            ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_31< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_32< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+            ppu.state_mut().tile_lo_latch = ppu.fetch();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_33< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_34< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+            ppu.state_mut().tile_hi_latch = ppu.fetch();
+            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.reload_background_shift_registers();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_35< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+            ppu.state_mut().tile_hi_latch = ppu.fetch();
+            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.reload_background_shift_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_36< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_37< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
+            ppu.state_mut().background_pattern_index_latch = ppu.fetch();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_38< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
+            ppu.state_mut().background_pattern_index_latch = ppu.fetch();
+            ppu.state_mut().n_scanline += 1;
+            ppu.state_mut().n_dot = 0;
+        }
+
+        #[allow(unused_variables)]
+        fn action_39< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().odd_cycle_flag = true;
+            ppu.state_mut().auxiliary_sprite_list_address = 0;
+            ppu.state_mut().secondary_sprite_list_address = 0;
+            ppu.state_mut().sprite_evaluation_mode = SpriteEvaluationMode::Search;
+            ppu.state_mut().first_sprite_is_sprite_zero_on_current_scanline = ppu.state().first_sprite_is_sprite_zero_on_next_scanline;
+            ppu.state_mut().first_sprite_is_sprite_zero_on_next_scanline = false;
+            if ppu.state().ppumask.show_sprites() {
+                ppu.state_mut().sprite_list_address = 0;
+            }
+            ppu.state_mut().sprite_index = 0;
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_40< T: Private >( ppu: &mut T ) {
+            ppu.sprite_evaluation();
+            set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.update_sprite_registers();
+            ppu.output_pixel();
+            ppu.shift_background_registers();
+            ppu.on_frame_was_generated();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_41< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_42< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().vblank_flag_was_cleared = false;
+            ppu.state_mut().n_scanline += 1;
+            ppu.state_mut().n_dot = 0;
+        }
+
+        #[allow(unused_variables)]
+        fn action_43< T: Private >( ppu: &mut T ) {
+            if ppu.state().vblank_flag_was_cleared == false {
+                ppu.state_mut().ppustatus.modify_vblank_has_occured( true );
+            }
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_44< T: Private >( ppu: &mut T ) {
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_45< T: Private >( ppu: &mut T ) {
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_scanline += 1;
+            ppu.state_mut().n_dot = 0;
+        }
+
+        #[allow(unused_variables)]
+        fn action_46< T: Private >( ppu: &mut T ) {
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().odd_frame_flag = !ppu.state().odd_frame_flag;
+            ppu.state_mut().n_scanline += 1;
+            ppu.state_mut().n_dot = 0;
+        }
+
+        #[allow(unused_variables)]
+        fn action_47< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().sprite_index = 0;
+            ppu.shift_background_registers();
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().ppustatus.0 = 0;
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_48< T: Private >( ppu: &mut T ) {
+            ppu.state_mut().ppustatus.modify_sprite_0_hit( false );
+            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.shift_background_registers();
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_49< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
+            ppu.state_mut().background_pattern_index_latch = ppu.fetch();
+            ppu.shift_background_registers();
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_50< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            ppu.shift_background_registers();
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_51< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
+            let packed_palette_indexes = ppu.fetch();
+            let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
+            ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
+            ppu.shift_background_registers();
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_52< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.shift_background_registers();
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_53< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+            ppu.state_mut().tile_lo_latch = ppu.fetch();
+            ppu.shift_background_registers();
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_54< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.shift_background_registers();
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_55< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+            ppu.state_mut().tile_hi_latch = ppu.fetch();
+            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.reload_background_shift_registers();
+            ppu.shift_background_registers();
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_56< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.shift_background_registers();
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_57< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+            ppu.state_mut().tile_hi_latch = ppu.fetch();
+            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.reload_background_shift_registers();
+            if ppu.state().ppumask.show_background() { ppu.increment_vertical_counters(); }
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_58< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            if ppu.state().ppumask.show_background() { ppu.reset_horizontal_counters(); }
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_59< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
+            ppu.state_mut().background_pattern_index_latch = ppu.fetch();
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_60< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_61< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
+            let packed_palette_indexes = ppu.fetch();
+            let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
+            ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_62< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.sprite_tile_lo_address_lo() );
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_63< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, ppu.sprite_tile_lo_address_hi() );
+            let mut value = ppu.fetch();
+            let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
+            if should_flip_horizontally {
+                value = reverse_bits( value );
+            }
+            ppu.current_sprite_mut().pattern_lo_shift_register = value;
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_64< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.sprite_tile_hi_address_lo() );
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_65< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, ppu.sprite_tile_hi_address_hi() );
+            let mut value = ppu.fetch();
+            let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
+            if should_flip_horizontally {
+                value = reverse_bits( value );
+            }
+            ppu.current_sprite_mut().pattern_hi_shift_register = value;
+            ppu.state_mut().sprite_index += 1;
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_66< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_67< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, ppu.sprite_tile_hi_address_hi() );
+            let mut value = ppu.fetch();
+            let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
+            if should_flip_horizontally {
+                value = reverse_bits( value );
+            }
+            ppu.current_sprite_mut().pattern_hi_shift_register = value;
+            ppu.state_mut().sprite_index += 1;
+            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_68< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_69< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
+            ppu.state_mut().background_pattern_index_latch = ppu.fetch();
+            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_70< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_71< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
+            let packed_palette_indexes = ppu.fetch();
+            let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
+            ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
+            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_72< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.sprite_tile_lo_address_lo() );
+            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_73< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, ppu.sprite_tile_lo_address_hi() );
+            let mut value = ppu.fetch();
+            let should_flip_horizontally = is_b6_set( ppu.state().sprite_attributes_latch );
+            if should_flip_horizontally {
+                value = reverse_bits( value );
+            }
+            ppu.current_sprite_mut().pattern_lo_shift_register = value;
+            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_74< T: Private >( ppu: &mut T ) {
+            set_lo!( ppu.state_mut().address, ppu.sprite_tile_hi_address_lo() );
+            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_75< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
+            ppu.state_mut().tile_hi_latch = ppu.fetch();
+            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.reload_background_shift_registers();
+            ppu.try_trigger_vblank_nmi();
+            ppu.state_mut().skip_cycle_flag = ppu.state().odd_frame_flag && ppu.state().ppumask.show_background();
+            ppu.state_mut().n_dot += 1;;
+        }
+
+        #[allow(unused_variables)]
+        fn action_76< T: Private >( ppu: &mut T ) {
+            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
+            ppu.state_mut().background_pattern_index_latch = ppu.fetch();
+            ppu.try_trigger_vblank_nmi();
+            if ppu.state().skip_cycle_flag { ppu.state_mut().skip_next_cycle = true; }
+            ppu.state_mut().n_scanline = 0;
+            ppu.state_mut().n_dot = 0;
+        }
+
+        unsafe fn get_action< T: Private >( index: usize ) -> fn( &mut T ) {
+            match index {
+                0 => action_00::< T > as fn( &mut T ),
+                1 => action_01::< T > as fn( &mut T ),
+                2 => action_02::< T > as fn( &mut T ),
+                3 => action_03::< T > as fn( &mut T ),
+                4 => action_04::< T > as fn( &mut T ),
+                5 => action_05::< T > as fn( &mut T ),
+                6 => action_06::< T > as fn( &mut T ),
+                7 => action_07::< T > as fn( &mut T ),
+                8 => action_08::< T > as fn( &mut T ),
+                9 => action_09::< T > as fn( &mut T ),
+                10 => action_10::< T > as fn( &mut T ),
+                11 => action_11::< T > as fn( &mut T ),
+                12 => action_12::< T > as fn( &mut T ),
+                13 => action_13::< T > as fn( &mut T ),
+                14 => action_14::< T > as fn( &mut T ),
+                15 => action_15::< T > as fn( &mut T ),
+                16 => action_16::< T > as fn( &mut T ),
+                17 => action_09::< T > as fn( &mut T ),
+                18 => action_10::< T > as fn( &mut T ),
+                19 => action_11::< T > as fn( &mut T ),
+                20 => action_12::< T > as fn( &mut T ),
+                21 => action_13::< T > as fn( &mut T ),
+                22 => action_14::< T > as fn( &mut T ),
+                23 => action_15::< T > as fn( &mut T ),
+                24 => action_17::< T > as fn( &mut T ),
+                25 => action_18::< T > as fn( &mut T ),
+                26 => action_19::< T > as fn( &mut T ),
+                27 => action_20::< T > as fn( &mut T ),
+                28 => action_21::< T > as fn( &mut T ),
+                29 => action_22::< T > as fn( &mut T ),
+                30 => action_23::< T > as fn( &mut T ),
+                31 => action_24::< T > as fn( &mut T ),
+                32 => action_25::< T > as fn( &mut T ),
+                33 => action_26::< T > as fn( &mut T ),
+                34 => action_19::< T > as fn( &mut T ),
+                35 => action_20::< T > as fn( &mut T ),
+                36 => action_21::< T > as fn( &mut T ),
+                37 => action_22::< T > as fn( &mut T ),
+                38 => action_23::< T > as fn( &mut T ),
+                39 => action_24::< T > as fn( &mut T ),
+                40 => action_25::< T > as fn( &mut T ),
+                41 => action_27::< T > as fn( &mut T ),
+                42 => action_28::< T > as fn( &mut T ),
+                43 => action_29::< T > as fn( &mut T ),
+                44 => action_30::< T > as fn( &mut T ),
+                45 => action_31::< T > as fn( &mut T ),
+                46 => action_32::< T > as fn( &mut T ),
+                47 => action_33::< T > as fn( &mut T ),
+                48 => action_34::< T > as fn( &mut T ),
+                49 => action_27::< T > as fn( &mut T ),
+                50 => action_28::< T > as fn( &mut T ),
+                51 => action_29::< T > as fn( &mut T ),
+                52 => action_30::< T > as fn( &mut T ),
+                53 => action_31::< T > as fn( &mut T ),
+                54 => action_32::< T > as fn( &mut T ),
+                55 => action_33::< T > as fn( &mut T ),
+                56 => action_35::< T > as fn( &mut T ),
+                57 => action_36::< T > as fn( &mut T ),
+                58 => action_37::< T > as fn( &mut T ),
+                59 => action_36::< T > as fn( &mut T ),
+                60 => action_38::< T > as fn( &mut T ),
+                61 => action_39::< T > as fn( &mut T ),
+                62 => action_01::< T > as fn( &mut T ),
+                63 => action_02::< T > as fn( &mut T ),
+                64 => action_03::< T > as fn( &mut T ),
+                65 => action_04::< T > as fn( &mut T ),
+                66 => action_05::< T > as fn( &mut T ),
+                67 => action_06::< T > as fn( &mut T ),
+                68 => action_07::< T > as fn( &mut T ),
+                69 => action_08::< T > as fn( &mut T ),
+                70 => action_09::< T > as fn( &mut T ),
+                71 => action_10::< T > as fn( &mut T ),
+                72 => action_11::< T > as fn( &mut T ),
+                73 => action_12::< T > as fn( &mut T ),
+                74 => action_13::< T > as fn( &mut T ),
+                75 => action_14::< T > as fn( &mut T ),
+                76 => action_15::< T > as fn( &mut T ),
+                77 => action_16::< T > as fn( &mut T ),
+                78 => action_09::< T > as fn( &mut T ),
+                79 => action_10::< T > as fn( &mut T ),
+                80 => action_11::< T > as fn( &mut T ),
+                81 => action_12::< T > as fn( &mut T ),
+                82 => action_13::< T > as fn( &mut T ),
+                83 => action_14::< T > as fn( &mut T ),
+                84 => action_15::< T > as fn( &mut T ),
+                85 => action_17::< T > as fn( &mut T ),
+                86 => action_18::< T > as fn( &mut T ),
+                87 => action_19::< T > as fn( &mut T ),
+                88 => action_20::< T > as fn( &mut T ),
+                89 => action_21::< T > as fn( &mut T ),
+                90 => action_22::< T > as fn( &mut T ),
+                91 => action_23::< T > as fn( &mut T ),
+                92 => action_24::< T > as fn( &mut T ),
+                93 => action_25::< T > as fn( &mut T ),
+                94 => action_26::< T > as fn( &mut T ),
+                95 => action_19::< T > as fn( &mut T ),
+                96 => action_20::< T > as fn( &mut T ),
+                97 => action_21::< T > as fn( &mut T ),
+                98 => action_22::< T > as fn( &mut T ),
+                99 => action_23::< T > as fn( &mut T ),
+                100 => action_24::< T > as fn( &mut T ),
+                101 => action_25::< T > as fn( &mut T ),
+                102 => action_27::< T > as fn( &mut T ),
+                103 => action_28::< T > as fn( &mut T ),
+                104 => action_29::< T > as fn( &mut T ),
+                105 => action_30::< T > as fn( &mut T ),
+                106 => action_31::< T > as fn( &mut T ),
+                107 => action_32::< T > as fn( &mut T ),
+                108 => action_33::< T > as fn( &mut T ),
+                109 => action_34::< T > as fn( &mut T ),
+                110 => action_27::< T > as fn( &mut T ),
+                111 => action_28::< T > as fn( &mut T ),
+                112 => action_29::< T > as fn( &mut T ),
+                113 => action_30::< T > as fn( &mut T ),
+                114 => action_31::< T > as fn( &mut T ),
+                115 => action_32::< T > as fn( &mut T ),
+                116 => action_33::< T > as fn( &mut T ),
+                117 => action_35::< T > as fn( &mut T ),
+                118 => action_36::< T > as fn( &mut T ),
+                119 => action_37::< T > as fn( &mut T ),
+                120 => action_36::< T > as fn( &mut T ),
+                121 => action_38::< T > as fn( &mut T ),
+                122 => action_39::< T > as fn( &mut T ),
+                123 => action_01::< T > as fn( &mut T ),
+                124 => action_02::< T > as fn( &mut T ),
+                125 => action_03::< T > as fn( &mut T ),
+                126 => action_04::< T > as fn( &mut T ),
+                127 => action_05::< T > as fn( &mut T ),
+                128 => action_06::< T > as fn( &mut T ),
+                129 => action_07::< T > as fn( &mut T ),
+                130 => action_08::< T > as fn( &mut T ),
+                131 => action_09::< T > as fn( &mut T ),
+                132 => action_10::< T > as fn( &mut T ),
+                133 => action_11::< T > as fn( &mut T ),
+                134 => action_12::< T > as fn( &mut T ),
+                135 => action_13::< T > as fn( &mut T ),
+                136 => action_14::< T > as fn( &mut T ),
+                137 => action_15::< T > as fn( &mut T ),
+                138 => action_16::< T > as fn( &mut T ),
+                139 => action_09::< T > as fn( &mut T ),
+                140 => action_10::< T > as fn( &mut T ),
+                141 => action_11::< T > as fn( &mut T ),
+                142 => action_12::< T > as fn( &mut T ),
+                143 => action_13::< T > as fn( &mut T ),
+                144 => action_14::< T > as fn( &mut T ),
+                145 => action_40::< T > as fn( &mut T ),
+                146 => action_17::< T > as fn( &mut T ),
+                147 => action_18::< T > as fn( &mut T ),
+                148 => action_19::< T > as fn( &mut T ),
+                149 => action_20::< T > as fn( &mut T ),
+                150 => action_21::< T > as fn( &mut T ),
+                151 => action_22::< T > as fn( &mut T ),
+                152 => action_23::< T > as fn( &mut T ),
+                153 => action_24::< T > as fn( &mut T ),
+                154 => action_25::< T > as fn( &mut T ),
+                155 => action_26::< T > as fn( &mut T ),
+                156 => action_19::< T > as fn( &mut T ),
+                157 => action_20::< T > as fn( &mut T ),
+                158 => action_21::< T > as fn( &mut T ),
+                159 => action_22::< T > as fn( &mut T ),
+                160 => action_23::< T > as fn( &mut T ),
+                161 => action_24::< T > as fn( &mut T ),
+                162 => action_25::< T > as fn( &mut T ),
+                163 => action_27::< T > as fn( &mut T ),
+                164 => action_28::< T > as fn( &mut T ),
+                165 => action_29::< T > as fn( &mut T ),
+                166 => action_30::< T > as fn( &mut T ),
+                167 => action_31::< T > as fn( &mut T ),
+                168 => action_32::< T > as fn( &mut T ),
+                169 => action_33::< T > as fn( &mut T ),
+                170 => action_34::< T > as fn( &mut T ),
+                171 => action_27::< T > as fn( &mut T ),
+                172 => action_28::< T > as fn( &mut T ),
+                173 => action_29::< T > as fn( &mut T ),
+                174 => action_30::< T > as fn( &mut T ),
+                175 => action_31::< T > as fn( &mut T ),
+                176 => action_32::< T > as fn( &mut T ),
+                177 => action_33::< T > as fn( &mut T ),
+                178 => action_35::< T > as fn( &mut T ),
+                179 => action_36::< T > as fn( &mut T ),
+                180 => action_37::< T > as fn( &mut T ),
+                181 => action_36::< T > as fn( &mut T ),
+                182 => action_38::< T > as fn( &mut T ),
+                183 => action_41::< T > as fn( &mut T ),
+                184 => action_42::< T > as fn( &mut T ),
+                185 => action_43::< T > as fn( &mut T ),
+                186 => action_41::< T > as fn( &mut T ),
+                187 => action_44::< T > as fn( &mut T ),
+                188 => action_45::< T > as fn( &mut T ),
+                189 => action_44::< T > as fn( &mut T ),
+                190 => action_45::< T > as fn( &mut T ),
+                191 => action_44::< T > as fn( &mut T ),
+                192 => action_46::< T > as fn( &mut T ),
+                193 => action_47::< T > as fn( &mut T ),
+                194 => action_48::< T > as fn( &mut T ),
+                195 => action_49::< T > as fn( &mut T ),
+                196 => action_50::< T > as fn( &mut T ),
+                197 => action_51::< T > as fn( &mut T ),
+                198 => action_52::< T > as fn( &mut T ),
+                199 => action_53::< T > as fn( &mut T ),
+                200 => action_54::< T > as fn( &mut T ),
+                201 => action_55::< T > as fn( &mut T ),
+                202 => action_56::< T > as fn( &mut T ),
+                203 => action_49::< T > as fn( &mut T ),
+                204 => action_50::< T > as fn( &mut T ),
+                205 => action_51::< T > as fn( &mut T ),
+                206 => action_52::< T > as fn( &mut T ),
+                207 => action_53::< T > as fn( &mut T ),
+                208 => action_54::< T > as fn( &mut T ),
+                209 => action_57::< T > as fn( &mut T ),
+                210 => action_58::< T > as fn( &mut T ),
+                211 => action_59::< T > as fn( &mut T ),
+                212 => action_60::< T > as fn( &mut T ),
+                213 => action_61::< T > as fn( &mut T ),
+                214 => action_62::< T > as fn( &mut T ),
+                215 => action_63::< T > as fn( &mut T ),
+                216 => action_64::< T > as fn( &mut T ),
+                217 => action_65::< T > as fn( &mut T ),
+                218 => action_66::< T > as fn( &mut T ),
+                219 => action_59::< T > as fn( &mut T ),
+                220 => action_60::< T > as fn( &mut T ),
+                221 => action_61::< T > as fn( &mut T ),
+                222 => action_62::< T > as fn( &mut T ),
+                223 => action_63::< T > as fn( &mut T ),
+                224 => action_64::< T > as fn( &mut T ),
+                225 => action_67::< T > as fn( &mut T ),
+                226 => action_68::< T > as fn( &mut T ),
+                227 => action_69::< T > as fn( &mut T ),
+                228 => action_70::< T > as fn( &mut T ),
+                229 => action_71::< T > as fn( &mut T ),
+                230 => action_72::< T > as fn( &mut T ),
+                231 => action_73::< T > as fn( &mut T ),
+                232 => action_74::< T > as fn( &mut T ),
+                233 => action_67::< T > as fn( &mut T ),
+                234 => action_66::< T > as fn( &mut T ),
+                235 => action_59::< T > as fn( &mut T ),
+                236 => action_60::< T > as fn( &mut T ),
+                237 => action_61::< T > as fn( &mut T ),
+                238 => action_62::< T > as fn( &mut T ),
+                239 => action_63::< T > as fn( &mut T ),
+                240 => action_64::< T > as fn( &mut T ),
+                241 => action_65::< T > as fn( &mut T ),
+                242 => action_56::< T > as fn( &mut T ),
+                243 => action_49::< T > as fn( &mut T ),
+                244 => action_50::< T > as fn( &mut T ),
+                245 => action_51::< T > as fn( &mut T ),
+                246 => action_52::< T > as fn( &mut T ),
+                247 => action_53::< T > as fn( &mut T ),
+                248 => action_54::< T > as fn( &mut T ),
+                249 => action_55::< T > as fn( &mut T ),
+                250 => action_56::< T > as fn( &mut T ),
+                251 => action_49::< T > as fn( &mut T ),
+                252 => action_50::< T > as fn( &mut T ),
+                253 => action_51::< T > as fn( &mut T ),
+                254 => action_52::< T > as fn( &mut T ),
+                255 => action_53::< T > as fn( &mut T ),
+                256 => action_54::< T > as fn( &mut T ),
+                257 => action_75::< T > as fn( &mut T ),
+                258 => action_66::< T > as fn( &mut T ),
+                259 => action_59::< T > as fn( &mut T ),
+                260 => action_66::< T > as fn( &mut T ),
+                261 => action_76::< T > as fn( &mut T ),
+                _ => fast_unreachable!()
+            }
+        }
+    }
+}
