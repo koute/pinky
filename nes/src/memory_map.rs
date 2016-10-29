@@ -19,6 +19,10 @@
     Whole 0x4020...0xFFFF is mapped to the cartridge.
 */
 
+pub const SRAM_ADDRESS: u16 = 0x6000;
+pub const LOWER_ROM_ADDRESS: u16 = 0x8000;
+pub const UPPER_ROM_ADDRESS: u16 = 0xC000;
+
 #[inline]
 pub fn translate_address_ram( address: u16 ) -> u16 {
     address & (2048 - 1)
@@ -151,9 +155,38 @@ pub fn vertical_mirroring( offset: u16 ) -> u16 {
     offset & (2048 - 1)
 }
 
+#[inline]
+pub fn only_lower_bank_mirroring( offset: u16 ) -> u16 {
+    offset & (1024 - 1)
+}
+
+#[inline]
+pub fn only_upper_bank_mirroring( offset: u16 ) -> u16 {
+    only_lower_bank_mirroring( offset ) + 1024
+}
+
+pub fn mirroring_to_str( mirroring: fn( u16 ) -> u16 ) -> &'static str {
+    if mirroring == horizontal_mirroring {
+        "horizontal"
+    } else if mirroring == vertical_mirroring {
+        "vertical"
+    } else if mirroring == only_lower_bank_mirroring {
+        "only_lower_bank_mirroring"
+    } else if mirroring == only_upper_bank_mirroring {
+        "only_upper_bank_mirroring"
+    } else {
+        unreachable!();
+    }
+}
+
 #[cfg(test)]
 mod ppu_background_tilemap_mirroring_tests {
-    use super::{vertical_mirroring, horizontal_mirroring};
+    use super::{
+        vertical_mirroring,
+        horizontal_mirroring,
+        only_lower_bank_mirroring,
+        only_upper_bank_mirroring
+    };
 
     const S: u16 = 1024; // Size of one background tilemap in bytes.
     const NT0_FST: u16 = 0;
@@ -221,5 +254,55 @@ mod ppu_background_tilemap_mirroring_tests {
         assert_eq!( vertical_mirroring( NTM2_LST ), vertical_mirroring( NT2_LST ) );
         assert_eq!( vertical_mirroring( NTM3_FST ), vertical_mirroring( NT3_FST ) );
         assert_eq!( vertical_mirroring( NTM3_FST + 768 - 1 ), vertical_mirroring( NT3_FST + 768 - 1 ) );
+    }
+
+    #[test]
+    fn test_only_lower_bank_mirroring() {
+        // 0 -> 0
+        // 1 -> 0
+        // 2 -> 0
+        // 3 -> 0
+        assert_eq!( only_lower_bank_mirroring( NT0_FST ), NT0_FST );
+        assert_eq!( only_lower_bank_mirroring( NT0_LST ), NT0_LST );
+        assert_eq!( only_lower_bank_mirroring( NT1_FST ), NT0_FST );
+        assert_eq!( only_lower_bank_mirroring( NT1_LST ), NT0_LST );
+        assert_eq!( only_lower_bank_mirroring( NT2_FST ), NT0_FST );
+        assert_eq!( only_lower_bank_mirroring( NT2_LST ), NT0_LST );
+        assert_eq!( only_lower_bank_mirroring( NT3_FST ), NT0_FST );
+        assert_eq!( only_lower_bank_mirroring( NT3_LST ), NT0_LST );
+
+        assert_eq!( only_lower_bank_mirroring( NTM0_FST ), only_lower_bank_mirroring( NT0_FST ) );
+        assert_eq!( only_lower_bank_mirroring( NTM0_LST ), only_lower_bank_mirroring( NT0_LST ) );
+        assert_eq!( only_lower_bank_mirroring( NTM1_FST ), only_lower_bank_mirroring( NT1_FST ) );
+        assert_eq!( only_lower_bank_mirroring( NTM1_LST ), only_lower_bank_mirroring( NT1_LST ) );
+        assert_eq!( only_lower_bank_mirroring( NTM2_FST ), only_lower_bank_mirroring( NT2_FST ) );
+        assert_eq!( only_lower_bank_mirroring( NTM2_LST ), only_lower_bank_mirroring( NT2_LST ) );
+        assert_eq!( only_lower_bank_mirroring( NTM3_FST ), only_lower_bank_mirroring( NT3_FST ) );
+        assert_eq!( only_lower_bank_mirroring( NTM3_FST + 768 - 1 ), only_lower_bank_mirroring( NT3_FST + 768 - 1 ) );
+    }
+
+    #[test]
+    fn test_only_upper_bank_mirroring() {
+        // 0 -> 1
+        // 1 -> 1
+        // 2 -> 1
+        // 3 -> 1
+        assert_eq!( only_upper_bank_mirroring( NT0_FST ), NT1_FST );
+        assert_eq!( only_upper_bank_mirroring( NT0_LST ), NT1_LST );
+        assert_eq!( only_upper_bank_mirroring( NT1_FST ), NT1_FST );
+        assert_eq!( only_upper_bank_mirroring( NT1_LST ), NT1_LST );
+        assert_eq!( only_upper_bank_mirroring( NT2_FST ), NT1_FST );
+        assert_eq!( only_upper_bank_mirroring( NT2_LST ), NT1_LST );
+        assert_eq!( only_upper_bank_mirroring( NT3_FST ), NT1_FST );
+        assert_eq!( only_upper_bank_mirroring( NT3_LST ), NT1_LST );
+
+        assert_eq!( only_upper_bank_mirroring( NTM0_FST ), only_upper_bank_mirroring( NT0_FST ) );
+        assert_eq!( only_upper_bank_mirroring( NTM0_LST ), only_upper_bank_mirroring( NT0_LST ) );
+        assert_eq!( only_upper_bank_mirroring( NTM1_FST ), only_upper_bank_mirroring( NT1_FST ) );
+        assert_eq!( only_upper_bank_mirroring( NTM1_LST ), only_upper_bank_mirroring( NT1_LST ) );
+        assert_eq!( only_upper_bank_mirroring( NTM2_FST ), only_upper_bank_mirroring( NT2_FST ) );
+        assert_eq!( only_upper_bank_mirroring( NTM2_LST ), only_upper_bank_mirroring( NT2_LST ) );
+        assert_eq!( only_upper_bank_mirroring( NTM3_FST ), only_upper_bank_mirroring( NT3_FST ) );
+        assert_eq!( only_upper_bank_mirroring( NTM3_FST + 768 - 1 ), only_upper_bank_mirroring( NT3_FST + 768 - 1 ) );
     }
 }

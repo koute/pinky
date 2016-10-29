@@ -1,6 +1,7 @@
 use rom::{NesRom, LoadError, Mirroring, ROM_BANK_SIZE, VROM_BANK_SIZE};
 use emumisc::{PeekPoke, copy_memory};
 use memory_map::{translate_address_rom, translate_address_save_ram, translate_address_background_tilemap, horizontal_mirroring, vertical_mirroring};
+use mapper_mmc1::MapperMMC1;
 
 pub trait Mapper {
     fn peek_rom( &self, address: u16 ) -> u8;
@@ -135,6 +136,12 @@ pub fn create_mapper( rom: NesRom ) -> Result< Box< Mapper >, LoadError > {
                 background_tilemaps: [0; 2048],
                 mirroring: mirroring
             }))
+        },
+        1 => {
+            MapperMMC1::from_rom( rom ).map( |mapper| {
+                let boxed: Box< Mapper > = Box::new( mapper );
+                boxed
+            })
         },
         _ => Err( LoadError::new( format!( "Unhandled mapper: {}", rom.mapper ) ) )
     }

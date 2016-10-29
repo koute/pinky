@@ -27,6 +27,7 @@ mod virtual_apu;
 mod virtual_nes;
 mod rom;
 mod mappers;
+mod mapper_mmc1;
 mod orphan;
 mod dma;
 mod filter;
