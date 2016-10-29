@@ -295,7 +295,7 @@ impl UserInterface {
             self.nes.audio_buffer.clear();
         }
 
-        if self.audio_device.as_ref().map( |device| device.size() < 44100 / 2 ).unwrap_or( false ) {
+        if self.audio_device.as_ref().map( |device| device.size() < 44100 / 2 ).unwrap_or( false ) && self.nes.frame % 2 == 0 {
             return;
         }
         self.renderer.present(); // This might block due to vsync.
