@@ -55,7 +55,7 @@ pub fn on_cycle< T: EmulatorInterface >( emulator: &mut T ) {
 pub fn on_frame< T: EmulatorInterface >( emulator: &mut T ) {
     emulator.testcase_state().frame += 1;
 
-    let frame_limit = emulator.testcase_state().frame_limit;
+    let frame_limit = emulator.testcase_state().frame_limit * 2;
     if emulator.testcase_state().frame == frame_limit {
         emulator.testcase_state().running = false;
 
