@@ -20,6 +20,10 @@ extern crate bitflags;
 #[macro_use]
 extern crate nes_testsuite;
 
+#[cfg(test)]
+#[macro_use]
+extern crate rp2c02_testsuite;
+
 mod memory_map;
 mod rp2c02_scheduler;
 mod rp2c02;

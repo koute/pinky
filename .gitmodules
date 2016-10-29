@@ -1,0 +1,3 @@
+[submodule "rp2c02-testsuite/generator/phantom2c02"]
+	path = rp2c02-testsuite/generator/phantom2c02
+	url = https://github.com/koute/phantom2c02.git

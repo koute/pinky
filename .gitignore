@@ -10,3 +10,5 @@ nes/target
 nes/Cargo.lock
 emumisc/target
 emumisc/Cargo.lock
+rp2c02-testsuite/target
+rp2c02-testsuite/Cargo.lock

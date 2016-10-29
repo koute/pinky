@@ -1,0 +1,35 @@
+"use strict";
+
+var _ = require( "./phantom2c02/lib/lodash" );
+var common = require( "./common" );
+var ppumask = common.ppumask;
+var sprite = common.sprite;
+
+common.generate( "current_address_during_sprite_rendering", function( ctx ) {
+    var ppumask_value = ppumask()
+        .set_show_sprites( true )
+        .set_show_sprites_in_leftmost_8_pixels( true );
+
+    ctx.fill_vram_with_test_data();
+
+    ctx.cpu_write_and_step( ppumask_value );
+    ctx.step_scanline();
+
+    var test = function() {
+        ctx.repeat( 257, ctx.step_pixel ); // Skip sprite evaluation.
+        ctx.repeat( 32, _.partial( ctx.write_secondary_oam, _, 0xFF ) );
+
+        ctx.write_sprite_to_secondary_oam( 0, sprite({ x: 0, y: 0, tile: 0xAA }) );
+        ctx.write_sprite_to_secondary_oam( 1, sprite({ x: 8, y: 0, tile: 0xBA, flip_h: true }) );
+        ctx.write_sprite_to_secondary_oam( 2, sprite({ x: 16, y: 0, tile: 0xCA, flip_v: true }) );
+        ctx.write_sprite_to_secondary_oam( 3, sprite({ x: 24, y: 0, tile: 0xDA, flip_h: true, flip_v: true }) );
+
+        ctx.repeat( 64, function() {
+            ctx.test.current_address();
+            ctx.step_pixel();
+        });
+        ctx.step_scanline();
+    };
+
+    ctx.repeat( 3, test );
+});

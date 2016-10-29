@@ -17,6 +17,9 @@ path = "../mos6502"
 [dev-dependencies.nes-testsuite]
 path = "../nes-testsuite"
 
+[dev-dependencies.rp2c02-testsuite]
+path = "../rp2c02-testsuite"
+
 [profile.test]
 opt-level = 2
 debug = true

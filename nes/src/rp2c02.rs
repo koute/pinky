@@ -1610,3 +1610,149 @@ mod tests {
         assert_eq!( ppu.peek( 0x3F00 + 31 ), 31 );
     }
 }
+
+#[cfg(test)]
+mod test_ppu {
+    use super::{Context, State, Private};
+    use rp2c02_testsuite::TestPPU;
+    use std::cell::Cell;
+    use std::fmt;
+
+    #[derive(Copy, Clone, PartialEq, Eq)]
+    pub struct MemoryOperation {
+        pub address: u16,
+        pub value: u8
+    }
+
+    impl fmt::Debug for MemoryOperation {
+        fn fmt( &self, fmt: &mut fmt::Formatter ) -> fmt::Result {
+            write!( fmt, "{{ address: 0x{:04X}, value: 0x{:02X} }}", self.address, self.value )
+        }
+    }
+
+    struct Instance {
+        state: State,
+        memory: [u8; 0x2400],
+        last_vram_read: Cell< Option< MemoryOperation > >,
+        expected_vram_read: Option< Option< MemoryOperation > >
+    }
+
+    impl Context for Instance {
+        fn state_mut( &mut self ) -> &mut State {
+            &mut self.state
+        }
+
+        fn state( &self ) -> &State {
+            &self.state
+        }
+
+        fn on_frame_was_generated( &mut self ) {}
+        fn set_vblank_nmi( &mut self, _: bool ) {}
+
+        fn peek_video_memory( &self, address: u16 ) -> u8 {
+            // The simulator uses one screen mirroring of the background tilemaps.
+            let value = self.memory[ ((address & 0x23FF) | (address & 0x2000)) as usize ];
+
+            self.last_vram_read.set( Some( MemoryOperation {
+                address: address,
+                value: value
+            }));
+
+            value
+        }
+
+        fn poke_video_memory( &mut self, _: u16, _: u8 ) {
+            unreachable!();
+        }
+    }
+
+    impl Instance {
+        fn new() -> Self {
+            Instance {
+                state: State::new(),
+                memory: [0; 0x2400],
+                last_vram_read: Cell::new( None ),
+                expected_vram_read: None
+            }
+        }
+    }
+
+    impl TestPPU for Instance {
+        fn expect_vram_read( &mut self, address: u16, value: u8 ) {
+            self.expected_vram_read = Some( Some( MemoryOperation {
+                address: address,
+                value: value
+            }));
+        }
+
+        fn expect_no_vram_read( &mut self ) {
+            self.expected_vram_read = Some( None );
+        }
+
+        fn get_current_address( &self ) -> u16 {
+            self.state.current_address
+        }
+
+        fn read_ioreg( &mut self, index: u8 ) -> u8 {
+            match index {
+                2 => self.peek_ppustatus(),
+                4 => self.peek_oamdata(),
+                7 => self.peek_ppudata(),
+                _ => unreachable!()
+            }
+        }
+
+        fn read_secondary_sprite_ram( &self, index: u8 ) -> u8 {
+            self.state.secondary_sprite_list_ram[ index as usize ]
+        }
+
+        fn write_ioreg( &mut self, index: u8, value: u8 ) {
+            match index {
+                0 => self.poke_ppuctrl( value ),
+                1 => self.poke_ppumask( value ),
+                3 => self.poke_oamaddr( value ),
+                4 => self.poke_oamdata( value ),
+                5 => self.poke_ppuscroll( value ),
+                6 => self.poke_ppuaddr( value ),
+                7 => self.poke_ppudata( value ),
+                _ => unreachable!()
+            }
+        }
+
+        fn write_vram( &mut self, address: u16, value: u8 ) {
+            self.memory[ address as usize ] = value;
+        }
+
+        fn write_palette_ram( &mut self, index: u8, value: u8 ) {
+            self.state.palette_ram[ index as usize ] = value;
+        }
+
+        fn write_sprite_ram( &mut self, index: u8, value: u8 ) {
+            self.state.sprite_list_ram[ index as usize ] = value;
+        }
+
+        fn write_secondary_sprite_ram( &mut self, index: u8, value: u8 ) {
+            self.state.secondary_sprite_list_ram[ index  as usize] = value;
+        }
+
+        fn step_pixel( &mut self ) {
+            self.last_vram_read = Cell::new( None );
+
+            self.execute();
+
+            if let Some( expected_vram_read ) = self.expected_vram_read.take() {
+                assert_eq!( self.last_vram_read.get(), expected_vram_read );
+            }
+        }
+
+        fn scanline( &self ) -> u16 {
+            self.state.n_scanline
+        }
+
+        fn dot( &self ) -> u16 {
+            self.state.n_dot
+        }
+    }
+
+    rp2c02_testsuite!( Instance );
+}
