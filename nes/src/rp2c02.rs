@@ -990,7 +990,6 @@ trait Private: Sized + Context {
         let pixel = ((self.state().ppumask.color_emphasize_bits() as u16) << 8) | (color_in_system_palette_index as u16);
         self.state_mut().framebuffer.buffer.poke( nth, pixel );
         self.state_mut().n_pixel += 1;
-        self.state_mut().n_dot += 1;
     }
 
     fn shift_background_registers( &mut self ) {
