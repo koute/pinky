@@ -879,39 +879,20 @@ trait Private: Sized + Context {
         0x2000 + (self.state().current_address & 0b0000110000000000)
     }
 
-    // Lower eight bits of the address.
-    fn pattern_index_address_lo( &self ) -> u16 {
-        (self.tile_x() as u16 + self.tile_y() as u16 * 32) & 0b0000000011111111
+    fn pattern_index_address( &self ) -> u16 {
+        (self.tilemap_address() + (self.tile_x() as u16 + self.tile_y() as u16 * 32)) & 0b0011111111111111
     }
 
-    // Upper six bits of the address.
-    fn pattern_index_address_hi( &self ) -> u16 {
-        (self.tilemap_address() + (self.tile_x() as u16 + self.tile_y() as u16 * 32)) & 0b0011111100000000
+    fn packed_palette_indexes_address( &self ) -> u16 {
+        ((self.tilemap_address() + 960) + (self.tile_y() as u16 / 4 * (32 / 4)) + (self.tile_x() as u16 / 4))
     }
 
-    fn packed_palette_indexes_address_lo( &self ) -> u16 {
-        // TODO: This is ugly; see http://wiki.nesdev.com/w/index.php/PPU_scrolling section "Tile and attribute fetching"
-        ((self.tilemap_address() + 960) + (self.tile_y() as u16 / 4 * (32 / 4)) + (self.tile_x() as u16 / 4)) & 0x00FF
+    fn bg_tile_lo_address( &self, index: u8 ) -> u16 {
+        (self.state().ppuctrl.background_pattern_table_address() + index as u16 * 16 + self.local_pixel_coordinate_y() as u16)
     }
 
-    fn packed_palette_indexes_address_hi( &self ) -> u16 {
-        ((self.tilemap_address() + 960) + (self.tile_y() as u16 / 4 * (32 / 4)) + (self.tile_x() as u16 / 4)) & 0xFF00
-    }
-
-    fn bg_tile_lo_address_lo( &self, index: u8 ) -> u16 {
-        (self.state().ppuctrl.background_pattern_table_address() + index as u16 * 16 + self.local_pixel_coordinate_y() as u16) & 0x00FF
-    }
-
-    fn bg_tile_lo_address_hi( &self, index: u8 ) -> u16 {
-        (self.state().ppuctrl.background_pattern_table_address() + index as u16 * 16) & 0xFF00
-    }
-
-    fn bg_tile_hi_address_lo( &self, index: u8 ) -> u16 {
-        (self.state().ppuctrl.background_pattern_table_address() + index as u16 * 16 + 8 + self.local_pixel_coordinate_y() as u16) & 0x00FF
-    }
-
-    fn bg_tile_hi_address_hi( &self, index: u8 ) -> u16 {
-        (self.state().ppuctrl.background_pattern_table_address() + index as u16 * 16 + 8) & 0xFF00
+    fn bg_tile_hi_address( &self, index: u8 ) -> u16 {
+        (self.state().ppuctrl.background_pattern_table_address() + index as u16 * 16 + 8 + self.local_pixel_coordinate_y() as u16)
     }
 
     fn background_pixel( &self ) -> (u8, u8) {

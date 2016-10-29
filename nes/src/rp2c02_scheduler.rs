@@ -298,7 +298,7 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_01< T: Private >( ppu: &mut T ) {
             ppu.clear_secondary_sprite_ram_cell();
-            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.state_mut().address = ppu.pattern_index_address();
             ppu.update_sprite_registers();
             ppu.output_pixel();
             ppu.shift_background_registers();
@@ -308,7 +308,6 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_02< T: Private >( ppu: &mut T ) {
             ppu.clear_secondary_sprite_ram_cell();
-            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
             ppu.state_mut().background_pattern_index_latch = ppu.fetch();
             ppu.update_sprite_registers();
             ppu.output_pixel();
@@ -319,7 +318,7 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_03< T: Private >( ppu: &mut T ) {
             ppu.clear_secondary_sprite_ram_cell();
-            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            ppu.state_mut().address = ppu.packed_palette_indexes_address();
             ppu.update_sprite_registers();
             ppu.output_pixel();
             ppu.shift_background_registers();
@@ -329,7 +328,6 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_04< T: Private >( ppu: &mut T ) {
             ppu.clear_secondary_sprite_ram_cell();
-            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
             let packed_palette_indexes = ppu.fetch();
             let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
             ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
@@ -342,7 +340,7 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_05< T: Private >( ppu: &mut T ) {
             ppu.clear_secondary_sprite_ram_cell();
-            set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.state_mut().address = ppu.bg_tile_lo_address( ppu.state().background_pattern_index_latch );
             ppu.update_sprite_registers();
             ppu.output_pixel();
             ppu.shift_background_registers();
@@ -352,7 +350,6 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_06< T: Private >( ppu: &mut T ) {
             ppu.clear_secondary_sprite_ram_cell();
-            set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
             ppu.state_mut().tile_lo_latch = ppu.fetch();
             ppu.update_sprite_registers();
             ppu.output_pixel();
@@ -363,7 +360,7 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_07< T: Private >( ppu: &mut T ) {
             ppu.clear_secondary_sprite_ram_cell();
-            set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.state_mut().address = ppu.bg_tile_hi_address( ppu.state().background_pattern_index_latch );
             ppu.update_sprite_registers();
             ppu.output_pixel();
             ppu.shift_background_registers();
@@ -373,9 +370,8 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_08< T: Private >( ppu: &mut T ) {
             ppu.clear_secondary_sprite_ram_cell();
-            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
             ppu.state_mut().tile_hi_latch = ppu.fetch();
-            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.increment_horizontal_counters();
             ppu.reload_background_shift_registers();
             ppu.update_sprite_registers();
             ppu.output_pixel();
@@ -386,7 +382,7 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_09< T: Private >( ppu: &mut T ) {
             ppu.sprite_evaluation();
-            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.state_mut().address = ppu.pattern_index_address();
             ppu.update_sprite_registers();
             ppu.output_pixel();
             ppu.shift_background_registers();
@@ -396,7 +392,6 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_10< T: Private >( ppu: &mut T ) {
             ppu.sprite_evaluation();
-            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
             ppu.state_mut().background_pattern_index_latch = ppu.fetch();
             ppu.update_sprite_registers();
             ppu.output_pixel();
@@ -407,7 +402,7 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_11< T: Private >( ppu: &mut T ) {
             ppu.sprite_evaluation();
-            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            ppu.state_mut().address = ppu.packed_palette_indexes_address();
             ppu.update_sprite_registers();
             ppu.output_pixel();
             ppu.shift_background_registers();
@@ -417,7 +412,6 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_12< T: Private >( ppu: &mut T ) {
             ppu.sprite_evaluation();
-            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
             let packed_palette_indexes = ppu.fetch();
             let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
             ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
@@ -430,7 +424,7 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_13< T: Private >( ppu: &mut T ) {
             ppu.sprite_evaluation();
-            set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.state_mut().address = ppu.bg_tile_lo_address( ppu.state().background_pattern_index_latch );
             ppu.update_sprite_registers();
             ppu.output_pixel();
             ppu.shift_background_registers();
@@ -440,7 +434,6 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_14< T: Private >( ppu: &mut T ) {
             ppu.sprite_evaluation();
-            set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
             ppu.state_mut().tile_lo_latch = ppu.fetch();
             ppu.update_sprite_registers();
             ppu.output_pixel();
@@ -451,7 +444,7 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_15< T: Private >( ppu: &mut T ) {
             ppu.sprite_evaluation();
-            set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.state_mut().address = ppu.bg_tile_hi_address( ppu.state().background_pattern_index_latch );
             ppu.update_sprite_registers();
             ppu.output_pixel();
             ppu.shift_background_registers();
@@ -461,9 +454,8 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_16< T: Private >( ppu: &mut T ) {
             ppu.sprite_evaluation();
-            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
             ppu.state_mut().tile_hi_latch = ppu.fetch();
-            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.increment_horizontal_counters();
             ppu.reload_background_shift_registers();
             ppu.update_sprite_registers();
             ppu.output_pixel();
@@ -474,11 +466,10 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_17< T: Private >( ppu: &mut T ) {
             ppu.sprite_evaluation();
-            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
             ppu.state_mut().tile_hi_latch = ppu.fetch();
-            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.increment_horizontal_counters();
             ppu.reload_background_shift_registers();
-            if ppu.state().ppumask.show_background() { ppu.increment_vertical_counters(); }
+            ppu.increment_vertical_counters();
             ppu.state_mut().n_dot += 1;;
         }
 
@@ -488,8 +479,8 @@ macro_rules! ppu_scheduling_logic {
             ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
             ppu.state_mut().sprite_vertical_position_latch = ppu.state().sprite_list_data_latch;
             ppu.state_mut().secondary_sprite_list_address += 1;
-            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-            if ppu.state().ppumask.show_background() { ppu.reset_horizontal_counters(); }
+            ppu.state_mut().address = ppu.pattern_index_address();
+            ppu.reset_horizontal_counters();
             ppu.state_mut().n_dot += 1;;
         }
 
@@ -498,7 +489,6 @@ macro_rules! ppu_scheduling_logic {
             ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
             ppu.state_mut().sprite_pattern_index_latch = ppu.state().sprite_list_data_latch;
             ppu.state_mut().secondary_sprite_list_address += 1;
-            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
             ppu.state_mut().background_pattern_index_latch = ppu.fetch();
             ppu.state_mut().n_dot += 1;;
         }
@@ -509,7 +499,7 @@ macro_rules! ppu_scheduling_logic {
             ppu.state_mut().sprite_attributes_latch = ppu.state().sprite_list_data_latch & 0b11100011;
             ppu.current_sprite_mut().attributes_latch = ppu.state().sprite_attributes_latch;
             ppu.state_mut().secondary_sprite_list_address += 1;
-            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            ppu.state_mut().address = ppu.packed_palette_indexes_address();
             ppu.state_mut().n_dot += 1;;
         }
 
@@ -517,7 +507,6 @@ macro_rules! ppu_scheduling_logic {
         fn action_21< T: Private >( ppu: &mut T ) {
             ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
             ppu.current_sprite_mut().dots_until_is_displayed = ppu.state().sprite_list_data_latch;
-            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
             let packed_palette_indexes = ppu.fetch();
             let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
             ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
@@ -571,20 +560,19 @@ macro_rules! ppu_scheduling_logic {
             ppu.state_mut().sprite_list_data_latch = ppu.state().secondary_sprite_list_ram.peek( ppu.state().secondary_sprite_list_address );
             ppu.state_mut().sprite_vertical_position_latch = ppu.state().sprite_list_data_latch;
             ppu.state_mut().secondary_sprite_list_address += 1;
-            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.state_mut().address = ppu.pattern_index_address();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_27< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.state_mut().address = ppu.pattern_index_address();
             ppu.shift_background_registers();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_28< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
             ppu.state_mut().background_pattern_index_latch = ppu.fetch();
             ppu.shift_background_registers();
             ppu.state_mut().n_dot += 1;;
@@ -592,14 +580,13 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_29< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            ppu.state_mut().address = ppu.packed_palette_indexes_address();
             ppu.shift_background_registers();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_30< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
             let packed_palette_indexes = ppu.fetch();
             let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
             ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
@@ -609,14 +596,13 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_31< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.state_mut().address = ppu.bg_tile_lo_address( ppu.state().background_pattern_index_latch );
             ppu.shift_background_registers();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_32< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
             ppu.state_mut().tile_lo_latch = ppu.fetch();
             ppu.shift_background_registers();
             ppu.state_mut().n_dot += 1;;
@@ -624,16 +610,15 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_33< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.state_mut().address = ppu.bg_tile_hi_address( ppu.state().background_pattern_index_latch );
             ppu.shift_background_registers();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_34< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
             ppu.state_mut().tile_hi_latch = ppu.fetch();
-            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.increment_horizontal_counters();
             ppu.reload_background_shift_registers();
             ppu.shift_background_registers();
             ppu.state_mut().n_dot += 1;;
@@ -641,29 +626,26 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_35< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
             ppu.state_mut().tile_hi_latch = ppu.fetch();
-            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.increment_horizontal_counters();
             ppu.reload_background_shift_registers();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_36< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.state_mut().address = ppu.pattern_index_address();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_37< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
             ppu.state_mut().background_pattern_index_latch = ppu.fetch();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_38< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
             ppu.state_mut().background_pattern_index_latch = ppu.fetch();
             ppu.state_mut().n_scanline += 1;
             ppu.state_mut().n_dot = 0;
@@ -689,7 +671,7 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_40< T: Private >( ppu: &mut T ) {
             ppu.sprite_evaluation();
-            set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.state_mut().address = ppu.bg_tile_hi_address( ppu.state().background_pattern_index_latch );
             ppu.update_sprite_registers();
             ppu.output_pixel();
             ppu.shift_background_registers();
@@ -750,7 +732,7 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_48< T: Private >( ppu: &mut T ) {
             ppu.state_mut().ppustatus.modify_sprite_0_hit( false );
-            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.state_mut().address = ppu.pattern_index_address();
             ppu.shift_background_registers();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
@@ -758,7 +740,6 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_49< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
             ppu.state_mut().background_pattern_index_latch = ppu.fetch();
             ppu.shift_background_registers();
             ppu.try_trigger_vblank_nmi();
@@ -767,7 +748,7 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_50< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            ppu.state_mut().address = ppu.packed_palette_indexes_address();
             ppu.shift_background_registers();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
@@ -775,7 +756,6 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_51< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
             let packed_palette_indexes = ppu.fetch();
             let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
             ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
@@ -786,7 +766,7 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_52< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.state_mut().address = ppu.bg_tile_lo_address( ppu.state().background_pattern_index_latch );
             ppu.shift_background_registers();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
@@ -794,7 +774,6 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_53< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
             ppu.state_mut().tile_lo_latch = ppu.fetch();
             ppu.shift_background_registers();
             ppu.try_trigger_vblank_nmi();
@@ -803,7 +782,7 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_54< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
+            ppu.state_mut().address = ppu.bg_tile_hi_address( ppu.state().background_pattern_index_latch );
             ppu.shift_background_registers();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
@@ -811,9 +790,8 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_55< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
             ppu.state_mut().tile_hi_latch = ppu.fetch();
-            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.increment_horizontal_counters();
             ppu.reload_background_shift_registers();
             ppu.shift_background_registers();
             ppu.try_trigger_vblank_nmi();
@@ -822,7 +800,7 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_56< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.state_mut().address = ppu.pattern_index_address();
             ppu.shift_background_registers();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
@@ -830,26 +808,24 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_57< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
             ppu.state_mut().tile_hi_latch = ppu.fetch();
-            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.increment_horizontal_counters();
             ppu.reload_background_shift_registers();
-            if ppu.state().ppumask.show_background() { ppu.increment_vertical_counters(); }
+            ppu.increment_vertical_counters();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_58< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-            if ppu.state().ppumask.show_background() { ppu.reset_horizontal_counters(); }
+            ppu.state_mut().address = ppu.pattern_index_address();
+            ppu.reset_horizontal_counters();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_59< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
             ppu.state_mut().background_pattern_index_latch = ppu.fetch();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
@@ -857,14 +833,13 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_60< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
+            ppu.state_mut().address = ppu.packed_palette_indexes_address();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_61< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
             let packed_palette_indexes = ppu.fetch();
             let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
             ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
@@ -915,7 +890,7 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_66< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
+            ppu.state_mut().address = ppu.pattern_index_address();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
         }
@@ -930,43 +905,41 @@ macro_rules! ppu_scheduling_logic {
             }
             ppu.current_sprite_mut().pattern_hi_shift_register = value;
             ppu.state_mut().sprite_index += 1;
-            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.reset_vertical_counters();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_68< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.state_mut().address = ppu.pattern_index_address();
+            ppu.reset_vertical_counters();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_69< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
             ppu.state_mut().background_pattern_index_latch = ppu.fetch();
-            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.reset_vertical_counters();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_70< T: Private >( ppu: &mut T ) {
-            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
-            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.state_mut().address = ppu.packed_palette_indexes_address();
+            ppu.reset_vertical_counters();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_71< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
             let packed_palette_indexes = ppu.fetch();
             let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
             ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
-            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.reset_vertical_counters();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
         }
@@ -974,7 +947,7 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_72< T: Private >( ppu: &mut T ) {
             set_lo!( ppu.state_mut().address, ppu.sprite_tile_lo_address_lo() );
-            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.reset_vertical_counters();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
         }
@@ -988,7 +961,7 @@ macro_rules! ppu_scheduling_logic {
                 value = reverse_bits( value );
             }
             ppu.current_sprite_mut().pattern_lo_shift_register = value;
-            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.reset_vertical_counters();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
         }
@@ -996,16 +969,15 @@ macro_rules! ppu_scheduling_logic {
         #[allow(unused_variables)]
         fn action_74< T: Private >( ppu: &mut T ) {
             set_lo!( ppu.state_mut().address, ppu.sprite_tile_hi_address_lo() );
-            if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+            ppu.reset_vertical_counters();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().n_dot += 1;;
         }
 
         #[allow(unused_variables)]
         fn action_75< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
             ppu.state_mut().tile_hi_latch = ppu.fetch();
-            if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
+            ppu.increment_horizontal_counters();
             ppu.reload_background_shift_registers();
             ppu.try_trigger_vblank_nmi();
             ppu.state_mut().skip_cycle_flag = ppu.state().odd_frame_flag && ppu.state().ppumask.show_background();
@@ -1014,7 +986,6 @@ macro_rules! ppu_scheduling_logic {
 
         #[allow(unused_variables)]
         fn action_76< T: Private >( ppu: &mut T ) {
-            set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
             ppu.state_mut().background_pattern_index_latch = ppu.fetch();
             ppu.try_trigger_vblank_nmi();
             if ppu.state().skip_cycle_flag { ppu.state_mut().skip_next_cycle = true; }

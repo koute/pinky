@@ -99,28 +99,24 @@ vis, pre    264..272..320            set_hi!( ppu.state_mut().address, ppu.sprit
 #######################
 
 # For dots 257..320 the background pattern index and packed palette index fetches are garbage.
-vis, pre    001..009..329, 337, 339  set_lo!( ppu.state_mut().address, ppu.pattern_index_address_lo() as u8 );
-vis, pre    002..010..330, 338, 340  set_hi!( ppu.state_mut().address, (ppu.pattern_index_address_hi() >> 8) as u8 );
-                                     ppu.state_mut().background_pattern_index_latch = ppu.fetch();
+vis, pre    001..009..329, 337, 339  ppu.state_mut().address = ppu.pattern_index_address();
+vis, pre    002..010..330, 338, 340  ppu.state_mut().background_pattern_index_latch = ppu.fetch();
 
-vis, pre    003..011..331            set_lo!( ppu.state_mut().address, ppu.packed_palette_indexes_address_lo() as u8 );
-vis, pre    004..012..332            set_hi!( ppu.state_mut().address, (ppu.packed_palette_indexes_address_hi() >> 8) as u8 );
-                                     let packed_palette_indexes = ppu.fetch();
+vis, pre    003..011..331            ppu.state_mut().address = ppu.packed_palette_indexes_address();
+vis, pre    004..012..332            let packed_palette_indexes = ppu.fetch();
                                      let bits_to_shift = (ppu.tile_x() & 2) + (ppu.tile_y() & 2) * 2;
                                      ppu.state_mut().background_palette_index_latch = (packed_palette_indexes >> bits_to_shift) & 0b11;
 
-vis, pre    005..013..253, 325, 333  set_lo!( ppu.state_mut().address, ppu.bg_tile_lo_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
-vis, pre    006..014..254, 326, 334  set_hi!( ppu.state_mut().address, (ppu.bg_tile_lo_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                                     ppu.state_mut().tile_lo_latch = ppu.fetch();
+vis, pre    005..013..253, 325, 333  ppu.state_mut().address = ppu.bg_tile_lo_address( ppu.state().background_pattern_index_latch );
+vis, pre    006..014..254, 326, 334  ppu.state_mut().tile_lo_latch = ppu.fetch();
 
-vis, pre    007..015..255, 327, 335  set_lo!( ppu.state_mut().address, ppu.bg_tile_hi_address_lo( ppu.state().background_pattern_index_latch ) as u8 );
-vis, pre    008..016..256, 328, 336  set_hi!( ppu.state_mut().address, (ppu.bg_tile_hi_address_hi( ppu.state().background_pattern_index_latch ) >> 8) as u8 );
-                                     ppu.state_mut().tile_hi_latch = ppu.fetch();
+vis, pre    007..015..255, 327, 335  ppu.state_mut().address = ppu.bg_tile_hi_address( ppu.state().background_pattern_index_latch );
+vis, pre    008..016..256, 328, 336  ppu.state_mut().tile_hi_latch = ppu.fetch();
 
-vis, pre    008..016..256, 328, 336  if ppu.state().ppumask.show_background() { ppu.increment_horizontal_counters(); }
-vis, pre    256                      if ppu.state().ppumask.show_background() { ppu.increment_vertical_counters(); }
-vis, pre    257                      if ppu.state().ppumask.show_background() { ppu.reset_horizontal_counters(); }
-pre         280..304                 if ppu.state().ppumask.show_background() { ppu.reset_vertical_counters(); }
+vis, pre    008..016..256, 328, 336  ppu.increment_horizontal_counters();
+vis, pre    256                      ppu.increment_vertical_counters();
+vis, pre    257                      ppu.reset_horizontal_counters();
+pre         280..304                 ppu.reset_vertical_counters();
 
 ############
 # RENDERING
