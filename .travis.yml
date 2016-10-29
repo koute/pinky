@@ -1,0 +1,19 @@
+language: rust
+rust:
+  - stable
+  - beta
+  - nightly
+
+matrix:
+  allow_failures:
+    - rust: nightly
+
+script:
+  - cd mos6502
+  - cargo test --verbose
+  - cd ../nes
+  - cargo test --verbose
+  - cd ../pinky-libretro
+  - cargo build --verbose
+  - cd ../pinky-devui
+  - cargo build --verbose
