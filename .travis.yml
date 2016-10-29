@@ -15,5 +15,3 @@ script:
   - cargo test --verbose
   - cd ../pinky-libretro
   - cargo build --verbose
-  - cd ../pinky-devui
-  - cargo build --verbose
