@@ -44,11 +44,23 @@ The `pinky-libretro` contains the libretro core of this emulator,
 which is the intended way to run it. It should be compatible with
 any libretro frontend, but it was only tested with [RetroArch].
 
-After compiling the libretro core you can run it like this with RetroArch:
+To compile the libretro core go into the `pinky-libretro` directory
+and type:
+
+```
+cargo build
+```
+
+This should build a shared object in `target/debug` called `libpinky_libretro.so`
+(on non-Linux systems the extension might be different, e.g. on Windows it'll be a `.dll`)
+which then you can use with RetroArch like this:
 
 ```
 retroarch -L libpinky_libretro.so your_rom.nes
 ```
+
+You can also run `cargo build --release` to build a significantly better optimized
+version (the debug build should run full speed on modern systems though).
 
 There's also a simple standalone SDL2-based frontend in the `pinky-devui`
 directory; running it is just a matter of passing it a path to your game ROM
