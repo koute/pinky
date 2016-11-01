@@ -27,6 +27,7 @@ pub fn reverse_bits( value: u8 ) -> u8 {
 
 pub trait BitExtra {
     fn replace_bits( &mut self, mask: Self, replacement: Self );
+    fn copy_bits_from( &mut self, mask: Self, replacement: Self );
     fn get_bits( self, mask: Self ) -> Self;
     fn mask_to_shift( mask: Self ) -> u8;
 }
@@ -54,6 +55,11 @@ macro_rules! impl_bit_extra {
             fn replace_bits( &mut self, mask: Self, replacement: Self ) {
                 let shift = BitExtra::mask_to_shift( mask );
                 *self = (*self & !mask) | ((replacement << shift) & mask);
+            }
+
+            #[inline(always)]
+            fn copy_bits_from( &mut self, mask: Self, replacement: Self ) {
+                *self = (*self & !mask) | (replacement & mask);
             }
 
             #[inline(always)]
@@ -140,6 +146,13 @@ fn test_replace_bits() {
 
     a.replace_bits( 0b11000000, 0b00000011 );
     assert_eq!( a, 0b11111111 );
+}
+
+#[test]
+fn test_copy_bits_from() {
+    let mut a: u16 = 0b00010100_00000000;
+    a.copy_bits_from( 0b01111011_11100000, 0b00000100_00000101 );
+    assert_eq!( a, 0b00000100_00000000 );
 }
 
 #[test]
