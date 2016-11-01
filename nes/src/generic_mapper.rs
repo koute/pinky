@@ -549,8 +549,11 @@ impl BankedGenericMapper {
         mapper.internal_video_rom_offset = mapper.inner.initialize_video_rom( &rom.video_rom[..] );
         mapper.internal_background_tilemaps_offset = mapper.inner.initialize_background_tilemaps( rom.mirroring );
 
-        mapper.rom_size = rom.rom.len() as u32;
-        mapper.video_rom_size = rom.video_rom.len() as u32;
+        mapper.rom_size = mapper.internal_video_rom_offset - mapper.internal_rom_bank_offset;
+        mapper.video_rom_size = mapper.internal_background_tilemaps_offset - mapper.internal_video_rom_offset;
+
+        assert!( mapper.rom_size > 0 );
+        assert!( mapper.video_rom_size > 0 );
 
         Ok( mapper )
     }
