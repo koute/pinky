@@ -9,6 +9,8 @@ matrix:
     - rust: nightly
 
 script:
+  - cd emumisc
+  - cargo test --verbose
   - cd mos6502
   - cargo test --verbose
   - cd ../nes
