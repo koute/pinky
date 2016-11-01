@@ -1,0 +1,99 @@
+2013-11-02
+* Completed manual
+* Added copyright notices to all files
+
+2013-10-26
+* Beeps out the mapper, PRG, and CHR result
+* Space for eight more bytes for flash memory identification
+
+2013-10-11
+* Displays exact letter names of board if known (such as SNROM
+  instead of S*ROM)
+* Put stub in all banks for A*ROM, B*ROM, G*ROM, and Crazy Climber
+
+2013-10-08
+* Enables MMC1 WRAM protection with E000.D4 after detection
+* Explicit "PRG RAM MISSING" message
+* Saves last PRG ROM bank in RAM early for better SUROM handling
+
+2013-09-29
+* Fixed a typo causing Holy Diver's CHR check to fail, which may
+  have crept in while merging its test with that of Crazy Climber
+* Distinguishes AOROM from Uchuusen Cosmo Carrier in order to fail
+  faster on emulators not supporting NES 2.0 submappers
+* Made detailed test for A53
+* Added a complete set of powers of two (32 to 512 KiB PRG ROM,
+  8 to 256 KiB CHR ROM)
+* Added a 7-Zip archive of test ROMs
+* Wrote the manual
+
+2013-09-28
+* Split MMC3 and FME-7 tests to separate file
+* Made detailed test for MMC1 and MMC2/MMC4
+* PRG fullness: 8000, 9000, A000, B0F0, C6A0, DA20, E000, F400
+
+2013-09-27
+* Tested by Oliveira on real cartridges
+* Made WRAM protection and IRQ tests for FME-7
+* Fixed a bug in detailed tests if CHR RAM is present
+
+2013-09-26
+* Made detailed PRG ROM and CHR ROM tests for FME-7
+
+2013-09-25
+* Made IRQ and WRAM protection tests for MMC3
+* Downloaded and compiled Nestopia because FCEUX and PowerPak
+  weren't handling MMC3 WRAM write protection correctly (as a
+  hack to get MMC6 games working without NES 2.0)
+
+2013-09-24
+* Expanded UNROM test driver to cover Holy Diver
+* Split MMC1, MMC2/4, MMC3, FME-7, and A53 tests to separate file
+* Made detailed PRG ROM and CHR ROM tests for MMC3
+
+2013-09-23
+* Made detailed test for UNROM and UNROM (Crazy Climber)
+
+2013-09-22
+* Verifies all CHR ROM bank tags
+* Displays OK or PROBLEM for the CHR RAM and PRG RAM tests
+* Result displays with variable number of lines
+* Broke down test steps to write in drivers.s
+* Made detailed test for GNROM, BNROM, and AOROM
+
+2013-09-21
+* Tests PRG RAM and CHR RAM byte-by-byte, tested using a debugger
+  to simulate a failing byte
+* Shouldn't crash on INL's MMC3 subset that has the $8000/$C000
+  swap bit ($8000 bit 6) forced to 1
+* PRG fullness: 8000, 9000, A000, B0F0, C630, D460, E000, F400
+  (start worrying if one of these passes xE00)
+
+2013-09-20
+* CHR RAM size, PRG RAM retention, and PRG RAM size verified on
+  PowerPak, Nintendulator, and nesemu2
+* Split PRG RAM work to a new file
+* Started on big honkin' mapper tests and byte-by-byte PRG RAM test
+
+2013-09-19
+* Tests for and shows PRG RAM size
+* Verified on PowerPak using MMC1 driver bundled with PR8
+
+2013-09-18
+* Began work on mapper test drivers
+* Shows size of PRG ROM and CHR RAM/ROM
+
+2013-09-17
+* Distinguishes MMC2 from MMC4
+* Distinguishes most Nintendo discrete mappers (except CPROM)
+* Mapper detection ensures the last 16K is visible
+* Build places first 16K of master in first 16K bank (for use by
+  mapper 180)
+* Build no longer makes a special image for MMC1; instead it always
+  puts the last 32K of master in all 256K outer banks
+* Some bytes shaved from Morse code playback
+* Removed "Holy diver, Batman!" joke that people unfamiliar with
+  1960s action comedy won't get, and replaced it with the name of
+  the board class associated with a mapper
+* Mapper number is written in decimal, not hex
+* Use palette with more contrast
