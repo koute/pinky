@@ -344,6 +344,7 @@ trait Private: Sized + Context {
         mem::swap( &mut mapper, &mut self.state_mut().mapper );
         let ready = self.state().ready;
 
+        // FIXME: This doesn't reset the mapper.
         *self.state_mut() = State {
             mapper: mapper,
             ready: ready,

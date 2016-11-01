@@ -163,7 +163,14 @@ impl UserInterface {
 
         self.nes.cycle = 0;
         self.nes.frame = 0;
-        self.nes.hard_reset();
+
+        self.nes = VirtualNES {
+            cycle: 0,
+            frame: 0,
+            state: nes::State::new(),
+            audio_buffer: Vec::new()
+        };
+        self.nes.load_rom_from_file( &self.rom_filename ).unwrap();
 
         let frame;
         loop {
