@@ -15,7 +15,7 @@ based only on [publicly available documentation].
    * A testsuite based on test ROMs.
    * A PPU testsuite automatically generated from a transistor-level
      simulation of a real PPU.
-   * Supports NROM (0) and MMC1 (1) mappers.
+   * Supports NROM (0), MMC1 (1) and UxROM (2) mappers.
    * Can be compiled as a [libretro] core.
 
 [libretro]: http://www.libretro.com/index.php/api/
