@@ -6,42 +6,42 @@ pub mod apu_test {
     pub fn testcase_1_len_ctr< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/apu_test/1-len_ctr.nes" );
 
-        harness::standard_testcase::< T >( ROM, "5111d60a4db76c22731b4017d76a2f31", 18 );
+        harness::standard_testcase::< T >( ROM, "a6a60165f8a7b10d1d2036e007ced46c", 19 );
     }
     pub fn testcase_2_len_table< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/apu_test/2-len_table.nes" );
 
-        harness::standard_testcase::< T >( ROM, "b0ffa7caf7ab376c9929186e2f3173e9", 13 );
+        harness::standard_testcase::< T >( ROM, "e082be73c51e77a560a0670cb014bf7f", 15 );
     }
     pub fn testcase_3_irq_flag< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/apu_test/3-irq_flag.nes" );
 
-        harness::standard_testcase::< T >( ROM, "5c344bde6be07e250485c0a69fea301e", 18 );
+        harness::standard_testcase::< T >( ROM, "df67bf9e0aa4961ce02ee3eb701d769d", 19 );
     }
     pub fn testcase_4_jitter< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/apu_test/4-jitter.nes" );
 
-        harness::standard_testcase::< T >( ROM, "1916d2178cc8bc3ed66df23ec137c2d8", 18 );
+        harness::standard_testcase::< T >( ROM, "5511965c38804478a2a2fd5e0ba14f95", 18 );
     }
     pub fn testcase_5_len_timing< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/apu_test/5-len_timing.nes" );
 
-        harness::standard_testcase::< T >( ROM, "107d4aefe84e9e854fa9b871175c3773", 111 );
+        harness::standard_testcase::< T >( ROM, "9416144226b82e3b7251d9ae933001c6", 112 );
     }
     pub fn testcase_6_irq_flag_timing< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/apu_test/6-irq_flag_timing.nes" );
 
-        harness::standard_testcase::< T >( ROM, "c5843d4f656d6b126e49b4754e91900b", 19 );
+        harness::standard_testcase::< T >( ROM, "b474f7a1ca18a1c045be117d725b80eb", 20 );
     }
     pub fn testcase_7_dmc_basics< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/apu_test/7-dmc_basics.nes" );
 
-        harness::standard_testcase::< T >( ROM, "f1b668840f36ba90cd137fe5eb7dfde0", 22 );
+        harness::standard_testcase::< T >( ROM, "3d7a08151b0d82655e5d81636851d9ef", 23 );
     }
     pub fn testcase_8_dmc_rates< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/apu_test/8-dmc_rates.nes" );
 
-        harness::standard_testcase::< T >( ROM, "f9a236839337d7642fe437caf456c480", 26 );
+        harness::standard_testcase::< T >( ROM, "c5f193bb4fd2e53b4961ce5b9931804e", 27 );
     }
 }
 pub mod blargg_apu_2005_07_30 {
@@ -123,7 +123,7 @@ pub mod dmc_dma_during_read4 {
     pub fn testcase_read_write_2007< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/dmc_dma_during_read4/read_write_2007.nes" );
 
-        harness::standard_testcase::< T >( ROM, "88608a8ed0cf18ef708519de1143db9e", 18 );
+        harness::standard_testcase::< T >( ROM, "289318c88b069a9e5a2f98ab4c283622", 18 );
     }
 }
 pub mod instr_misc {
@@ -131,17 +131,17 @@ pub mod instr_misc {
     pub fn testcase_01_abs_x_wrap< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/instr_misc/01-abs_x_wrap.nes" );
 
-        harness::standard_testcase::< T >( ROM, "a9ca82047bb04a64afd3949699615afc", 12 );
+        harness::standard_testcase::< T >( ROM, "668c9056dd5ebd4323c8731394afe88a", 11 );
     }
     pub fn testcase_02_branch_wrap< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/instr_misc/02-branch_wrap.nes" );
 
-        harness::standard_testcase::< T >( ROM, "b5d3a5b428304a71c81436edc6f511e7", 12 );
+        harness::standard_testcase::< T >( ROM, "167f0376a521b5e6bbfdf3e4d5e142ff", 11 );
     }
     pub fn testcase_03_dummy_reads< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/instr_misc/03-dummy_reads.nes" );
 
-        harness::standard_testcase::< T >( ROM, "704d3a7d459675125709aa4eaab43b69", 56 );
+        harness::standard_testcase::< T >( ROM, "e4b3faaf58413bedc1b7df11a6a8cc3f", 58 );
     }
 }
 pub mod oam_read {
@@ -149,7 +149,7 @@ pub mod oam_read {
     pub fn testcase_oam_read< T: harness::EmulatorInterface >() {
         static ROM: &'static [u8] = include_bytes!( "../roms/oam_read/oam_read.nes" );
 
-        harness::standard_testcase::< T >( ROM, "7909f77fe22ff669e107f5334134ad0b", 28 );
+        harness::standard_testcase::< T >( ROM, "c9b29cadea705ba03162b95030da598f", 34 );
     }
 }
 pub mod sprite_hit_tests_2005_10_05 {
