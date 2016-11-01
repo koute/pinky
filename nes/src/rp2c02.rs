@@ -895,7 +895,7 @@ trait Private: Sized + Context {
         if self.rendering_is_enabled() {
             let mask = 0b0000010000011111;
             let value = self.state().temporary_address;
-            self.state_mut().current_address.replace_bits( mask, value );
+            self.state_mut().current_address.copy_bits_from( mask, value );
         }
     }
 
@@ -903,7 +903,7 @@ trait Private: Sized + Context {
         if self.rendering_is_enabled() {
             let mask = 0b0111101111100000;
             let value = self.state().temporary_address;
-            self.state_mut().current_address.replace_bits( mask, value );
+            self.state_mut().current_address.copy_bits_from( mask, value );
         }
     }
 
