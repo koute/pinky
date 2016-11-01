@@ -1000,7 +1000,7 @@ trait Private: Sized + Context {
         // usually get this ugly vertical line there since the sprites'
         // position is cleared to be 0xFF by default, so any unused sprites
         // end up on dot 255.
-        if self.state().n_dot == 255 {
+        if self.state().n_dot == 255 || self.state().n_scanline == 0 {
             return (background_palette_index, background_color_index);
         }
 
