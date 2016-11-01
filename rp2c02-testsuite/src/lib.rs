@@ -13,6 +13,7 @@ pub trait TestPPU {
     fn expect_no_vram_read( &mut self );
 
     fn get_current_address( &self ) -> u16;
+    fn get_temporary_address( &self ) -> u16;
 
     fn read_ioreg( &mut self, index: u8 ) -> u8;
     fn read_secondary_sprite_ram( &self, index: u8 ) -> u8;

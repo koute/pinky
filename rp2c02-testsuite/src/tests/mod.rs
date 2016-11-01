@@ -4,6 +4,7 @@ mod test_vram_access_during_sprite_rendering;
 mod test_current_address_during_sprite_rendering_without_sprites;
 mod test_vram_access_during_sprite_rendering_without_sprites;
 mod test_current_address_when_not_rendering;
+mod test_vram_access_after_scrolling;
 mod test_vram_access_during_sprite_rendering_double_height;
 mod test_current_address_during_background_rendering;
 mod test_vram_access_during_background_rendering;
@@ -14,6 +15,7 @@ pub use tests::test_vram_access_during_sprite_rendering::*;
 pub use tests::test_current_address_during_sprite_rendering_without_sprites::*;
 pub use tests::test_vram_access_during_sprite_rendering_without_sprites::*;
 pub use tests::test_current_address_when_not_rendering::*;
+pub use tests::test_vram_access_after_scrolling::*;
 pub use tests::test_vram_access_during_sprite_rendering_double_height::*;
 pub use tests::test_current_address_during_background_rendering::*;
 pub use tests::test_vram_access_during_background_rendering::*;
@@ -47,6 +49,12 @@ macro_rules! rp2c02_testsuite {
                 use super::$interface;
                 let mut ppu = $interface::new();
                 $crate::tests::test_current_address_when_not_rendering( &mut ppu );
+            }
+            #[test]
+            fn test_vram_access_after_scrolling() {
+                use super::$interface;
+                let mut ppu = $interface::new();
+                $crate::tests::test_vram_access_after_scrolling( &mut ppu );
             }
             #[test]
             fn test_vram_access_during_sprite_rendering_double_height() {
