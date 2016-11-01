@@ -1691,6 +1691,10 @@ mod test_ppu {
             self.state.current_address
         }
 
+        fn get_temporary_address( &self ) -> u16 {
+            self.state.temporary_address
+        }
+
         fn read_ioreg( &mut self, index: u8 ) -> u8 {
             match index {
                 2 => self.peek_ppustatus(),

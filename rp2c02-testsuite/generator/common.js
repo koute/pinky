@@ -74,6 +74,10 @@ function generate( name, callback ) {
                     self.println( "assert_eq( ppu.get_current_address(), 0x%04X );", ctx.get_current_address() );
                 },
 
+                temporary_address: function() {
+                    self.println( "assert_eq( ppu.get_temporary_address(), 0x%04X );", ctx.get_temporary_address() );
+                },
+
                 cpu_read: function( address ) {
                     var obj = ctx.resolve_io_port( address );
                     ctx.queue_cpu_read( obj, function( value ) {
