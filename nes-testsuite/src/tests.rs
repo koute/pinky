@@ -126,6 +126,14 @@ pub mod dmc_dma_during_read4 {
         harness::standard_testcase::< T >( ROM, "289318c88b069a9e5a2f98ab4c283622", 18 );
     }
 }
+pub mod holy_diver_batman {
+    use harness;
+    pub fn testcase_m1_p128k_c128k_w8k< T: harness::EmulatorInterface >() {
+        static ROM: &'static [u8] = include_bytes!( "../roms/holy_diver_batman/M1_P128K_C128K_W8K.nes" );
+
+        harness::standard_testcase::< T >( ROM, "6fca84256a8b97bd5cfa920365a9fd3b", 84 );
+    }
+}
 pub mod instr_misc {
     use harness;
     pub fn testcase_01_abs_x_wrap< T: harness::EmulatorInterface >() {
@@ -378,6 +386,13 @@ macro_rules! nes_testsuite {
             fn testcase_read_write_2007() {
                 use super::$interface;
                 $crate::tests::dmc_dma_during_read4::testcase_read_write_2007::< $interface >();
+            }
+        }
+        mod holy_diver_batman {
+            #[test]
+            fn testcase_m1_p128k_c128k_w8k() {
+                use super::$interface;
+                $crate::tests::holy_diver_batman::testcase_m1_p128k_c128k_w8k::< $interface >();
             }
         }
         mod instr_misc {
