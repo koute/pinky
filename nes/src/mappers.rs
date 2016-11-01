@@ -1,6 +1,7 @@
 use rom::{NesRom, LoadError};
 use generic_mapper::GenericMapper;
 use mapper_mmc1::MapperMMC1;
+use mapper_uxrom::MapperUxROM;
 
 pub trait Mapper {
     fn peek_rom( &self, address: u16 ) -> u8;
@@ -67,6 +68,12 @@ pub fn create_mapper( rom: NesRom ) -> Result< Box< Mapper >, LoadError > {
         },
         1 => {
             MapperMMC1::from_rom( rom ).map( |mapper| {
+                let boxed: Box< Mapper > = Box::new( mapper );
+                boxed
+            })
+        },
+        2 => {
+            MapperUxROM::from_rom( rom ).map( |mapper| {
                 let boxed: Box< Mapper > = Box::new( mapper );
                 boxed
             })

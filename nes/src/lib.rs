@@ -33,6 +33,7 @@ mod rom;
 mod mappers;
 mod generic_mapper;
 mod mapper_mmc1;
+mod mapper_uxrom;
 mod orphan;
 mod dma;
 mod filter;
