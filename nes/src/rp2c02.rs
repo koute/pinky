@@ -932,16 +932,14 @@ trait Private: Sized + Context {
     }
 
     fn packed_palette_indexes_address( &self ) -> u16 {
-        let offset = if self.state().n_dot > 256 && self.state().n_dot < 321 {
+        if self.state().n_dot > 256 && self.state().n_dot < 321 {
             // This is for the garbage fetches during the sprite fetching.
             // Not sure if this is how it's supposed to be done, but it seems
             // to match up with the real PPU behavior so far.
-            self.state().current_address & 0xFF
+            self.tilemap_address() + (self.tile_y() as u16 / 4 * (32 / 4)) + (self.state().current_address & 0xFF)
         } else {
-            960
-        };
-
-        ((self.tilemap_address() + offset) + (self.tile_y() as u16 / 4 * (32 / 4)) + (self.tile_x() as u16 / 4))
+            ((self.tilemap_address() + 960) + (self.tile_y() as u16 / 4 * (32 / 4)) + (self.tile_x() as u16 / 4))
+        }
     }
 
     fn bg_tile_lo_address( &self, index: u8 ) -> u16 {
