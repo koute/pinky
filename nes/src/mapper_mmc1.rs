@@ -1,34 +1,13 @@
-use std::ops::Sub;
-use emumisc::{PeekPoke, BitExtra, is_b0_set, is_b7_set};
-use rom::{NesRom, LoadError, Mirroring};
+use emumisc::{BitExtra, is_b0_set, is_b7_set};
+use rom::{NesRom, LoadError};
 use mappers::Mapper;
-use memory_map::{
-    self,
-    SRAM_ADDRESS,
-    LOWER_ROM_ADDRESS,
-    UPPER_ROM_ADDRESS,
-    translate_address_background_tilemap
-};
+use generic_mapper::{bank, BankedGenericMapper};
+use memory_map::LOWER_ROM_ADDRESS;
 
 // FIXME: This implementation of MMC1 is not yet accurate.
 // At very least the serial writes to the serial port
 // should be ignored, and they are not currently.
 // This does break a few games.
-
-#[inline]
-fn wraparound< T: Sub< Output = T > + PartialOrd + Copy >( limit: T, mut value: T ) -> T {
-    // This isn't going to be super fast,
-    // and it's probably unnecessary if we have
-    // a bank count that is a power of two
-    // (since then we could have used a simple
-    // bitwise 'and' then), but for now it'll do.
-
-    while value >= limit {
-        value = value - limit;
-    }
-
-    value
-}
 
 const SHIFT_REGISTER_DEFAULT_VALUE: u8 = 0b10000;
 
@@ -46,174 +25,76 @@ enum SwitchingModeForVROM {
 }
 
 pub struct MapperMMC1 {
-    // At 0x6000 - 0x7FFF, fixed on most boards.
-    current_sram_offset: i32,
-
-    // At 0x8000 - 0xBFFF, either switchable or fixed to the first bank.
-    current_lower_rom_offset: i32,
-
-    // At 0xC000 - 0xFFFF, either switchable or fixed to the last bank.
-    current_upper_rom_offset: i32,
-
-    // At 0x0000 - 0x0FFF in the PPU address space.
-    current_lower_vrom_offset: i32,
-
-    // At 0x1000 - 0x1FFF in the PPU address space.
-    current_upper_vrom_offset: i32,
-
-    sram: Vec< u8 >,
-    rom: Vec< u8 >,
-    vrom: Vec< u8 >,
-    background_tilemaps: [u8; 2048],
-    is_vrom_writable: bool,
+    inner: BankedGenericMapper,
 
     shift_register: u8,
-
-    mirroring: fn( u16 ) -> u16,
     rom_switching_mode: SwitchingModeForROM,
     vrom_switching_mode: SwitchingModeForVROM,
     selected_rom_bank: u8,
     selected_lower_vrom_bank: u8,
-    selected_upper_vrom_bank: u8,
-    is_sram_writable: bool
+    selected_upper_vrom_bank: u8
 }
 
-const LOWER_VROM_ADDRESS: u16 = 0x0000;
-const UPPER_VROM_ADDRESS: u16 = 0x1000;
-
-const SRAM_BANK_SIZE: i32 = 8 * 1024;
-const ROM_BANK_SIZE: i32 = 16 * 1024;
-const VROM_BANK_SIZE: i32 = 4 * 1024;
-
-// These allow us to bake the memory address of a given memory
-// region in our offsets, effectively saving us one extra operation
-// per memory access.
-const SRAM_OFFSET: i32 = -(SRAM_ADDRESS as i32);
-const LOWER_ROM_OFFSET: i32 = -(LOWER_ROM_ADDRESS as i32);
-const UPPER_ROM_OFFSET: i32 = -(UPPER_ROM_ADDRESS as i32);
-const LOWER_VROM_OFFSET: i32 = -(LOWER_VROM_ADDRESS as i32);
-const UPPER_VROM_OFFSET: i32 = -(UPPER_VROM_ADDRESS as i32);
-
 impl MapperMMC1 {
-    fn empty() -> Self {
-        MapperMMC1 {
-            current_sram_offset: SRAM_OFFSET,
-            current_lower_rom_offset: LOWER_ROM_OFFSET,
-            current_upper_rom_offset: UPPER_ROM_OFFSET,
-            current_lower_vrom_offset: LOWER_VROM_OFFSET,
-            current_upper_vrom_offset: UPPER_VROM_OFFSET,
-
-            sram: Vec::new(),
-            rom: Vec::new(),
-            vrom: Vec::new(),
-            background_tilemaps: [0; 2048],
-            is_vrom_writable: false,
+    pub fn from_rom( rom: NesRom ) -> Result< Self, LoadError > {
+        let mut mapper = MapperMMC1 {
+            inner: try!( BankedGenericMapper::from_rom( rom ) ),
 
             shift_register: SHIFT_REGISTER_DEFAULT_VALUE,
-
-            mirroring: memory_map::horizontal_mirroring,
             rom_switching_mode: SwitchingModeForROM::OnlyLower,
             vrom_switching_mode: SwitchingModeForVROM::Independent,
             selected_rom_bank: 0,
             selected_lower_vrom_bank: 0,
-            selected_upper_vrom_bank: 1,
-            is_sram_writable: true // TODO: Different carts have different default.
-        }
-    }
-
-    pub fn from_rom( rom: NesRom ) -> Result< Self, LoadError > {
-        let mut mapper = Self::empty();
-        mapper.sram.resize( rom.ram_bank_count as usize * SRAM_BANK_SIZE as usize, 0 );
-        for rom_bank in rom.rom_banks {
-            mapper.rom.extend_from_slice( &rom_bank[..] );
-        }
-
-        if mapper.rom.len() < 2 * ROM_BANK_SIZE as usize {
-            mapper.rom.resize( 2 * ROM_BANK_SIZE as usize, 0 );
-        }
-
-        if rom.vrom_banks.is_empty() {
-            // This means we simply have 8k of VRAM here.
-            mapper.vrom.resize( 2 * VROM_BANK_SIZE as usize, 0 );
-            mapper.is_vrom_writable = true;
-        } else {
-            for vrom_bank in rom.vrom_banks {
-                mapper.vrom.extend_from_slice( &vrom_bank[..] );
-            }
-        }
-
-        mapper.mirroring = match rom.mirroring {
-            Mirroring::Horizontal => memory_map::horizontal_mirroring,
-            Mirroring::Vertical => memory_map::vertical_mirroring,
-            _ => return Err( LoadError::new( format!( "Unsupported mirroring: {:?}", rom.mirroring ) ) )
+            selected_upper_vrom_bank: 1
         };
 
-        mapper.update_offsets();
+        mapper.update_mapping();
         Ok( mapper )
     }
 
-    fn update_offsets( &mut self ) {
-        self.current_sram_offset = 0;
-
-        let rom_size = self.rom.len() as i32;
+    fn update_mapping( &mut self ) {
         match self.rom_switching_mode {
             SwitchingModeForROM::Fused => {
-                let bank = (self.selected_rom_bank as i32 / 2) * 2;
-                self.current_lower_rom_offset = wraparound( rom_size, bank * ROM_BANK_SIZE );
-                self.current_upper_rom_offset = wraparound( rom_size, self.current_lower_rom_offset + ROM_BANK_SIZE );
+                let bank = (self.selected_rom_bank / 2) * 2;
+                self.inner.set_cpu_lower_16k_bank_to_bank( bank );
+                self.inner.set_cpu_upper_16k_bank_to_bank( bank.wrapping_add( 1 ) );
             },
             SwitchingModeForROM::OnlyLower => {
-                self.current_lower_rom_offset = wraparound( rom_size, self.selected_rom_bank as i32 * ROM_BANK_SIZE );
-                self.current_upper_rom_offset = rom_size - ROM_BANK_SIZE;
+                let last_bank = self.inner.last_rom_16k_bank();
+                self.inner.set_cpu_lower_16k_bank_to_bank( self.selected_rom_bank );
+                self.inner.set_cpu_upper_16k_bank_to_bank( last_bank );
             },
             SwitchingModeForROM::OnlyUpper => {
-                self.current_lower_rom_offset = 0;
-                self.current_upper_rom_offset = wraparound( rom_size, self.selected_rom_bank as i32 * ROM_BANK_SIZE );
+                self.inner.set_cpu_lower_16k_bank_to_bank( 0 ); // First bank.
+                self.inner.set_cpu_upper_16k_bank_to_bank( self.selected_rom_bank );
             }
         }
 
-        let vrom_size = self.vrom.len() as i32;
         match self.vrom_switching_mode {
             SwitchingModeForVROM::Fused => {
-                let bank = (self.selected_lower_vrom_bank as i32 / 2) * 2;
-                self.current_lower_vrom_offset = wraparound( vrom_size, bank * VROM_BANK_SIZE );
-                self.current_upper_vrom_offset = wraparound( vrom_size, self.current_lower_vrom_offset + VROM_BANK_SIZE );
+                let bank = (self.selected_lower_vrom_bank / 2) * 2;
+                self.inner.set_ppu_lower_4k_bank_to_bank( bank );
+                self.inner.set_ppu_upper_4k_bank_to_bank( bank.wrapping_add( 1 ) );
             },
             SwitchingModeForVROM::Independent => {
-                self.current_lower_vrom_offset = wraparound( vrom_size, self.selected_lower_vrom_bank as i32 * VROM_BANK_SIZE );
-                self.current_upper_vrom_offset = wraparound( vrom_size, self.selected_upper_vrom_bank as i32 * VROM_BANK_SIZE );
+                self.inner.set_ppu_lower_4k_bank_to_bank( self.selected_lower_vrom_bank );
+                self.inner.set_ppu_upper_4k_bank_to_bank( self.selected_upper_vrom_bank );
             }
         }
-
-        // Now we prebake the offsets.
-        self.current_sram_offset += SRAM_OFFSET;
-        self.current_lower_rom_offset += LOWER_ROM_OFFSET;
-        self.current_upper_rom_offset += UPPER_ROM_OFFSET;
-        self.current_lower_vrom_offset += LOWER_VROM_OFFSET;
-        self.current_upper_vrom_offset += UPPER_VROM_OFFSET;
     }
 }
 
 impl Mapper for MapperMMC1 {
     fn peek_sram( &self, address: u16 ) -> u8 {
-        self.sram.peek( self.current_sram_offset.wrapping_add( address as i32 ) )
+        self.inner.peek_sram( address )
     }
 
     fn poke_sram( &mut self, address: u16, value: u8 ) {
-        if self.is_sram_writable {
-            self.sram.poke( self.current_sram_offset.wrapping_add( address as i32 ), value )
-        }
+        self.inner.poke_sram( address, value )
     }
 
     fn peek_rom( &self, address: u16 ) -> u8 {
-        debug_assert!( address >= LOWER_ROM_ADDRESS );
-
-        if address < UPPER_ROM_ADDRESS {
-            self.rom.peek( self.current_lower_rom_offset.wrapping_add( address as i32 ) )
-        } else {
-            debug_assert!( address >= UPPER_ROM_ADDRESS );
-            self.rom.peek( self.current_upper_rom_offset.wrapping_add( address as i32 ) )
-        }
+        self.inner.peek_rom( address )
     }
 
     fn poke_rom( &mut self, address: u16, value: u8 ) {
@@ -250,11 +131,11 @@ impl Mapper for MapperMMC1 {
 
         match register {
             0b00 => { // Control register.
-                self.mirroring = match full_value.get_bits( 0b00011 ) {
-                    0b00 => memory_map::only_lower_bank_mirroring,
-                    0b01 => memory_map::only_upper_bank_mirroring,
-                    0b10 => memory_map::vertical_mirroring,
-                    0b11 => memory_map::horizontal_mirroring,
+                match full_value.get_bits( 0b00011 ) {
+                    0b00 => self.inner.set_only_lower_bank_mirroring(),
+                    0b01 => self.inner.set_only_upper_bank_mirroring(),
+                    0b10 => self.inner.set_vertical_mirroring(),
+                    0b11 => self.inner.set_horizontal_mirroring(),
                     _ => unsafe { fast_unreachable!() }
                 };
 
@@ -271,8 +152,7 @@ impl Mapper for MapperMMC1 {
                     _ => unsafe { fast_unreachable!() }
                 };
 
-                debug!( "Mirroring = {:?}, ROM switching mode = {:?}, VROM switching mode = {:?}",
-                    memory_map::mirroring_to_str( self.mirroring ),
+                debug!( "ROM switching mode = {:?}, VROM switching mode = {:?}",
                     self.rom_switching_mode,
                     self.vrom_switching_mode
                 );
@@ -285,62 +165,43 @@ impl Mapper for MapperMMC1 {
             },
             0b11 => { // Switch ROM bank
                 self.selected_rom_bank = full_value.get_bits( 0b01111 );
-                self.is_sram_writable = full_value.get_bits( 0b10000 ) == 0;
+                let is_sram_writable = full_value.get_bits( 0b10000 ) == 0;
+
+                self.inner.set_cpu_8k_writable( bank::CPU_8K::Ox6000, is_sram_writable );
             },
             _ => unsafe { fast_unreachable!() }
         }
 
-        self.update_offsets();
+        self.update_mapping();
     }
 
     fn peek_video_memory( &self, address: u16 ) -> u8 {
-        if address <= 0x0FFF {
-            self.vrom.peek( self.current_lower_vrom_offset.wrapping_add( address as i32 ) )
-        } else if address >= 0x1000 && address <= 0x1FFF {
-            self.vrom.peek( self.current_upper_vrom_offset.wrapping_add( address as i32 ) )
-        } else {
-            let translated_address = (self.mirroring)( translate_address_background_tilemap( address ) );
-            self.background_tilemaps.peek( translated_address )
-        }
+        self.inner.peek_video_memory( address )
     }
 
     fn poke_video_memory( &mut self, address: u16, value: u8 ) {
-        if address > 0x1FFF {
-            let translated_address = (self.mirroring)( translate_address_background_tilemap( address ) );
-            self.background_tilemaps.poke( translated_address, value );
-        } else {
-            if self.is_vrom_writable {
-                if address < 0x1000 {
-                    self.vrom.poke( self.current_lower_vrom_offset.wrapping_add( address as i32 ), value );
-                } else {
-                    self.vrom.poke( self.current_upper_vrom_offset.wrapping_add( address as i32 ), value );
-                }
-            } else {
-                warn!( "Unhandled write to the VROM at 0x{:04X} (value=0x{:02X})", address, value );
-            }
-        }
+        self.inner.poke_video_memory( address, value )
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::MapperMMC1;
-    use super::{
+
+    use generic_mapper::bank;
+    use rom::{Mirroring, NesRom};
+    use memory_map::{
+        SRAM_ADDRESS,
+        LOWER_ROM_ADDRESS,
+        UPPER_ROM_ADDRESS,
         LOWER_VROM_ADDRESS,
         UPPER_VROM_ADDRESS
     };
 
-    use memory_map::{
-        SRAM_ADDRESS,
-        LOWER_ROM_ADDRESS,
-        UPPER_ROM_ADDRESS
-    };
-
     use mappers::Mapper;
 
-    const SRAM_BANK_SIZE: usize = super::SRAM_BANK_SIZE as usize;
-    const ROM_BANK_SIZE: usize = super::ROM_BANK_SIZE as usize;
-    const VROM_BANK_SIZE: usize = super::VROM_BANK_SIZE as usize;
+    const ROM_BANK_SIZE: usize = 16 * 1024;
+    const VROM_BANK_SIZE: usize = 4 * 1024;
 
     const RESET_SHIFT_REGISTER: u8 = 1 << 7;
 
@@ -369,31 +230,40 @@ mod tests {
     }
 
     fn setup() -> MapperMMC1 {
-        let mut mapper = MapperMMC1::empty();
-        mapper.sram.resize( SRAM_BANK_SIZE as usize, 0 );
-        mapper.rom.resize( 4 * ROM_BANK_SIZE as usize, 0 );
-        mapper.vrom.resize( 4 * VROM_BANK_SIZE as usize, 0 );
+        let mut rom = Vec::new();
+        let mut vrom = Vec::new();
+        rom.resize( 4 * ROM_BANK_SIZE as usize, 0 );
+        vrom.resize( 4 * VROM_BANK_SIZE as usize, 0 );
 
-        mapper.sram[ 0 ] = 200;
-        mapper.sram[ 1 ] = 201;
+        rom[ 0 * ROM_BANK_SIZE + 0 ] = 10;
+        rom[ 0 * ROM_BANK_SIZE + 1 ] = 11;
+        rom[ 1 * ROM_BANK_SIZE + 0 ] = 20;
+        rom[ 1 * ROM_BANK_SIZE + 1 ] = 21;
+        rom[ 2 * ROM_BANK_SIZE + 0 ] = 30;
+        rom[ 2 * ROM_BANK_SIZE + 1 ] = 31;
+        rom[ 3 * ROM_BANK_SIZE + 0 ] = 40;
+        rom[ 3 * ROM_BANK_SIZE + 1 ] = 41;
 
-        mapper.rom[ 0 * ROM_BANK_SIZE + 0 ] = 10;
-        mapper.rom[ 0 * ROM_BANK_SIZE + 1 ] = 11;
-        mapper.rom[ 1 * ROM_BANK_SIZE + 0 ] = 20;
-        mapper.rom[ 1 * ROM_BANK_SIZE + 1 ] = 21;
-        mapper.rom[ 2 * ROM_BANK_SIZE + 0 ] = 30;
-        mapper.rom[ 2 * ROM_BANK_SIZE + 1 ] = 31;
-        mapper.rom[ 3 * ROM_BANK_SIZE + 0 ] = 40;
-        mapper.rom[ 3 * ROM_BANK_SIZE + 1 ] = 41;
+        vrom[ 0 * VROM_BANK_SIZE + 0 ] = 110;
+        vrom[ 0 * VROM_BANK_SIZE + 1 ] = 111;
+        vrom[ 1 * VROM_BANK_SIZE + 0 ] = 120;
+        vrom[ 1 * VROM_BANK_SIZE + 1 ] = 121;
+        vrom[ 2 * VROM_BANK_SIZE + 0 ] = 130;
+        vrom[ 2 * VROM_BANK_SIZE + 1 ] = 131;
+        vrom[ 3 * VROM_BANK_SIZE + 0 ] = 140;
+        vrom[ 3 * VROM_BANK_SIZE + 1 ] = 141;
 
-        mapper.vrom[ 0 * VROM_BANK_SIZE + 0 ] = 110;
-        mapper.vrom[ 0 * VROM_BANK_SIZE + 1 ] = 111;
-        mapper.vrom[ 1 * VROM_BANK_SIZE + 0 ] = 120;
-        mapper.vrom[ 1 * VROM_BANK_SIZE + 1 ] = 121;
-        mapper.vrom[ 2 * VROM_BANK_SIZE + 0 ] = 130;
-        mapper.vrom[ 2 * VROM_BANK_SIZE + 1 ] = 131;
-        mapper.vrom[ 3 * VROM_BANK_SIZE + 0 ] = 140;
-        mapper.vrom[ 3 * VROM_BANK_SIZE + 1 ] = 141;
+        let rom = NesRom {
+            mapper: 1,
+            rom: rom,
+            video_rom: vrom,
+            save_ram_length: 8 * 1024,
+            mirroring: Mirroring::Horizontal
+        };
+
+        let mut mapper = MapperMMC1::from_rom( rom ).unwrap();
+        mapper.inner.memory_mut()[ 0 ] = 200;
+        mapper.inner.memory_mut()[ 1 ] = 201;
 
         mapper.poke_rom( 0x8000, RESET_SHIFT_REGISTER );
         mapper
@@ -463,6 +333,18 @@ mod tests {
         assert_eq!( mapper.peek_rom( LOWER_ROM_ADDRESS + 0 ), 10 );
         assert_eq!( mapper.peek_rom( LOWER_ROM_ADDRESS + 1 ), 11 );
         assert_eq!( mapper.peek_rom( UPPER_ROM_ADDRESS + 0 ), 40 );
+        assert_eq!( mapper.peek_rom( UPPER_ROM_ADDRESS + 1 ), 41 );
+    }
+
+    #[test]
+    fn rom_out_of_range_lower_bank() {
+        let mut mapper = setup();
+        write_reg( &mut mapper, CONTROL_REG, ROM_SWITCHING_MODE_ONLY_LOWER );
+
+        write_reg( &mut mapper, ROM_BANK_REG, 4 );
+        assert_eq!( mapper.peek_rom( LOWER_ROM_ADDRESS + 0 ), 10 ); // This switches.
+        assert_eq!( mapper.peek_rom( LOWER_ROM_ADDRESS + 1 ), 11 );
+        assert_eq!( mapper.peek_rom( UPPER_ROM_ADDRESS + 0 ), 40 ); // This is hardcoded.
         assert_eq!( mapper.peek_rom( UPPER_ROM_ADDRESS + 1 ), 41 );
     }
 
@@ -536,7 +418,8 @@ mod tests {
     #[test]
     fn vrom_poke_independent() {
         let mut mapper = setup();
-        mapper.is_vrom_writable = true;
+        mapper.inner.set_ppu_4k_writable( bank::PPU_4K::Ox0000, true );
+        mapper.inner.set_ppu_4k_writable( bank::PPU_4K::Ox1000, true );
         write_reg( &mut mapper, CONTROL_REG, VROM_SWITCHING_MODE_INDEPENDENT );
 
         write_reg( &mut mapper, LOWER_VROM_BANK_REG, 0 );
@@ -551,10 +434,11 @@ mod tests {
         assert_eq!( mapper.peek_video_memory( UPPER_VROM_ADDRESS + 0 ), 3 );
         assert_eq!( mapper.peek_video_memory( UPPER_VROM_ADDRESS + 1 ), 4 );
 
-        assert_eq!( mapper.vrom[ 0 ], 1 );
-        assert_eq!( mapper.vrom[ 1 ], 2 );
-        assert_eq!( mapper.vrom[ VROM_BANK_SIZE + 0 ], 3 );
-        assert_eq!( mapper.vrom[ VROM_BANK_SIZE + 1 ], 4 );
+        let internal_video_rom_offset = mapper.inner.internal_video_rom_offset();
+        assert_eq!( mapper.inner.memory()[ internal_video_rom_offset as usize + 0 ], 1 );
+        assert_eq!( mapper.inner.memory()[ internal_video_rom_offset as usize + 1 ], 2 );
+        assert_eq!( mapper.inner.memory()[ internal_video_rom_offset as usize + VROM_BANK_SIZE + 0 ], 3 );
+        assert_eq!( mapper.inner.memory()[ internal_video_rom_offset as usize + VROM_BANK_SIZE + 1 ], 4 );
     }
 
     #[test]
@@ -591,7 +475,8 @@ mod tests {
     #[test]
     fn vrom_poke_fused() {
         let mut mapper = setup();
-        mapper.is_vrom_writable = true;
+        mapper.inner.set_ppu_4k_writable( bank::PPU_4K::Ox0000, true );
+        mapper.inner.set_ppu_4k_writable( bank::PPU_4K::Ox1000, true );
         write_reg( &mut mapper, CONTROL_REG, VROM_SWITCHING_MODE_FUSED );
 
         write_reg( &mut mapper, LOWER_VROM_BANK_REG, 0 );

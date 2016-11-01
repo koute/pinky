@@ -1,5 +1,5 @@
 use rom::{NesRom, LoadError};
-use mapper_nrom::MapperNROM;
+use generic_mapper::GenericMapper;
 use mapper_mmc1::MapperMMC1;
 
 pub trait Mapper {
@@ -53,10 +53,17 @@ impl Mapper for MapperNull {
 pub fn create_mapper( rom: NesRom ) -> Result< Box< Mapper >, LoadError > {
     match rom.mapper {
         0 => {
-            MapperNROM::from_rom( rom ).map( |mapper| {
-                let boxed: Box< Mapper > = Box::new( mapper );
-                boxed
-            })
+            try!( rom.check_rom_bank_count( &[1, 2] ) );
+            try!( rom.check_video_rom_bank_count( &[0, 1] ) );
+
+            let mut mapper = GenericMapper::new();
+            mapper.initialize_save_ram();
+            mapper.initialize_rom( &rom.rom[..] );
+            mapper.initialize_video_rom( &rom.video_rom[..] );
+            mapper.initialize_background_tilemaps( rom.mirroring );
+
+            debug!( "Initialized mapper: {:?}", mapper );
+            Ok( Box::new( mapper ) )
         },
         1 => {
             MapperMMC1::from_rom( rom ).map( |mapper| {

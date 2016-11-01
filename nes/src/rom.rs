@@ -72,15 +72,22 @@ pub const VROM_BANK_SIZE: usize = 8 * 1024;
 
 pub struct NesRom {
     pub mapper: u8,
-    pub rom_banks: Vec< [u8; ROM_BANK_SIZE] >,
-    pub vrom_banks: Vec< [u8; VROM_BANK_SIZE] >,
-    pub ram_bank_count: u8,
+    pub rom: Vec< u8 >,
+    pub video_rom: Vec< u8 >,
+    pub save_ram_length: u32,
     pub mirroring: Mirroring
 }
 
 impl fmt::Debug for NesRom {
     fn fmt( &self, fmt: &mut fmt::Formatter ) -> fmt::Result {
-        try!( write!( fmt, "<NesRom mapper={}, rom_banks={}, vrom_banks={}, ram_banks={}, mirroring={:?}>", self.mapper, self.rom_banks.len(), self.vrom_banks.len(), self.ram_bank_count, self.mirroring ) );
+        try!( write!( fmt, "<NesRom mapper={}, rom={}k, video_rom={}k, ram={}k, mirroring={:?}>",
+            self.mapper,
+            self.rom.len() / 1024,
+            self.video_rom.len() / 1024,
+            self.save_ram_length / 1024,
+            self.mirroring
+        ));
+
         Ok(())
     }
 }
@@ -101,12 +108,12 @@ impl NesRom {
         }
 
         let rom_bank_count = try!( fp.read_u8() ) as usize;
-        let vrom_bank_count = try!( fp.read_u8() ) as usize;
+        let video_rom_bank_count = try!( fp.read_u8() ) as usize;
         let flags_1 = try!( fp.read_u8() );
         let flags_2 = try!( fp.read_u8() );
 
         // For compatibility with older INES files we assume there must be always one RAM bank.
-        let ram_bank_count = max( 1, try!( fp.read_u8() ) );
+        let save_ram_length = max( 1, try!( fp.read_u8() ) as u32 ) * 8 * 1024;
 
         // Skip padding.
         try!( fp.seek( SeekFrom::Current(7) ) );
@@ -124,32 +131,59 @@ impl NesRom {
         let has_trainer = flags_1 & 0b100 != 0;
         let mapper = (flags_2 & 0xF0) | ((flags_1 & 0xF0) >> 4);
 
-        let mut rom_banks = Vec::< [u8; ROM_BANK_SIZE] >::with_capacity( rom_bank_count );
-        let mut vrom_banks = Vec::< [u8; VROM_BANK_SIZE] >::with_capacity( vrom_bank_count );
+        let mut rom = Vec::< u8 >::with_capacity( rom_bank_count * ROM_BANK_SIZE );
+        let mut video_rom = Vec::< u8 >::with_capacity( video_rom_bank_count * VROM_BANK_SIZE );
 
         unsafe {
-            rom_banks.set_len( rom_bank_count );
-            vrom_banks.set_len( vrom_bank_count );
+            rom.set_len( rom_bank_count * ROM_BANK_SIZE );
+            video_rom.set_len( video_rom_bank_count * VROM_BANK_SIZE );
         }
 
         if has_trainer {
             try!( fp.seek( SeekFrom::Current( 512 ) ) ); // Skip trainer.
         }
 
-        for bank in &mut rom_banks {
-            try!( fill_array( fp, bank ) );
-        }
-
-        for bank in &mut vrom_banks {
-            try!( fill_array( fp, bank ) );
-        }
+        try!( fp.read_exact( &mut rom[..] ) );
+        try!( fp.read_exact( &mut video_rom[..] ) );
 
         Ok( NesRom {
             mapper: mapper,
-            rom_banks: rom_banks,
-            vrom_banks: vrom_banks,
-            ram_bank_count: ram_bank_count,
+            rom: rom,
+            video_rom: video_rom,
+            save_ram_length: save_ram_length,
             mirroring: mirroring
         })
+    }
+
+    pub fn rom_bank_count( &self ) -> usize {
+        self.rom.len() / ROM_BANK_SIZE
+    }
+
+    pub fn video_rom_bank_count( &self ) -> usize {
+        self.video_rom.len() / VROM_BANK_SIZE
+    }
+
+    pub fn check_rom_bank_count( &self, possibilities: &[usize] ) -> Result< (), LoadError > {
+        if possibilities.contains( &self.rom_bank_count() ) == false {
+            let error = LoadError::new(
+                format!( "Unsupported ROM bank count; is {}, should be: {:?}.", self.rom_bank_count(), possibilities )
+            );
+
+            Err( error )
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn check_video_rom_bank_count( &self, possibilities: &[usize] ) -> Result< (), LoadError > {
+        if possibilities.contains( &self.video_rom_bank_count() ) == false {
+            let error = LoadError::new(
+                format!( "Unsupported VROM bank count; is {}, should be: {:?}.", self.video_rom_bank_count(), possibilities )
+            );
+
+            Err( error )
+        } else {
+            Ok(())
+        }
     }
 }
