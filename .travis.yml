@@ -11,7 +11,7 @@ matrix:
 script:
   - cd emumisc
   - cargo test --verbose
-  - cd mos6502
+  - cd ../mos6502
   - cargo test --verbose
   - cd ../nes
   - cargo test --verbose
