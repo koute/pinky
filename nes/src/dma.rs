@@ -166,7 +166,7 @@ trait Private: Sized + Context {
 mod tests {
     use std::fmt;
     use dma;
-    use super::*;
+    use super::{Context, Interface, State};
 
     #[derive(Copy, Clone, PartialEq, Eq)]
     enum Action {
