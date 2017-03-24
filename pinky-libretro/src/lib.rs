@@ -65,13 +65,16 @@ impl PinkyCore {
     }
 }
 
-impl libretro_backend::Backend for PinkyCore {
-    fn on_initialize( &mut self ) -> CoreInfo {
+impl Default for PinkyCore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl libretro_backend::Core for PinkyCore {
+    fn info() -> CoreInfo {
         CoreInfo::new( "Pinky", env!( "CARGO_PKG_VERSION" ) )
             .supports_roms_with_extension( "nes" )
-    }
-
-    fn on_destroy( &mut self ) {
     }
 
     fn on_load_game( &mut self, game_data: GameData ) -> LoadGameResult {
@@ -141,6 +144,4 @@ impl libretro_backend::Backend for PinkyCore {
     }
 }
 
-libretro_backend!({
-    Box::new( PinkyCore::new() )
-});
+libretro_core!( PinkyCore );

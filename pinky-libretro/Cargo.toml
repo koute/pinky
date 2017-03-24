@@ -7,7 +7,7 @@ authors = ["Jan Bujak <j@exia.io>"]
 crate-type = ["cdylib"]
 
 [dependencies]
-libretro-backend = "0.1"
+libretro-backend = "0.2"
 
 [dependencies.nes]
 path = "../nes"
