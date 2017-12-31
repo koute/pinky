@@ -343,6 +343,11 @@ impl fmt::Debug for Opcode {
             TXA         => write!( fmt, "A <- X" ),
             TXS         => write!( fmt, "SP <- X" ),
             TYA         => write!( fmt, "A <- Y" ),
+            // Unofficial instructions.
+            LAX( arg )  => write!( fmt, "A, X <- {:?}", arg ),
+            SAX( arg )  => write!( fmt, "{:?} <- A & X", arg ),
+            AXS( arg )  => write!( fmt, "X <- (A & X) - {:?}", arg ),
+
             UNK( opc )  => write!( fmt, "UNK [{:02X}]", opc )
         }
     }
@@ -515,6 +520,27 @@ trait Private: Sized + Context {
             _ => unsafe { fast_unreachable!() }
         };
 
+        self.write_to_operand( value );
+
+        Ok( EmulationStatus::Normal )
+    }
+
+    fn reg2mem_and( &mut self, src_1: Register8, src_2: Register8 ) -> Result< EmulationStatus, EmulationError > {
+        let value_1 = match src_1 {
+            A => self.state().a,
+            X => self.state().x,
+            Y => self.state().y,
+            _ => unsafe { fast_unreachable!() }
+        };
+
+        let value_2 = match src_2 {
+            A => self.state().a,
+            X => self.state().x,
+            Y => self.state().y,
+            _ => unsafe { fast_unreachable!() }
+        };
+
+        let value = value_1 & value_2;
         self.write_to_operand( value );
 
         Ok( EmulationStatus::Normal )
@@ -895,6 +921,19 @@ trait Private: Sized + Context {
 
     fn unk( &mut self ) -> Result< EmulationStatus, EmulationError > {
         Err( EmulationError::InvalidInstruction( self.state().pc, self.state().decoded.opcode ) )
+    }
+
+    /* UNOFFICIAL INSTRUCTIONS */
+
+    fn axs( &mut self ) -> Result< EmulationStatus, EmulationError > {
+        let value = self.state().a & self.state().x;
+        let diff = ( value as u16 ).wrapping_sub( self.state().decoded.operand as u16 );
+
+        self.set_flags( StatusFlag::Carry, diff < 0x100 );
+        self.set_SZ( diff as u8 );
+        self.state_mut().x = diff as u8;
+
+        Ok( EmulationStatus::Normal )
     }
 
     /* OTHER */

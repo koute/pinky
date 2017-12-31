@@ -167,3 +167,18 @@
 0x8A R   txa    reg_x               mov2reg( A )
 0x9A R   txs    _                   txs()
 0x98 R   tya    reg_y               mov2reg( A )
+
+# Unofficial opcodes.
+0xA7 R   lax    abs_zp              mov2reg( A ); mov2reg( X )
+0xB7 R   lax    addy_zp             mov2reg( A ); mov2reg( X )
+0xA3 R   lax    indirect_indexed    mov2reg( A ); mov2reg( X )
+0xB3 R   lax    indexed_indirect    mov2reg( A ); mov2reg( X )
+0xAF R   lax    abs                 mov2reg( A ); mov2reg( X )
+0xBF R   lax    addy                mov2reg( A ); mov2reg( X )
+0x87 W   sax    abs_zp              reg2mem_and( A, X )
+0x97 W   sax    addx_zp             reg2mem_and( A, X )
+0x83 W   sax    indirect_indexed    reg2mem_and( A, X )
+0x8F W   sax    abs                 reg2mem_and( A, X )
+
+# Alternative name: SBX, SAX
+0xCB R   axs    imm8                axs()
