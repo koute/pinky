@@ -67,7 +67,7 @@ class Instruction < Struct.new( :opcode, :rw, :mnemonic, :memop, :code )
     end
 
     def callback_name
-        "exec_#{self.code.gsub( / |\(\)|(\)$)/, '' ).gsub( /\(|,|::/, '_' ).gsub( '-', 'neg_' ).downcase}"
+        "exec_#{self.code.gsub( /;| |\(\)|(\)$)/, '' ).gsub( /\(|\)|,|::/, '_' ).gsub( '-', 'neg_' ).downcase}"
     end
 
 end
@@ -212,10 +212,15 @@ def generate_opcode_jump_table
         next if done.has_key? name
         done[ name ] = true
 
+        lines = instruction.code.split( /;\s*/ )
+        0.upto( lines.length - 2 ) { |i| lines[ i ] += "?;" }
+
+        code = lines.map { |line| "cpu.#{line}" }.join( "\n" + " " * 16 )
+
         output
         output <<-EOS
             fn #{name}< T: Private >( cpu: &mut T ) -> Result< EmulationStatus, EmulationError > {
-                cpu.#{instruction.code}
+                #{code}
             }
         EOS
 
