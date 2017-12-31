@@ -56,6 +56,10 @@ pub trait Interface: Sized + Context {
         Private::execute_for_a_frame( self )
     }
 
+    fn execute_cycle( &mut self ) -> Result< bool, Box< Error > > {
+        Private::execute_cycle( self )
+    }
+
     fn framebuffer( &self ) -> &rp2c02::Framebuffer {
         Private::framebuffer( self )
     }
@@ -408,6 +412,13 @@ trait Private: Sized + Context {
             self.state_mut().ready = false;
             Err( self.state_mut().error.take().unwrap() )
         }
+    }
+
+    fn execute_cycle( &mut self ) -> Result< bool, Box< Error > > {
+        let last_counter_value = self.state().full_frame_counter;
+        mos6502::Interface::execute( self.newtype_mut() )?;
+
+        Ok( self.state().full_frame_counter != last_counter_value )
     }
 
     fn framebuffer( &self ) -> &rp2c02::Framebuffer {
