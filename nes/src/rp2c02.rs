@@ -455,7 +455,7 @@ impl PpuStatus {
 */
 
 pub struct Framebuffer {
-    buffer: Box< [u16; 256 * 240] >
+    buffer: Vec< u16 >
 }
 
 impl PartialEq for Framebuffer {
@@ -531,8 +531,11 @@ impl< 'a > Iterator for FramebufferIterator< 'a > {
 
 impl Default for Framebuffer {
     fn default() -> Self {
+        let mut buffer = Vec::new();
+        buffer.resize( 256 * 240, 0 );
+
         Framebuffer {
-            buffer: Box::new( [0; 256 * 240] )
+            buffer
         }
     }
 }
