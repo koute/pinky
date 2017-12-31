@@ -9,7 +9,7 @@ authors = [ "Jan Bujak <j@exia.io>" ]
 name = "pinky-devui"
 
 [dependencies]
-# sdl2 = "0.24"
+sdl2 = "0.27"
 clock_ticks = "0.1"
 serde_json = "0.7"
 md5 = "0.1"
@@ -20,9 +20,6 @@ path = "../emumisc"
 
 [dependencies.nes]
 path = "../nes"
-
-[dependencies.sdl2]
-git = "https://github.com/koute/rust-sdl2.git"
 
 [profile.dev]
 opt-level = 2
