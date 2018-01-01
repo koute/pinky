@@ -2,6 +2,8 @@ pinky-devui/target
 pinky-devui/Cargo.lock
 pinky-libretro/target
 pinky-libretro/Cargo.lock
+pinky-web/target
+pinky-web/Cargo.lock
 nes-testsuite/target
 nes-testsuite/Cargo.lock
 mos6502/target
