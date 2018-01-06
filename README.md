@@ -5,6 +5,8 @@
 Pinky is an [NES] emulator written in [Rust] completely from scratch
 based only on [publicly available documentation].
 
+You can [run it in your Web browser](http://koute.github.io/pinky-web/)!
+
 [NES]: https://en.wikipedia.org/wiki/Nintendo_Entertainment_System
 [Rust]: https://www.rust-lang.org/en-US/
 [publicly available documentation]: http://wiki.nesdev.com/w/index.php/Nesdev_Wiki
@@ -17,12 +19,13 @@ based only on [publicly available documentation].
      simulation of a real PPU.
    * Supports NROM (0), MMC1 (1) and UxROM (2) mappers.
    * Can be compiled as a [libretro] core.
+   * Can be compiled into WebAssembly.
 
 [libretro]: http://www.libretro.com/index.php/api/
 
 There are still many things missing, including:
 
-   * Unofficial 6502 instructions support.
+   * Most unofficial 6502 instructions.
    * Support for other mappers.
    * Accurate PPU sprite overflow.
    * Savestate support.
