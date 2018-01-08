@@ -202,6 +202,11 @@ fn setup_webgl( canvas: &Element ) -> Value {
             }
         }
 
+        if( gl === null ) {
+            console.error( "WebGL rendering context not found." );
+            return null;
+        }
+
         var vertex_shader = gl.createShader( gl.VERTEX_SHADER );
         var fragment_shader = gl.createShader( gl.FRAGMENT_SHADER );
         gl.shaderSource( vertex_shader, @{VERTEX_SHADER} );
