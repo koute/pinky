@@ -505,7 +505,7 @@ impl ChannelSquare {
     }
 
     fn is_silent( &self ) -> bool {
-        !self.enabled || self.period < 8 || self.length_counter == 0 || self.frequency_generator_output() >= 0x7FF
+        !self.enabled || self.period < 8 || self.length_counter == 0 || (self.frequency_generator_enabled == true && self.frequency_generator_output() >= 0x7FF)
     }
 
     fn output( &self ) -> u8 {
