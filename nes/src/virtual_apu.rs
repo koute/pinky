@@ -741,6 +741,10 @@ impl ChannelNoise {
         }
     }
 
+    fn clock_volume_generator( &mut self ) {
+        self.volume_generator.clock();
+    }
+
     fn clock_timer( &mut self ) {
         if self.timer == 0 {
             let bit_a = self.feedback_register.get_bits( 0b00000001 );
@@ -1011,6 +1015,7 @@ trait Private: Sized + Context {
             if entry.clk_volume_generator() {
                 self.state_mut().channel_square_1.clock_volume_generator();
                 self.state_mut().channel_square_2.clock_volume_generator();
+                self.state_mut().channel_noise.clock_volume_generator();
             }
 
             if entry.clk_length_counter() {
