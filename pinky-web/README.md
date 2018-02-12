@@ -19,13 +19,14 @@ and the [stdweb] project.
 
 ### Building (using Rust's native WebAssembly backend)
 
-1. Install newest nightly Rust:
+1. Install newest Rust:
 
        $ curl https://sh.rustup.rs -sSf | sh
 
-2. Install WebAssembly target:
+2. Install nightly:
 
-       $ rustup target add wasm32-unknown-unknown
+       $ rustup install nigtnly
+       $ rustup default nightly
 
 3. Install [cargo-web]:
 
@@ -33,7 +34,7 @@ and the [stdweb] project.
 
 4. Build it:
 
-       $ cargo web start --target-webasm --release
+       $ cargo web start --release
 
 5. Visit `http://localhost:8000` with your browser.
 
@@ -41,7 +42,5 @@ and the [stdweb] project.
 
 ### Building for other backends
 
-Replace `--target-webasm` with `--target-webasm-emscripten` or `--target-asmjs-emscripten`
-if you want to build it using another backend. You will also have to install the
-corresponding targets with `rustup` - `wasm32-unknown-emscripten` and `asmjs-unknown-emscripten`
-respectively.
+You can add `--target=asmjs-unknown-emscripten` or `--target=wasm32-unknown-emscripten` argument
+to build it using another backend.
