@@ -25,7 +25,7 @@ and the [stdweb] project.
 
 2. Install nightly:
 
-       $ rustup install nigtnly
+       $ rustup install nightly
        $ rustup default nightly
 
 3. Install [cargo-web]:
