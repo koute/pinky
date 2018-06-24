@@ -16,25 +16,23 @@ use std::error::Error;
 
 use stdweb::web::{
     self,
-    IEventTarget,
-    INode,
-    IElement,
     FileReader,
     FileReaderResult,
+    FileList,
     Element,
     ArrayBuffer
 };
 
 use stdweb::web::event::{
-    IEvent,
-    IKeyboardEvent,
     ClickEvent,
     ChangeEvent,
     ProgressLoadEvent,
-    KeydownEvent,
-    KeyupEvent,
+    KeyDownEvent,
+    KeyUpEvent,
     KeyboardLocation
 };
+
+use stdweb::traits::*;
 
 use stdweb::web::html_element::InputElement;
 use stdweb::unstable::TryInto;
@@ -489,11 +487,11 @@ struct RomEntry {
 js_deserializable!( RomEntry );
 
 fn show( id: &str ) {
-    web::document().get_element_by_id( id ).unwrap().class_list().remove( "hidden" );
+    web::document().get_element_by_id( id ).unwrap().class_list().remove( "hidden" ).unwrap();
 }
 
 fn hide( id: &str ) {
-    web::document().get_element_by_id( id ).unwrap().class_list().add( "hidden" );
+    web::document().get_element_by_id( id ).unwrap().class_list().add( "hidden" ).unwrap();
 }
 
 fn fetch_builtin_rom_list< F: FnOnce( Vec< RomEntry > ) + 'static >( callback: F ) {
@@ -517,7 +515,7 @@ fn fetch_builtin_rom_list< F: FnOnce( Vec< RomEntry > ) + 'static >( callback: F
 fn support_builtin_roms( roms: Vec< RomEntry >, pinky: Rc< RefCell< PinkyWeb > > ) {
     let entries = web::document().get_element_by_id( "rom-list" ).unwrap();
     for rom in roms {
-        let entry = web::document().create_element( "button" );
+        let entry = web::document().create_element( "button" ).unwrap();
         let name = rom.name;
         let file = rom.file;
 
@@ -549,7 +547,7 @@ fn support_custom_roms( pinky: Rc< RefCell< PinkyWeb > > ) {
     let browse_for_roms_button = web::document().get_element_by_id( "browse-for-roms" ).unwrap();
     browse_for_roms_button.add_event_listener( move |event: ChangeEvent| {
         let input: InputElement = event.target().unwrap().try_into().unwrap();
-        let files = input.files().unwrap();
+        let files: FileList = js!( @{input}.files(); ).try_into().unwrap();
         let file = match files.iter().next() {
             Some( file ) => file,
             None => return
@@ -569,7 +567,7 @@ fn support_custom_roms( pinky: Rc< RefCell< PinkyWeb > > ) {
             load_rom( &pinky, &rom_data );
         }));
 
-        reader.read_as_array_buffer( &file );
+        reader.read_as_array_buffer( &file ).unwrap();
     });
 }
 
@@ -594,14 +592,14 @@ fn support_rom_changing( pinky: Rc< RefCell< PinkyWeb > > ) {
 }
 
 fn support_input( pinky: Rc< RefCell< PinkyWeb > > ) {
-    web::window().add_event_listener( enclose!( [pinky] move |event: KeydownEvent| {
+    web::window().add_event_listener( enclose!( [pinky] move |event: KeyDownEvent| {
         let handled = pinky.borrow_mut().on_key( &event.key(), event.location(), true );
         if handled {
             event.prevent_default();
         }
     }));
 
-    web::window().add_event_listener( enclose!( [pinky] move |event: KeyupEvent| {
+    web::window().add_event_listener( enclose!( [pinky] move |event: KeyUpEvent| {
         let handled = pinky.borrow_mut().on_key( &event.key(), event.location(), false );
         if handled {
             event.prevent_default();

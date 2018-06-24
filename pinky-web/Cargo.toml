@@ -8,7 +8,7 @@ serde = "1"
 serde_derive = "1"
 
 [dependencies.stdweb]
-version = "0.3"
+version = "0.4"
 
 [dependencies.nes]
 path = "../nes"
