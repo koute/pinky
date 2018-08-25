@@ -250,7 +250,7 @@ impl GenericMapper {
             },
             Mirroring::FourScreen => {
                 self.extend_empty( 4 * 1024 );
-                self.set_ppu_4k_bank( bank::PPU_4K::Ox2000, offset );
+                self.set_four_screen_mirroring( offset );
             }
         }
 
@@ -400,6 +400,12 @@ impl GenericMapper {
     }
 
     #[inline]
+    pub fn set_ppu_8k_bank( &mut self, internal_address: u32 ) {
+        self.set_ppu_4k_bank( bank::PPU_4K::Ox0000, internal_address );
+        self.set_ppu_4k_bank( bank::PPU_4K::Ox1000, internal_address + 0x1000 );
+    }
+
+    #[inline]
     pub fn set_horizontal_mirroring( &mut self, internal_address: u32 ) {
         self.set_ppu_1k_bank( bank::PPU_1K::Ox2000, internal_address );
         self.set_ppu_1k_bank( bank::PPU_1K::Ox2400, internal_address );
@@ -429,6 +435,16 @@ impl GenericMapper {
         self.set_ppu_1k_bank( bank::PPU_1K::Ox2400, internal_address + 0x0400 );
         self.set_ppu_1k_bank( bank::PPU_1K::Ox2800, internal_address + 0x0400 );
         self.set_ppu_1k_bank( bank::PPU_1K::Ox2C00, internal_address + 0x0400 );
+    }
+
+    #[inline]
+    pub fn set_four_screen_mirroring( &mut self, internal_address: u32 ) {
+        if internal_address + 4 * 1024 > self.memory.len() as u32 {
+            let extra_space = internal_address + 4 * 1024 - self.memory.len() as u32;
+            self.extend_empty( extra_space );
+        }
+
+        self.set_ppu_4k_bank( bank::PPU_4K::Ox2000, internal_address );
     }
 
     #[inline]
@@ -525,7 +541,8 @@ pub struct BankedGenericMapper {
     internal_background_tilemaps_offset: u32,
 
     rom_size: u32,
-    video_rom_size: u32
+    video_rom_size: u32,
+    default_mirroring: Mirroring
 }
 
 impl BankedGenericMapper {
@@ -538,7 +555,8 @@ impl BankedGenericMapper {
             internal_background_tilemaps_offset: 0,
 
             rom_size: 0,
-            video_rom_size: 0
+            video_rom_size: 0,
+            default_mirroring: Mirroring::Horizontal
         }
     }
 
@@ -551,6 +569,7 @@ impl BankedGenericMapper {
 
         mapper.rom_size = mapper.internal_video_rom_offset - mapper.internal_rom_bank_offset;
         mapper.video_rom_size = mapper.internal_background_tilemaps_offset - mapper.internal_video_rom_offset;
+        mapper.default_mirroring = rom.mirroring;
 
         assert!( mapper.rom_size > 0 );
         assert!( mapper.video_rom_size > 0 );
@@ -589,6 +608,11 @@ impl BankedGenericMapper {
     }
 
     #[inline]
+    pub fn video_rom_8k_bank_count( &self ) -> u8 {
+        (self.video_rom_size / (8 * 1024)) as u8
+    }
+
+    #[inline]
     pub fn set_cpu_lower_16k_bank_to_bank( &mut self, bank: u8 ) {
         let bank = wraparound( self.rom_16k_bank_count(), bank ) as u32;
         self.inner.set_cpu_lower_16k_bank( self.internal_rom_bank_offset + bank * 16 * 1024 );
@@ -613,6 +637,12 @@ impl BankedGenericMapper {
     }
 
     #[inline]
+    pub fn set_ppu_8k_bank_to_bank( &mut self, bank: u8 ) {
+        let bank = wraparound( self.video_rom_8k_bank_count(), bank ) as u32;
+        self.inner.set_ppu_8k_bank( self.internal_video_rom_offset + bank * 8 * 1024 );
+    }
+
+    #[inline]
     pub fn set_horizontal_mirroring( &mut self ) {
         self.inner.set_horizontal_mirroring( self.internal_background_tilemaps_offset );
     }
@@ -630,6 +660,20 @@ impl BankedGenericMapper {
     #[inline]
     pub fn set_only_upper_bank_mirroring( &mut self ) {
         self.inner.set_only_upper_bank_mirroring( self.internal_background_tilemaps_offset );
+    }
+
+    #[inline]
+    pub fn set_four_screen_mirroring( &mut self ) {
+        self.inner.set_four_screen_mirroring( self.internal_background_tilemaps_offset );
+    }
+
+    #[inline]
+    pub fn set_default_mirroring( &mut self ) {
+        match self.default_mirroring {
+            Mirroring::Horizontal => self.set_horizontal_mirroring(),
+            Mirroring::Vertical => self.set_vertical_mirroring(),
+            Mirroring::FourScreen => self.set_four_screen_mirroring()
+        }
     }
 
     #[inline]
