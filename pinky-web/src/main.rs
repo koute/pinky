@@ -547,7 +547,7 @@ fn support_custom_roms( pinky: Rc< RefCell< PinkyWeb > > ) {
     let browse_for_roms_button = web::document().get_element_by_id( "browse-for-roms" ).unwrap();
     browse_for_roms_button.add_event_listener( move |event: ChangeEvent| {
         let input: InputElement = event.target().unwrap().try_into().unwrap();
-        let files: FileList = js!( @{input}.files(); ).try_into().unwrap();
+        let files: FileList = js!( return @{input}.files; ).try_into().unwrap();
         let file = match files.iter().next() {
             Some( file ) => file,
             None => return
