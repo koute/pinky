@@ -155,7 +155,7 @@ impl UserInterface {
 
         let mut array = [0; 256 * 240];
         for (pixel, out) in self.last_framebuffer.as_ref().unwrap().iter().zip( array.iter_mut() ) {
-            *out = pixel.color_in_system_palette_index();
+            *out = pixel.base_color_index();
         }
 
         let mut path = PathBuf::from( "/tmp" );

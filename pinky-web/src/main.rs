@@ -47,10 +47,10 @@ macro_rules! enclose {
     };
 }
 
-fn palette_to_abgr( palette: &nes::Palette ) -> [u32; 64] {
-    let mut output = [0; 64];
+fn palette_to_abgr( palette: &nes::Palette ) -> [u32; 512] {
+    let mut output = [0; 512];
     for (index, out) in output.iter_mut().enumerate() {
-        let (r, g, b) = palette.get_rgb( index as u8 );
+        let (r, g, b) = palette.get_rgb( index as u16 );
         *out = ((b as u32) << 16) |
                ((g as u32) <<  8) |
                ((r as u32)      ) |
@@ -62,7 +62,7 @@ fn palette_to_abgr( palette: &nes::Palette ) -> [u32; 64] {
 
 struct PinkyWeb {
     state: nes::State,
-    palette: [u32; 64],
+    palette: [u32; 512],
     framebuffer: [u32; 256 * 240],
     audio_buffer: Vec< f32 >,
     audio_chunk_counter: u32,
@@ -379,7 +379,7 @@ impl PinkyWeb {
         let framebuffer = self.state.framebuffer();
         if !self.paused {
             for (pixel_in, pixel_out) in framebuffer.iter().zip( self.framebuffer.iter_mut() ) {
-                *pixel_out = self.palette[ pixel_in.color_in_system_palette_index() as usize ];
+                *pixel_out = self.palette[ pixel_in.full_color_index() as usize ];
             }
         }
 

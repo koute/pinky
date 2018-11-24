@@ -58,7 +58,7 @@ impl nes_testsuite::EmulatorInterface for Instance {
     fn get_framebuffer( &mut self, output: &mut [u8] ) {
         let framebuffer = nes::Interface::framebuffer( self );
         for (out, pixel) in output.iter_mut().zip( framebuffer.iter() ) {
-            *out = pixel.color_in_system_palette_index();
+            *out = pixel.base_color_index();
         }
     }
 

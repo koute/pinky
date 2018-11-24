@@ -482,11 +482,7 @@ impl Framebuffer {
         assert_eq!( array.len(), 256 * 240 );
 
         for (pixel, out) in self.iter().zip( array.iter_mut() ) {
-            // TODO
-            debug_assert!( pixel.is_red_emphasized() == false );
-            debug_assert!( pixel.is_green_emphasized() == false );
-            debug_assert!( pixel.is_blue_emphasized() == false );
-            *out = palette.get_packed_abgr( pixel.color_in_system_palette_index() );
+            *out = palette.get_packed_abgr( pixel.full_color_index() );
         }
     }
 }
@@ -496,23 +492,28 @@ pub struct FramebufferPixel( u16 );
 
 impl FramebufferPixel {
     #[inline]
-    pub fn color_in_system_palette_index( &self ) -> u8 {
-        (self.0 & 0xFF) as u8
+    pub fn base_color_index( &self ) -> u8 {
+        (self.0 & 0b111111) as u8
+    }
+
+    #[inline]
+    pub fn full_color_index( &self ) -> u16 {
+        self.0
     }
 
     #[inline]
     pub fn is_red_emphasized( &self ) -> bool {
-        self.0.get_bits( 0b00000001_00000000 ) != 0
+        self.0.get_bits( 0b00000000_01000000 ) != 0
     }
 
     #[inline]
     pub fn is_green_emphasized( &self ) -> bool {
-        self.0.get_bits( 0b00000010_00000000 ) != 0
+        self.0.get_bits( 0b00000000_10000000 ) != 0
     }
 
     #[inline]
     pub fn is_blue_emphasized( &self ) -> bool {
-        self.0.get_bits( 0b00000100_00000000 ) != 0
+        self.0.get_bits( 0b00000001_00000000 ) != 0
     }
 }
 
@@ -544,12 +545,49 @@ impl Default for Framebuffer {
     The NES doesn't output an RGB signal; it directly outputs analog video signal, hence
     there is a multitude of ways of interpreting the colors it generates.
 */
-pub struct Palette( [u32; 64] );
+pub struct Palette( [u32; 512] );
+
+fn generate_emphasis_colors( palette: &mut Palette ) {
+    for index in 64..512 {
+        let pixel = FramebufferPixel( index );
+        // TODO: This isn't really accurate.
+        let (r, g, b) = palette.get_rgb( pixel.base_color_index() as u16 );
+        let mut r = r as f32 / 255.0;
+        let mut g = g as f32 / 255.0;
+        let mut b = b as f32 / 255.0;
+        if pixel.is_red_emphasized() {
+            r *= 1.1;
+            g *= 0.85;
+            b *= 0.85;
+        }
+        if pixel.is_green_emphasized() {
+            r *= 0.85;
+            g *= 1.1;
+            b *= 0.85;
+        }
+        if pixel.is_blue_emphasized() {
+            r *= 0.85;
+            g *= 0.85;
+            b *= 1.1;
+        }
+        if r > 1.0 { r = 1.0; }
+        if g > 1.0 { g = 1.0; }
+        if b > 1.0 { b = 1.0; }
+        let r = r * 255.0;
+        let g = g * 255.0;
+        let b = b * 255.0;
+        palette.0[ index as usize ] =
+            r as u32 |
+            (g as u32) << 8 |
+            (b as u32) << 16;
+    }
+}
 
 impl Palette {
     pub fn new( data: &[u8] ) -> Palette {
-        assert_eq!( data.len(), 192 );
-        let mut output = [0; 64];
+        assert!( data.len() == 192 || data.len() == 1536 );
+
+        let mut output = [0; 512];
         for (index, components) in data.chunks( 3 ).enumerate() {
             let r = components[0] as u32;
             let g = components[1] as u32;
@@ -557,15 +595,20 @@ impl Palette {
             output[ index ] = r | g << 8 | b << 16 | 0xFF << 24;
         }
 
-        Palette( output )
+        let mut palette = Palette( output );
+        if data.len() == 192 {
+            generate_emphasis_colors( &mut palette );
+        }
+
+        palette
     }
 
-    pub fn get_packed_abgr( &self, index: u8 ) -> u32 {
-        debug_assert!( index < 64 );
+    pub fn get_packed_abgr( &self, index: u16 ) -> u32 {
+        debug_assert!( index < 512 );
         self.0.peek( index )
     }
 
-    pub fn get_rgb( &self, index: u8 ) -> (u8, u8, u8) {
+    pub fn get_rgb( &self, index: u16 ) -> (u8, u8, u8) {
         let value = self.get_packed_abgr( index );
         let r = (value & 0x000000FF) as u8;
         let g = ((value & 0x0000FF00) >> 8) as u8;
@@ -1026,7 +1069,7 @@ trait Private: Sized + Context {
         let color_in_system_palette_index = self.peek( 0x3F00 + (palette_index as u16 * 4) + color_in_palette_index as u16 );
         // let color_in_system_palette_index = self.state_mut().palette_ram.peek( (palette_index as usize * 4) + color_in_palette_index as usize );
         let nth = self.state().n_pixel;
-        let pixel = ((self.state().ppumask.color_emphasize_bits() as u16) << 8) | (color_in_system_palette_index as u16);
+        let pixel = ((self.state().ppumask.color_emphasize_bits() as u16) << 6) | (color_in_system_palette_index as u16);
         self.state_mut().framebuffer.buffer.poke( nth, pixel );
         self.state_mut().n_pixel += 1;
     }
