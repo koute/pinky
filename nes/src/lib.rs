@@ -35,6 +35,7 @@ mod generic_mapper;
 mod mapper_mmc1;
 mod mapper_uxrom;
 mod mapper_unrom512;
+mod mapper_axrom;
 mod orphan;
 mod dma;
 mod filter;

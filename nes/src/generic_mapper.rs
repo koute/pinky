@@ -296,6 +296,14 @@ impl GenericMapper {
     }
 
     #[inline]
+    pub fn set_cpu_32k_bank( &mut self, internal_address: u32 ) {
+        self.set_cpu_8k_bank( bank::CPU_8K::Ox8000, internal_address );
+        self.set_cpu_8k_bank( bank::CPU_8K::OxA000, internal_address + 8 * 1024 );
+        self.set_cpu_8k_bank( bank::CPU_8K::OxC000, internal_address + 16 * 1024 );
+        self.set_cpu_8k_bank( bank::CPU_8K::OxE000, internal_address + 24 * 1024 );
+    }
+
+    #[inline]
     pub fn set_cpu_8k_writable( &mut self, bank: bank::CPU_8K, is_writable: bool ) {
         let bank = bank as usize;
         let flags = (&mut self.cpu_flags[..]).at_mut( bank );
@@ -603,6 +611,11 @@ impl BankedGenericMapper {
     }
 
     #[inline]
+    pub fn rom_32k_bank_count( &self ) -> u8 {
+        (self.rom_size / (32 * 1024)) as u8
+    }
+
+    #[inline]
     pub fn video_rom_4k_bank_count( &self ) -> u8 {
         (self.video_rom_size / (4 * 1024)) as u8
     }
@@ -622,6 +635,12 @@ impl BankedGenericMapper {
     pub fn set_cpu_upper_16k_bank_to_bank( &mut self, bank: u8 ) {
         let bank = wraparound( self.rom_16k_bank_count(), bank ) as u32;
         self.inner.set_cpu_upper_16k_bank( self.internal_rom_bank_offset + bank * 16 * 1024 );
+    }
+
+    #[inline]
+    pub fn set_cpu_32k_bank_to_bank( &mut self, bank: u8 ) {
+        let bank = wraparound( self.rom_32k_bank_count(), bank ) as u32;
+        self.inner.set_cpu_32k_bank( self.internal_rom_bank_offset + bank * 32 * 1024 );
     }
 
     #[inline]
