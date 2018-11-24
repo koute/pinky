@@ -13,9 +13,8 @@ impl MapperAxROM {
             inner: try!( BankedGenericMapper::from_rom( rom ) )
         };
 
-        let last_bank = mapper.inner.last_rom_16k_bank();
-        mapper.inner.set_cpu_lower_16k_bank_to_bank( 0 );
-        mapper.inner.set_cpu_upper_16k_bank_to_bank( last_bank );
+        mapper.inner.set_cpu_32k_bank_to_bank( 0 );
+        mapper.inner.set_only_lower_bank_mirroring();
 
         Ok( mapper )
     }
