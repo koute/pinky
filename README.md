@@ -17,7 +17,7 @@ You can [run it in your Web browser](http://koute.github.io/pinky-web/)!
    * A testsuite based on test ROMs.
    * A PPU testsuite automatically generated from a transistor-level
      simulation of a real PPU.
-   * Supports NROM (0), MMC1 (1) and UxROM (2) mappers.
+   * Supports NROM (0), MMC1 (1), UxROM (2), AxROM (7) and UNROM 512 (30) mappers.
    * Can be compiled as a [libretro] core.
    * Can be compiled into WebAssembly.
 
