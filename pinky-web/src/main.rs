@@ -29,7 +29,7 @@ use stdweb::web::event::{
     ProgressLoadEvent,
     KeyDownEvent,
     KeyUpEvent,
-    KeyboardLocation
+    IKeyboardEvent,
 };
 
 use stdweb::traits::*;
@@ -397,35 +397,31 @@ impl PinkyWeb {
         }
     }
 
-    fn on_key( &mut self, key: &str, location: KeyboardLocation, is_pressed: bool ) -> bool {
-        let button = match (key, location) {
-            ("Enter", _) => nes::Button::Start,
-            ("Shift", KeyboardLocation::Right) => nes::Button::Select,
-            ("ArrowUp", _) => nes::Button::Up,
-            ("ArrowLeft", _) => nes::Button::Left,
-            ("ArrowRight", _) => nes::Button::Right,
-            ("ArrowDown", _) => nes::Button::Down,
+    fn on_key( &mut self, keycode: &str, is_pressed: bool ) -> bool {
+        let button = match keycode {
+            "Enter" => nes::Button::Start,
+            "ShiftRight" => nes::Button::Select,
+            "ArrowUp" => nes::Button::Up,
+            "ArrowLeft" => nes::Button::Left,
+            "ArrowRight" => nes::Button::Right,
+            "ArrowDown" => nes::Button::Down,
 
             // On Edge the arrows have different names
             // for some reason.
-            ("Up", _) => nes::Button::Up,
-            ("Left", _) => nes::Button::Left,
-            ("Right", _) => nes::Button::Right,
-            ("Down", _) => nes::Button::Down,
+            "Up" => nes::Button::Up,
+            "Left" => nes::Button::Left,
+            "Right" => nes::Button::Right,
+            "Down" => nes::Button::Down,
 
-            ("z", _) => nes::Button::A,
-            ("x", _) => nes::Button::B,
-
-            // For those using the Dvorak layout.
-            (";", _) => nes::Button::A,
-            ("q", _) => nes::Button::B,
+            "KeyZ" => nes::Button::A,
+            "KeyX" => nes::Button::B,
 
             // For those using the Dvorak layout **and** Microsoft Edge.
             //
             // On `keydown` we get ";" as we should, but on `keyup`
             // we get "Unidentified". Seriously Microsoft, how buggy can
             // your browser be?
-            ("Unidentified", _) if is_pressed == false => nes::Button::A,
+            "Unidentified" if is_pressed == false => nes::Button::A,
 
             _ => return false
         };
@@ -593,14 +589,14 @@ fn support_rom_changing( pinky: Rc< RefCell< PinkyWeb > > ) {
 
 fn support_input( pinky: Rc< RefCell< PinkyWeb > > ) {
     web::window().add_event_listener( enclose!( [pinky] move |event: KeyDownEvent| {
-        let handled = pinky.borrow_mut().on_key( &event.key(), event.location(), true );
+        let handled = pinky.borrow_mut().on_key( &event.code(), true );
         if handled {
             event.prevent_default();
         }
     }));
 
     web::window().add_event_listener( enclose!( [pinky] move |event: KeyUpEvent| {
-        let handled = pinky.borrow_mut().on_key( &event.key(), event.location(), false );
+        let handled = pinky.borrow_mut().on_key( &event.code(), false );
         if handled {
             event.prevent_default();
         }
