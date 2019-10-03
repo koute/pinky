@@ -707,9 +707,6 @@ macro_rules! decoding_logic {
                 253 => exec_sbc,
                 254 => exec_incdec_1,
                 255 => exec_unk,
-                _ => unsafe {
-                    fast_unreachable!()
-                }
             }
         }
 
