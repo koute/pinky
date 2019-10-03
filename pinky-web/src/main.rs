@@ -349,7 +349,7 @@ impl PinkyWeb {
     // in which case we'll temporairly give back the control
     // of the main thread back to the web browser so that
     // it can handle other events and process audio.
-    fn run_a_bit( &mut self ) -> Result< bool, Box< Error > > {
+    fn run_a_bit( &mut self ) -> Result< bool, Box< dyn Error > > {
         if self.paused {
             return Ok( true );
         }
@@ -623,7 +623,7 @@ fn load_rom( pinky: &Rc< RefCell< PinkyWeb > >, rom_data: &[u8] ) {
     show( "change-rom-button" );
 }
 
-fn handle_error< E: Into< Box< Error > > >( error: E ) {
+fn handle_error< E: Into< Box< dyn Error > > >( error: E ) {
     let error_message = format!( "{}", error.into() );
     web::document().get_element_by_id( "error-description" ).unwrap().set_text_content( &error_message );
 

@@ -33,8 +33,8 @@ impl TestcaseState {
 }
 
 pub trait EmulatorInterface: Sized {
-    fn new( rom_data: &[u8], testcase_state: TestcaseState ) -> Result< Self, Box< Error >>;
-    fn run( &mut self ) -> Result< (), Box< Error >>;
+    fn new( rom_data: &[u8], testcase_state: TestcaseState ) -> Result< Self, Box< dyn Error >>;
+    fn run( &mut self ) -> Result< (), Box< dyn Error >>;
     fn peek_memory( &mut self, address: u16 ) -> u8;
     fn poke_memory( &mut self, address: u16, value: u8 );
     fn get_framebuffer( &mut self, output: &mut [u8] );

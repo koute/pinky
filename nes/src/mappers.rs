@@ -53,7 +53,7 @@ impl Mapper for MapperNull {
     }
 }
 
-pub fn create_mapper( rom: NesRom ) -> Result< Box< Mapper >, LoadError > {
+pub fn create_mapper( rom: NesRom ) -> Result< Box< dyn Mapper >, LoadError > {
     match rom.mapper {
         0 => {
             try!( rom.check_rom_bank_count( &[1, 2] ) );
@@ -70,25 +70,25 @@ pub fn create_mapper( rom: NesRom ) -> Result< Box< Mapper >, LoadError > {
         },
         1 => {
             MapperMMC1::from_rom( rom ).map( |mapper| {
-                let boxed: Box< Mapper > = Box::new( mapper );
+                let boxed: Box< dyn Mapper > = Box::new( mapper );
                 boxed
             })
         },
         2 => {
             MapperUxROM::from_rom( rom ).map( |mapper| {
-                let boxed: Box< Mapper > = Box::new( mapper );
+                let boxed: Box< dyn Mapper > = Box::new( mapper );
                 boxed
             })
         },
         7 => {
             MapperAxROM::from_rom( rom ).map( |mapper| {
-                let boxed: Box< Mapper > = Box::new( mapper );
+                let boxed: Box< dyn Mapper > = Box::new( mapper );
                 boxed
             })
         },
         30 => {
             MapperUNROM512::from_rom( rom ).map( |mapper| {
-                let boxed: Box< Mapper > = Box::new( mapper );
+                let boxed: Box< dyn Mapper > = Box::new( mapper );
                 boxed
             })
         },

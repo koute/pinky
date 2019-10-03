@@ -592,7 +592,7 @@ trait Private: Sized + Context {
             }
             self.set_flags( StatusFlag::Zero, ((reg_a.wrapping_add(op).wrapping_add(carry)) & 0xff) == 0 );
             self.set_flags( StatusFlag::Sign, (tmp & 0x80) != 0 );
-            self.set_flags( StatusFlag::Overflow, (((reg_a ^ tmp) & 0x80) != 0 && ((reg_a ^ op) & 0x80) == 0) );
+            self.set_flags( StatusFlag::Overflow, ((reg_a ^ tmp) & 0x80) != 0 && ((reg_a ^ op) & 0x80) == 0 );
             if (tmp & 0x1f0) > 0x90 {
                 tmp = tmp.wrapping_add(0x60);
             }
