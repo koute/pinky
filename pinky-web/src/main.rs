@@ -401,10 +401,10 @@ impl PinkyWeb {
         let button = match (key, location) {
             ("Enter", _) => nes::Button::Start,
             ("Shift", KeyboardLocation::Right) => nes::Button::Select,
-            ("ArrowUp", _) => nes::Button::Up,
-            ("ArrowLeft", _) => nes::Button::Left,
-            ("ArrowRight", _) => nes::Button::Right,
-            ("ArrowDown", _) => nes::Button::Down,
+            ("w", _) => nes::Button::Up,
+            ("a", _) => nes::Button::Left,
+            ("d", _) => nes::Button::Right,
+            ("s", _) => nes::Button::Down,
 
             // On Edge the arrows have different names
             // for some reason.
@@ -413,12 +413,11 @@ impl PinkyWeb {
             ("Right", _) => nes::Button::Right,
             ("Down", _) => nes::Button::Down,
 
-            ("z", _) => nes::Button::A,
-            ("x", _) => nes::Button::B,
+            ("k", _) => nes::Button::A,
+            ("l", _) => nes::Button::B,
 
-            // For those using the Dvorak layout.
-            (";", _) => nes::Button::A,
-            ("q", _) => nes::Button::B,
+            (".", _) => nes::Button::A,
+            ("/", _) => nes::Button::B,
 
             // For those using the Dvorak layout **and** Microsoft Edge.
             //
