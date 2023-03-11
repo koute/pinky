@@ -21,7 +21,7 @@ fn list_files< P: AsRef< Path > >( path: P ) -> io::Result< Vec< PathBuf > > {
 
 fn main() {
     let files = list_files( "src/tests" ).unwrap();
-    let modules: Vec< _ > = files.into_iter().flat_map( |path| {
+    let mut modules: Vec< _ > = files.into_iter().flat_map( |path| {
         let filename = path.file_name().unwrap().to_string_lossy();
         if filename.starts_with( "test_" ) == false {
             None
@@ -29,6 +29,7 @@ fn main() {
             Some( filename[ 0..filename.len() - 3 ].to_owned() )
         }
     }).collect();
+    modules.sort();
 
     let out_dir: PathBuf = env::var_os( "CARGO_MANIFEST_DIR" ).unwrap().into();
     let out_filename = out_dir.join( "src" ).join( "tests" ).join( "mod.rs" );
