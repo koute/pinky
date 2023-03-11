@@ -1,0 +1,14 @@
+[workspace]
+members = [
+    "emumisc",
+    "mos6502",
+    "nes",
+    "nes-testsuite",
+    "pinky-devui",
+    "pinky-libretro",
+    "pinky-web",
+    "rp2c02-testsuite"
+]
+
+[profile.test]
+opt-level = 2

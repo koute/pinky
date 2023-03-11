@@ -1,3 +1,5 @@
+extern crate std as core;
+
 extern crate sdl2;
 extern crate clock_ticks;
 extern crate serde_json;

@@ -1,4 +1,7 @@
+#![no_std]
+
 extern crate unreachable;
+extern crate alloc;
 
 #[macro_use]
 mod misc;
@@ -31,7 +34,7 @@ pub use memory::{as_bytes, allocate_slice, copy_memory};
 #[macro_export]
 macro_rules! impl_deref {
     ($container: ty, $field_type: ty, $field: ident) => (
-        impl ::std::ops::Deref for $container {
+        impl ::core::ops::Deref for $container {
             type Target = $field_type;
 
             #[inline(always)]
@@ -40,7 +43,7 @@ macro_rules! impl_deref {
             }
         }
 
-        impl ::std::ops::DerefMut for $container {
+        impl ::core::ops::DerefMut for $container {
             #[inline(always)]
             fn deref_mut( &mut self ) -> &mut Self::Target {
                 &mut self.$field
@@ -52,14 +55,14 @@ macro_rules! impl_deref {
 #[macro_export]
 macro_rules! impl_as_ref {
     ($container: ty, $field_type: ty, $field: ident) => (
-        impl ::std::convert::AsRef< $field_type > for $container {
+        impl ::core::convert::AsRef< $field_type > for $container {
             #[inline(always)]
             fn as_ref( &self ) -> &$field_type {
                 &self.$field
             }
         }
 
-        impl ::std::convert::AsMut< $field_type > for $container {
+        impl ::core::convert::AsMut< $field_type > for $container {
             #[inline(always)]
             fn as_mut( &mut self ) -> &mut $field_type {
                 &mut self.$field
@@ -74,7 +77,7 @@ macro_rules! newtype {
         $(#[$attr])*
         pub struct $new( pub $old );
 
-        impl ::std::ops::Deref for $new {
+        impl ::core::ops::Deref for $new {
             type Target = $old;
 
             #[inline(always)]
@@ -83,21 +86,21 @@ macro_rules! newtype {
             }
         }
 
-        impl ::std::ops::DerefMut for $new {
+        impl ::core::ops::DerefMut for $new {
             #[inline(always)]
             fn deref_mut( &mut self ) -> &mut Self::Target {
                 &mut self.0
             }
         }
 
-        impl ::std::convert::AsRef< $old > for $new {
+        impl ::core::convert::AsRef< $old > for $new {
             #[inline(always)]
             fn as_ref( &self ) -> &$old {
                 &self.0
             }
         }
 
-        impl ::std::convert::AsMut< $old > for $new {
+        impl ::core::convert::AsMut< $old > for $new {
             #[inline(always)]
             fn as_mut( &mut self ) -> &mut $old {
                 &mut self.0

@@ -1,6 +1,8 @@
-use std::ptr;
-use std::slice;
-use std::mem;
+use core::ptr;
+use core::slice;
+use core::mem;
+use alloc::boxed::Box;
+use alloc::vec::Vec;
 
 #[inline]
 pub fn as_bytes< T: Copy >( array: &[T] ) -> &[u8] {

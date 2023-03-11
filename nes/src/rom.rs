@@ -1,23 +1,9 @@
-use std::io;
-use std::io::{Read, Error, ErrorKind, Seek, SeekFrom};
-use std::cmp::max;
-use std::fmt;
-use std::error;
-
-use byteorder::{ReadBytesExt, LittleEndian};
-
-fn fill_array< T: Read >( fp: &mut T, out: &mut [u8] ) -> io::Result<()> {
-    match fp.read( out ) {
-        Ok( size ) => {
-            if size == out.len() {
-                Ok(())
-            } else {
-                Err( Error::new( ErrorKind::Other, "Unexpected end of file found" ) )
-            }
-        },
-        Err( error ) => Err( error )
-    }
-}
+use core::cmp::max;
+use core::fmt;
+use core::error;
+use alloc::string::String;
+use alloc::vec::Vec;
+use alloc::format;
 
 fn decapitalize< M: fmt::Display >( msg: M ) -> String {
     let message = format!( "{}", msg );
@@ -32,7 +18,6 @@ fn decapitalize< M: fmt::Display >( msg: M ) -> String {
 #[derive(Debug)]
 pub enum LoadError {
     Custom( String ),
-    IO( io::Error )
 }
 
 impl LoadError {
@@ -45,7 +30,6 @@ impl fmt::Display for LoadError {
     fn fmt( &self, fmt: &mut fmt::Formatter ) -> fmt::Result {
         match *self {
             LoadError::Custom( ref message ) => try!( write!( fmt, "Unable to load ROM - {}", decapitalize( message ))),
-            LoadError::IO( ref error ) => try!( write!( fmt, "Unable to load ROM - {}", decapitalize( error ))),
         }
 
         Ok(())
@@ -56,14 +40,7 @@ impl error::Error for LoadError {
     fn description( &self ) -> &str {
         match *self {
             LoadError::Custom( ref message ) => &message[..],
-            LoadError::IO( ref error ) => error.description()
         }
-    }
-}
-
-impl From< io::Error > for LoadError {
-    fn from( error: io::Error ) -> LoadError {
-        LoadError::IO( error )
     }
 }
 
@@ -100,23 +77,23 @@ pub enum Mirroring {
 }
 
 impl NesRom {
-    pub fn load< T: Read + Seek >( fp: &mut T ) -> Result< Self, LoadError > {
-        let magic = try!( fp.read_u32::< LittleEndian >() );
+    pub fn load( mut data: &[u8] ) -> Result< Self, LoadError > {
+        if data.len() < 16 {
+            return Err( LoadError::new( "unexpected end of file" ) );
+        }
 
+        let magic = u32::from_le_bytes( [data[0], data[1], data[2], data[3]] );
         if magic != 0x1a53454e {
             return Err( LoadError::new( format!( "Not an INES ROM file: magic number mismatch (got: 0x{:08X})", magic ) ) );
         }
 
-        let rom_bank_count = try!( fp.read_u8() ) as usize;
-        let video_rom_bank_count = try!( fp.read_u8() ) as usize;
-        let flags_1 = try!( fp.read_u8() );
-        let flags_2 = try!( fp.read_u8() );
+        let rom_bank_count = data[ 4 ] as usize;
+        let video_rom_bank_count = data[ 5 ] as usize;
+        let flags_1 = data[ 6 ];
+        let flags_2 = data[ 7 ];
 
         // For compatibility with older INES files we assume there must be always one RAM bank.
-        let save_ram_length = max( 1, try!( fp.read_u8() ) as u32 ) * 8 * 1024;
-
-        // Skip padding.
-        try!( fp.seek( SeekFrom::Current(7) ) );
+        let save_ram_length = max( 1, data[ 8 ] as u32 ) * 8 * 1024;
 
         let mirroring = {
             if flags_1 & 0b1000 != 0 {
@@ -131,20 +108,23 @@ impl NesRom {
         let has_trainer = flags_1 & 0b100 != 0;
         let mapper = (flags_2 & 0xF0) | ((flags_1 & 0xF0) >> 4);
 
-        let mut rom = Vec::< u8 >::with_capacity( rom_bank_count * ROM_BANK_SIZE );
-        let mut video_rom = Vec::< u8 >::with_capacity( video_rom_bank_count * VROM_BANK_SIZE );
+        let rom_size = rom_bank_count * ROM_BANK_SIZE;
+        let video_rom_size = video_rom_bank_count * VROM_BANK_SIZE;
 
-        unsafe {
-            rom.set_len( rom_bank_count * ROM_BANK_SIZE );
-            video_rom.set_len( video_rom_bank_count * VROM_BANK_SIZE );
-        }
-
+        data = &data[ 16.. ];
         if has_trainer {
-            try!( fp.seek( SeekFrom::Current( 512 ) ) ); // Skip trainer.
+            if data.len() < 512 {
+                return Err( LoadError::new( "unexpected end of file" ) );
+            }
+            data = &data[ 512.. ]; // Skip trainer.
         }
 
-        try!( fp.read_exact( &mut rom[..] ) );
-        try!( fp.read_exact( &mut video_rom[..] ) );
+        if data.len() < rom_size + video_rom_size {
+            return Err( LoadError::new( "unexpected end of file" ) );
+        }
+
+        let rom = data[ ..rom_size ].to_vec();
+        let video_rom = data[ rom_size..rom_size + video_rom_size ].to_vec();
 
         Ok( NesRom {
             mapper: mapper,

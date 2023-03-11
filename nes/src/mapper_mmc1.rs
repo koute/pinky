@@ -152,6 +152,7 @@ impl Mapper for MapperMMC1 {
                     _ => unsafe { fast_unreachable!() }
                 };
 
+                #[cfg(feature = "log")]
                 debug!( "ROM switching mode = {:?}, VROM switching mode = {:?}",
                     self.rom_switching_mode,
                     self.vrom_switching_mode

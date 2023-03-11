@@ -1,4 +1,6 @@
-use std::fmt;
+use core::fmt;
+use alloc::vec::Vec;
+
 use emumisc::{PeekPoke, At};
 use rom::Mirroring;
 use mappers::Mapper;
@@ -464,6 +466,7 @@ impl GenericMapper {
     #[inline]
     pub fn poke_cpu_memory_space( &mut self, address: u16, value: u8 ) {
         if self.is_cpu_address_writable( address ) == false {
+            #[cfg(feature = "log")]
             warn!( "Unhandled write to 0x{:04X} (value=0x{:02X})", address, value );
             return;
         }
@@ -523,7 +526,7 @@ impl Mapper for GenericMapper {
     }
 }
 
-use std::ops::Sub;
+use core::ops::Sub;
 use rom::{NesRom, LoadError};
 #[inline]
 fn wraparound< T: Sub< Output = T > + PartialOrd + Copy >( limit: T, mut value: T ) -> T {

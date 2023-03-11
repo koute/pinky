@@ -39,7 +39,7 @@ impl nes_testsuite::EmulatorInterface for Instance {
             testcase_state: testcase_state
         };
 
-        try!( nes::Interface::load_rom_from_memory( &mut instance, rom_data ) );
+        try!( nes::Interface::load_rom( &mut instance, rom_data ) );
         Ok( instance )
     }
 

@@ -83,9 +83,15 @@ impl libretro_backend::Core for PinkyCore {
         }
 
         let result = if let Some( data ) = game_data.data() {
-            nes::Interface::load_rom_from_memory( self, data )
+            nes::Interface::load_rom( self, data )
         } else if let Some( path ) = game_data.path() {
-            nes::Interface::load_rom_from_file( self, path )
+            let data = match std::fs::read( path ) {
+                Ok( data ) => data,
+                Err( _ ) => {
+                    return LoadGameResult::Failed( game_data );
+                }
+            };
+            nes::Interface::load_rom( self, &data )
         } else {
             unreachable!();
         };

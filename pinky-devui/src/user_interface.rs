@@ -170,7 +170,7 @@ impl UserInterface {
             state: nes::State::new(),
             audio_buffer: Vec::new()
         };
-        self.nes.load_rom_from_file( &self.rom_filename ).unwrap();
+        self.nes.load_rom( &std::fs::read( &self.rom_filename ).unwrap() ).unwrap();
 
         let frame;
         loop {
@@ -269,7 +269,8 @@ impl UserInterface {
         if let Some( filename ) = env::args().skip(1).next() {
             println!( "Loading '{}'...", filename );
             self.rom_filename = PathBuf::from( &filename );
-            self.nes.load_rom_from_file( filename ).unwrap();
+            let data = std::fs::read( filename ).unwrap();
+            self.nes.load_rom( &data ).unwrap();
 
             self.is_emulating = true;
             self.image_buffer.clear();

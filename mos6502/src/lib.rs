@@ -1,5 +1,11 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(not(feature = "std"), feature(error_in_core))]
+
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
+
+#[cfg(feature = "std")]
+extern crate std as core;
 
 #[macro_use]
 extern crate emumisc;

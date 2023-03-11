@@ -1,10 +1,9 @@
 use self::Register8::*;
 use self::Direction::*;
 
-use std::mem::transmute;
-use std::fmt;
-use std::ops::Deref;
-use std::error;
+use core::mem::transmute;
+use core::fmt;
+use core::ops::Deref;
 
 use emumisc::WrappingExtra;
 
@@ -227,7 +226,7 @@ impl fmt::Display for EmulationError {
     }
 }
 
-impl error::Error for EmulationError {
+impl core::error::Error for EmulationError {
     fn description( &self ) -> &str {
         use self::EmulationError::*;
         match *self {
@@ -1018,6 +1017,7 @@ trait Private: Sized + Context {
         result
     }
 
+    #[cfg(feature = "std")]
     fn print_registers( &self ) {
         println!( "            NV-BDIZC  A  X  Y   PC" );
         println!( "            {:08b} {:02X} {:02X} {:02X} {:04X}", self.state().status, self.state().a, self.state().x, self.state().y, self.state().pc );

@@ -1,5 +1,5 @@
-use std::mem;
-use std::ops::{Deref, DerefMut};
+use core::mem;
+use core::ops::{Deref, DerefMut};
 
 // A shim like this is necessary to implement an orphaned instance in Rust.
 // It's very important to keep the structure opaque to keep it safe to use.

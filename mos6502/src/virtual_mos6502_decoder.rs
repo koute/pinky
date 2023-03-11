@@ -761,9 +761,8 @@ macro_rules! decoding_logic {
             
             #[inline(always)]
             fn get_register( &self ) -> Register8 {
-                use std::mem;
                 unsafe {
-                    mem::transmute( (self.attr & 0b00011000) >> 3 )
+                    core::mem::transmute( (self.attr & 0b00011000) >> 3 )
                 }
             }
             

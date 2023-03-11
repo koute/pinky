@@ -1,4 +1,4 @@
-use std::mem;
+use core::mem;
 
 #[inline(always)] pub fn is_b0_set( value: u8 ) -> bool { (value & (1 << 0)) != 0 }
 #[inline(always)] pub fn is_b1_set( value: u8 ) -> bool { (value & (1 << 1)) != 0 }
@@ -11,8 +11,6 @@ use std::mem;
 
 #[inline(always)]
 pub fn to_bit( bit: u8, value: bool ) -> u8 {
-    use std::mem;
-
     debug_assert!( bit < 8 );
     let converted: u8 = unsafe { mem::transmute( value ) };
     debug_assert!( converted == 0 || converted == 1 );
@@ -37,7 +35,7 @@ macro_rules! impl_bit_extra {
         impl BitExtra for $typ {
             #[inline(always)]
             fn mask_to_shift( mask: Self ) -> u8 {
-                use std::mem::size_of;
+                use core::mem::size_of;
                 debug_assert!( mask != 0 );
 
                 for n_bit in 0..(size_of::< Self >() * 8) as u8 {

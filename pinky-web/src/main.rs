@@ -613,7 +613,7 @@ fn load_rom( pinky: &Rc< RefCell< PinkyWeb > >, rom_data: &[u8] ) {
 
     let mut pinky = pinky.borrow_mut();
     let pinky = pinky.deref_mut();
-    if let Err( err ) = nes::Interface::load_rom_from_memory( pinky, rom_data ) {
+    if let Err( err ) = nes::Interface::load_rom( pinky, rom_data ) {
         handle_error( err );
         return;
     }

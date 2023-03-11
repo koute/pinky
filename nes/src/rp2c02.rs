@@ -1,6 +1,7 @@
-use std::mem;
-use std::default::Default;
-use std::slice;
+use core::mem;
+use core::default::Default;
+use core::slice;
+use alloc::vec::Vec;
 
 use emumisc::{WrappingExtra, BitExtra, HiLoAccess, PeekPoke, At, is_b5_set, is_b6_set, is_b7_set, reverse_bits};
 

@@ -1,8 +1,6 @@
-use std::path::Path;
-use std::error::Error;
-use std::fs::File;
-use std::io::{Read, Seek};
-use std::mem;
+use core::error::Error;
+use core::mem;
+use alloc::boxed::Box;
 
 use mos6502;
 use rp2c02;
@@ -24,16 +22,8 @@ pub trait Context: Sized {
 }
 
 pub trait Interface: Sized + Context {
-    fn load_rom< T: Read + Seek >( &mut self, stream: &mut T ) -> Result< (), LoadError > {
-        Private::load_rom( self, stream )
-    }
-
-    fn load_rom_from_memory( &mut self, buffer: &[u8] ) -> Result< (), LoadError > {
-        Private::load_rom_from_memory( self, buffer )
-    }
-
-    fn load_rom_from_file< P: AsRef< Path >>( &mut self, path: P ) -> Result< (), LoadError > {
-        Private::load_rom_from_file( self, path )
+    fn load_rom( &mut self, buffer: &[u8] ) -> Result< (), LoadError > {
+        Private::load_rom( self, buffer )
     }
 
     fn hard_reset( &mut self ) {
@@ -319,8 +309,10 @@ trait Private: Sized + Context {
         Orphan::< Self >::cast_mut( self )
     }
 
-    fn load_rom< T: Read + Seek >( &mut self, stream: &mut T ) -> Result< (), LoadError > {
-        let rom = try!( NesRom::load( stream ) );
+    fn load_rom( &mut self, buffer: &[u8] ) -> Result< (), LoadError > {
+        let rom = try!( NesRom::load( buffer ) );
+
+        #[cfg(feature = "log")]
         info!( "Loaded ROM: {:?}", rom );
 
         let mapper = try!( create_mapper( rom ) );
@@ -330,17 +322,6 @@ trait Private: Sized + Context {
         self.hard_reset();
 
         Ok(())
-    }
-
-    fn load_rom_from_memory( &mut self, buffer: &[u8] ) -> Result< (), LoadError > {
-        use std::io::Cursor;
-        let mut cursor = Cursor::new( buffer );
-        self.load_rom( &mut cursor )
-    }
-
-    fn load_rom_from_file< P: AsRef< Path >>( &mut self, path: P ) -> Result< (), LoadError > {
-        let mut fp = try!( File::open( path ) );
-        self.load_rom( &mut fp )
     }
 
     fn hard_reset( &mut self ) {
@@ -456,6 +437,7 @@ trait Private: Sized + Context {
                     4 => rp2c02::Interface::peek_oamdata( self.newtype_mut() ),
                     7 => rp2c02::Interface::peek_ppudata( self.newtype_mut() ),
                     _ => {
+                        #[cfg(feature = "log")]
                         warn!( "Unhandled read from PPU register 0x{:04X}", address );
                         0
                     }
@@ -495,7 +477,10 @@ trait Private: Sized + Context {
                     5 => rp2c02::Interface::poke_ppuscroll( self.newtype_mut(), value ),
                     6 => rp2c02::Interface::poke_ppuaddr( self.newtype_mut(), value ),
                     7 => rp2c02::Interface::poke_ppudata( self.newtype_mut(), value ),
-                    _ => warn!( "Unhandled write to PPU register 0x{:04X} (value=0x{:02X})", address, value )
+                    _ => {
+                        #[cfg(feature = "log")]
+                        warn!( "Unhandled write to PPU register 0x{:04X} (value=0x{:02X})", address, value )
+                    }
                 }
             }, {
                 match translate_address_ioreg_other( address ) {
@@ -535,7 +520,10 @@ trait Private: Sized + Context {
                         let is_on_odd_cycle = self.is_on_odd_cycle();
                         virtual_apu::Interface::poke_frame_sequencer_ctrl( self.newtype_mut(), value, is_on_odd_cycle )
                     },
-                    _ => warn!( "Unhandled write to IO register 0x{:04X} (value=0x{:02X})", address, value )
+                    _ => {
+                        #[cfg(feature = "log")]
+                        warn!( "Unhandled write to IO register 0x{:04X} (value=0x{:02X})", address, value )
+                    }
                 }
             }, {
                 self.state().mapper.poke_expansion_rom( address, value );
