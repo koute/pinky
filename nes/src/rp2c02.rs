@@ -489,6 +489,7 @@ impl Framebuffer {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct FramebufferPixel( u16 );
 
 impl FramebufferPixel {
@@ -546,6 +547,7 @@ impl Default for Framebuffer {
     The NES doesn't output an RGB signal; it directly outputs analog video signal, hence
     there is a multitude of ways of interpreting the colors it generates.
 */
+#[repr(transparent)]
 pub struct Palette( [u32; 512] );
 
 fn generate_emphasis_colors( palette: &mut Palette ) {
@@ -585,23 +587,26 @@ fn generate_emphasis_colors( palette: &mut Palette ) {
 }
 
 impl Palette {
+    #[inline(always)]
     pub fn new( data: &[u8] ) -> Palette {
+        let mut output = Palette( [0; 512] );
+        Self::new_inplace( data, &mut output );
+        output
+    }
+
+    fn new_inplace( data: &[u8], palette: &mut Palette ) {
         assert!( data.len() == 192 || data.len() == 1536 );
 
-        let mut output = [0; 512];
         for (index, components) in data.chunks( 3 ).enumerate() {
             let r = components[0] as u32;
             let g = components[1] as u32;
             let b = components[2] as u32;
-            output[ index ] = r | g << 8 | b << 16 | 0xFF << 24;
+            palette.0[ index ] = r | g << 8 | b << 16 | 0xFF << 24;
         }
 
-        let mut palette = Palette( output );
         if data.len() == 192 {
-            generate_emphasis_colors( &mut palette );
+            generate_emphasis_colors( palette );
         }
-
-        palette
     }
 
     pub fn get_packed_abgr( &self, index: u16 ) -> u32 {
@@ -623,6 +628,7 @@ impl Palette {
 static DEFAULT_PALETTE: &'static [u8] = include_bytes!( "../data/FBX-Final.pal" );
 
 impl Default for Palette {
+    #[inline(always)]
     fn default() -> Palette {
         Palette::new( DEFAULT_PALETTE )
     }
