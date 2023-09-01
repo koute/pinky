@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Jan Bujak <j@exia.io>"]
 
 [dependencies]
-bitflags = "0.7"
+bitflags = "2.4.0"
 
 [dependencies.emumisc]
 path = "../emumisc"

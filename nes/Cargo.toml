@@ -5,7 +5,7 @@ authors = ["Jan Bujak <j@exia.io>"]
 
 [dependencies]
 log = { version = "0.4", default-features = false, optional = true }
-bitflags = "0.7"
+bitflags = "2.4.0"
 
 [dependencies.emumisc]
 path = "../emumisc"

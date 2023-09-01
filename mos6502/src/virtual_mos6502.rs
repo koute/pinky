@@ -139,28 +139,27 @@ impl State {
     }
 }
 
-pub mod StatusFlag {
-    bitflags!(
-        pub flags Ty: u8 {
-            const Carry         = 1 << 0,   /* This holds the carry out of the most significant bit in any arithmetic operation.
-                                            After subtraction this flag is cleared if a borrow is required, and set if no borrow is required.
-                                            Also used in shift and rotate logical operations. */
-            const Zero          = 1 << 1,   /* Set to 1 when any arithmetic or logical operation produces a zero result, and is set to 0 if the result is non-zero. */
-            const IRQDisable    = 1 << 2,   /* If set interrupts are disabled. */
-            const BCDMode       = 1 << 3,
-            const SoftIRQ       = 1 << 4,   /* Is set to 1 all the time, except after an NMI. (Can be accessed only by pushing the status register to stack.) */
-            const Unused        = 1 << 5,   /* Is set to 1 all the time. (Can be accessed only by pushing the status register to stack.) */
-            const Overflow      = 1 << 6,   /* Set when an arithmetic operation produces a result too large to be represented in a byte. */
-            const Sign          = 1 << 7    /* Set if the result of an operation is negative, cleared if positive. */
-        }
-    );
-}
+bitflags!(
+    #[derive(Copy, Clone)]
+    pub struct StatusFlag: u8 {
+        const Carry         = 1 << 0;   /* This holds the carry out of the most significant bit in any arithmetic operation.
+                                           After subtraction this flag is cleared if a borrow is required, and set if no borrow is required.
+                                           Also used in shift and rotate logical operations. */
+        const Zero          = 1 << 1;   /* Set to 1 when any arithmetic or logical operation produces a zero result, and is set to 0 if the result is non-zero. */
+        const IRQDisable    = 1 << 2;   /* If set interrupts are disabled. */
+        const BCDMode       = 1 << 3;
+        const SoftIRQ       = 1 << 4;   /* Is set to 1 all the time, except after an NMI. (Can be accessed only by pushing the status register to stack.) */
+        const Unused        = 1 << 5;   /* Is set to 1 all the time. (Can be accessed only by pushing the status register to stack.) */
+        const Overflow      = 1 << 6;   /* Set when an arithmetic operation produces a result too large to be represented in a byte. */
+        const Sign          = 1 << 7;   /* Set if the result of an operation is negative, cleared if positive. */
+    }
+);
 
 const NMI_VECTOR_ADDRESS: Address = 0xFFFA;
 const RESET_VECTOR_ADDRESS: Address = 0xFFFC;
 const IRQ_VECTOR_ADDRESS: Address = 0xFFFE;
 
-impl fmt::Display for StatusFlag::Ty {
+impl fmt::Display for StatusFlag {
     #[allow(unused_assignments)] // Since Rust generates an invalid warning here: "value assigned to `already_written` is never read"
     fn fmt( &self, fmt: &mut fmt::Formatter ) -> fmt::Result {
         let mut already_written = false;
@@ -271,7 +270,7 @@ impl fmt::Debug for Location {
     }
 }
 
-fn show_branch( fmt: &mut fmt::Formatter, flag: StatusFlag::Ty, cond: bool, offset_u8: u8 ) -> fmt::Result {
+fn show_branch( fmt: &mut fmt::Formatter, flag: StatusFlag, cond: bool, offset_u8: u8 ) -> fmt::Result {
     let offset = offset_u8 as i8;
     if offset == -2 {
         write!( fmt, "HANG" )?;
@@ -466,7 +465,7 @@ trait Private: Sized + Context {
 
     /* INSTRUCTIONS */
 
-    fn branch( &mut self, flag: StatusFlag::Ty, condition: bool ) -> Result< EmulationStatus, EmulationError > {
+    fn branch( &mut self, flag: StatusFlag, condition: bool ) -> Result< EmulationStatus, EmulationError > {
         if self.is_set( flag ) != condition {
             return Ok( EmulationStatus::Normal );
         }
@@ -487,12 +486,12 @@ trait Private: Sized + Context {
         Ok( EmulationStatus::Normal )
     }
 
-    fn set( &mut self, flag: StatusFlag::Ty ) -> Result< EmulationStatus, EmulationError > {
+    fn set( &mut self, flag: StatusFlag ) -> Result< EmulationStatus, EmulationError > {
         self.set_flags( flag, true );
         Ok( EmulationStatus::Normal )
     }
 
-    fn clr( &mut self, flag: StatusFlag::Ty ) -> Result< EmulationStatus, EmulationError > {
+    fn clr( &mut self, flag: StatusFlag ) -> Result< EmulationStatus, EmulationError > {
         self.set_flags( flag, false );
         Ok( EmulationStatus::Normal )
     }
@@ -1050,7 +1049,7 @@ trait Private: Sized + Context {
     }
 
     #[inline]
-    fn set_flags( &mut self, flags: StatusFlag::Ty, condition: bool ) {
+    fn set_flags( &mut self, flags: StatusFlag, condition: bool ) {
         let status = self.state().status;
         let new_status = if condition { status | flags.bits() } else { status & !flags.bits() };
 
@@ -1058,7 +1057,7 @@ trait Private: Sized + Context {
     }
 
     #[inline]
-    fn is_set( &self, flags: StatusFlag::Ty ) -> bool {
+    fn is_set( &self, flags: StatusFlag ) -> bool {
         (self.state().status & flags.bits()) == flags.bits()
     }
 

@@ -10,11 +10,11 @@ use mappers::Mapper;
 pub struct GenericMapper {
     // 0x6000 .. 0xFFFF, 40kb in total, remapped in 8kb chunks
     cpu_offsets: [i32; 5],
-    cpu_flags: [MapFlag::Ty; 5],
+    cpu_flags: [MapFlag; 5],
 
     // 0x0000 .. 0x2FFF, 12kb in total, remapped in 1kb chunks
     ppu_offsets: [i32; 12],
-    ppu_flags: [MapFlag::Ty; 12],
+    ppu_flags: [MapFlag; 12],
 
     // For maximum flexibility we just dump everything into one big vector.
     memory: Vec< u8 >
@@ -22,7 +22,7 @@ pub struct GenericMapper {
 
 impl fmt::Debug for GenericMapper {
     fn fmt( &self, fmt: &mut fmt::Formatter ) -> fmt::Result {
-        fn print_maps( fmt: &mut fmt::Formatter, offsets: &[i32], flags: &[MapFlag::Ty], prebaked_offsets: &[i32] ) -> fmt::Result {
+        fn print_maps( fmt: &mut fmt::Formatter, offsets: &[i32], flags: &[MapFlag], prebaked_offsets: &[i32] ) -> fmt::Result {
             let increment = -(prebaked_offsets[1] - prebaked_offsets[0]) / 1024;
             for ((offset, flags), prebaked) in offsets.iter().zip( flags.iter() ).zip( prebaked_offsets.iter() ) {
                 write!( fmt, "        0x{:04X}: ", -prebaked )?;
@@ -56,14 +56,13 @@ impl fmt::Debug for GenericMapper {
     }
 }
 
-pub mod MapFlag {
-    bitflags!(
-        pub flags Ty: u8 {
-            const Mapped      = 1 << 0,
-            const Writable    = 1 << 1
-        }
-    );
-}
+bitflags!(
+    #[derive(Copy, Clone)]
+    pub struct MapFlag: u8 {
+        const Mapped      = 1 << 0;
+        const Writable    = 1 << 1;
+    }
+);
 
 // We prebake the memory address of a given memory region in our offsets,
 // effectively saving us one extra operation per memory access.
@@ -158,9 +157,9 @@ impl GenericMapper {
     pub fn new() -> Self {
         GenericMapper {
             cpu_offsets: PREBAKED_CPU_OFFSETS,
-            cpu_flags: [MapFlag::Ty::empty(); 5],
+            cpu_flags: [MapFlag::empty(); 5],
             ppu_offsets: PREBAKED_PPU_OFFSETS,
-            ppu_flags: [MapFlag::Ty::empty(); 12],
+            ppu_flags: [MapFlag::empty(); 12],
 
             memory: Vec::new()
         }

@@ -58,15 +58,15 @@ pub trait Interface: Sized + Context {
         Private::swap_framebuffer( self, other )
     }
 
-    fn set_button_state( &mut self, port: ControllerPort, button: Button::Ty, is_pressed: bool ) {
+    fn set_button_state( &mut self, port: ControllerPort, button: Button, is_pressed: bool ) {
         Private::set_button_state( self, port, button, is_pressed )
     }
 
-    fn press( &mut self, port: ControllerPort, button: Button::Ty ) {
+    fn press( &mut self, port: ControllerPort, button: Button ) {
         Private::press( self, port, button )
     }
 
-    fn release( &mut self, port: ControllerPort, button: Button::Ty ) {
+    fn release( &mut self, port: ControllerPort, button: Button ) {
         Private::release( self, port, button )
     }
 
@@ -95,8 +95,8 @@ pub struct State {
     frame_counter: u32,
     full_frame_counter: u32,
     audio_samples_counter: u32,
-    gamepad_1: Button::Ty,
-    gamepad_2: Button::Ty,
+    gamepad_1: Button,
+    gamepad_2: Button,
     gamepad_shift_register_1: u8,
     gamepad_shift_register_2: u8,
     gamepad_shift_register_update: bool
@@ -117,8 +117,8 @@ impl State {
             frame_counter: 0,
             full_frame_counter: 0,
             audio_samples_counter: 0,
-            gamepad_1: Button::Ty::empty(),
-            gamepad_2: Button::Ty::empty(),
+            gamepad_1: Button::empty(),
+            gamepad_2: Button::empty(),
             gamepad_shift_register_1: 0,
             gamepad_shift_register_2: 0,
             gamepad_shift_register_update: false
@@ -138,18 +138,17 @@ pub enum ControllerPort {
 }
 
 // These values are deliberately picked to be the same as the ones in NES' input registers.
-pub mod Button {
-    bitflags! {
-        pub flags Ty: u8 {
-            const A          = 1 << 0,
-            const B          = 1 << 1,
-            const Select     = 1 << 2,
-            const Start      = 1 << 3,
-            const Up         = 1 << 4,
-            const Down       = 1 << 5,
-            const Left       = 1 << 6,
-            const Right      = 1 << 7
-        }
+bitflags! {
+    #[derive(Copy, Clone)]
+    pub struct Button: u8 {
+        const A          = 1 << 0;
+        const B          = 1 << 1;
+        const Select     = 1 << 2;
+        const Start      = 1 << 3;
+        const Up         = 1 << 4;
+        const Down       = 1 << 5;
+        const Left       = 1 << 6;
+        const Right      = 1 << 7;
     }
 }
 
@@ -410,7 +409,7 @@ trait Private: Sized + Context {
         rp2c02::Interface::swap_framebuffer( self.newtype_mut(), other )
     }
 
-    fn set_button_state( &mut self, port: ControllerPort, button: Button::Ty, is_pressed: bool ) {
+    fn set_button_state( &mut self, port: ControllerPort, button: Button, is_pressed: bool ) {
         if is_pressed {
             self.press( port, button );
         } else {
@@ -418,11 +417,11 @@ trait Private: Sized + Context {
         }
     }
 
-    fn press( &mut self, port: ControllerPort, button: Button::Ty ) {
+    fn press( &mut self, port: ControllerPort, button: Button ) {
         self.gamepad( port ).insert( button );
     }
 
-    fn release( &mut self, port: ControllerPort, button: Button::Ty ) {
+    fn release( &mut self, port: ControllerPort, button: Button ) {
         self.gamepad( port ).remove( button );
     }
 
@@ -566,7 +565,7 @@ trait Private: Sized + Context {
         value | 0x40
     }
 
-    fn gamepad( &mut self, port: ControllerPort ) -> &mut Button::Ty {
+    fn gamepad( &mut self, port: ControllerPort ) -> &mut Button {
         match port {
             ControllerPort::First => &mut self.state_mut().gamepad_1,
             ControllerPort::Second => &mut self.state_mut().gamepad_2

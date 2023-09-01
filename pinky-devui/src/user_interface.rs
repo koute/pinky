@@ -23,7 +23,7 @@ macro_rules! json_object {
     })
 }
 
-fn keycode_to_button( keycode: Keycode ) -> Option< Button::Ty > {
+fn keycode_to_button( keycode: Keycode ) -> Option< Button > {
     let button = match keycode {
         Keycode::Left => Button::Left,
         Keycode::Right => Button::Right,
