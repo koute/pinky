@@ -10,7 +10,7 @@ pub struct MapperAxROM {
 impl MapperAxROM {
     pub fn from_rom( rom: NesRom ) -> Result< Self, LoadError > {
         let mut mapper = MapperAxROM {
-            inner: try!( BankedGenericMapper::from_rom( rom ) )
+            inner: BankedGenericMapper::from_rom( rom )?
         };
 
         mapper.inner.set_cpu_32k_bank_to_bank( 0 );

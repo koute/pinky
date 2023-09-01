@@ -110,12 +110,12 @@ fn test_cpu_memory_map() {
 
     fn get( address: u16 ) -> (Type, u16) {
         match_cpu_address!( address,
-            { (Type::RAM, translate_address_ram( address )) },
-            { (Type::IOREG_PPU, translate_address_ioreg_ppu( address )) },
-            { (Type::IOREG_OTHER, translate_address_ioreg_other( address )) },
-            { (Type::EXPANSION_ROM, translate_address_expansion_rom( address )) },
-            { (Type::SAVE_RAM, translate_address_save_ram( address )) },
-            { (Type::ROM, translate_address_rom( address )) }
+            (Type::RAM, translate_address_ram( address )),
+            (Type::IOREG_PPU, translate_address_ioreg_ppu( address )),
+            (Type::IOREG_OTHER, translate_address_ioreg_other( address )),
+            (Type::EXPANSION_ROM, translate_address_expansion_rom( address )),
+            (Type::SAVE_RAM, translate_address_save_ram( address )),
+            (Type::ROM, translate_address_rom( address ))
         )
     }
 

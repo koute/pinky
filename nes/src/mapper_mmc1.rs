@@ -38,7 +38,7 @@ pub struct MapperMMC1 {
 impl MapperMMC1 {
     pub fn from_rom( rom: NesRom ) -> Result< Self, LoadError > {
         let mut mapper = MapperMMC1 {
-            inner: try!( BankedGenericMapper::from_rom( rom ) ),
+            inner: BankedGenericMapper::from_rom( rom )?,
 
             shift_register: SHIFT_REGISTER_DEFAULT_VALUE,
             rom_switching_mode: SwitchingModeForROM::OnlyLower,

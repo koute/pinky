@@ -168,9 +168,9 @@ impl fmt::Display for StatusFlag::Ty {
             ($flag:ident) => {
                 if self.contains( StatusFlag::$flag ) {
                     if already_written {
-                        try!( write!( fmt, "|" ) );
+                        write!( fmt, "|" )?;
                     }
-                    try!( write!( fmt, stringify!( $flag ) ) );
+                    write!( fmt, stringify!( $flag ) )?;
                     already_written = true;
                 }
             }
@@ -274,10 +274,10 @@ impl fmt::Debug for Location {
 fn show_branch( fmt: &mut fmt::Formatter, flag: StatusFlag::Ty, cond: bool, offset_u8: u8 ) -> fmt::Result {
     let offset = offset_u8 as i8;
     if offset == -2 {
-        try!( write!( fmt, "HANG" ) );
+        write!( fmt, "HANG" )?;
     }
     else {
-        try!( write!( fmt, "JMP {}{}", if offset.wrapping_add(2) > 0 {"+"} else {""}, offset.wrapping_add(2) ) );
+        write!( fmt, "JMP {}{}", if offset.wrapping_add(2) > 0 {"+"} else {""}, offset.wrapping_add(2) )?;
     }
     write!( fmt, " IF {}{:}", if cond {""} else {"!"}, flag )
 }
@@ -591,7 +591,7 @@ trait Private: Sized + Context {
             }
             self.set_flags( StatusFlag::Zero, ((reg_a.wrapping_add(op).wrapping_add(carry)) & 0xff) == 0 );
             self.set_flags( StatusFlag::Sign, (tmp & 0x80) != 0 );
-            self.set_flags( StatusFlag::Overflow, (((reg_a ^ tmp) & 0x80) != 0 && ((reg_a ^ op) & 0x80) == 0) );
+            self.set_flags( StatusFlag::Overflow, ((reg_a ^ tmp) & 0x80) != 0 && ((reg_a ^ op) & 0x80) == 0 );
             if (tmp & 0x1f0) > 0x90 {
                 tmp = tmp.wrapping_add(0x60);
             }
@@ -909,7 +909,7 @@ trait Private: Sized + Context {
     fn rts( &mut self ) -> Result< EmulationStatus, EmulationError > {
         self.dummy_pop(); // A dummy pop to increment the stack pointer.
         self.pop_pc();
-        self.fetch_and_increment_pc();
+        let _ = self.fetch_and_increment_pc();
 
         Ok( EmulationStatus::Normal )
     }

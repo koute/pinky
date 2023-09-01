@@ -33,17 +33,17 @@ impl nes::Context for Instance {
 }
 
 impl nes_testsuite::EmulatorInterface for Instance {
-    fn new( rom_data: &[u8], testcase_state: nes_testsuite::TestcaseState ) -> Result< Self, Box< Error >> {
+    fn new( rom_data: &[u8], testcase_state: nes_testsuite::TestcaseState ) -> Result< Self, Box< dyn Error >> {
         let mut instance = Instance {
             state: nes::State::new(),
             testcase_state: testcase_state
         };
 
-        try!( nes::Interface::load_rom( &mut instance, rom_data ) );
+        nes::Interface::load_rom( &mut instance, rom_data )?;
         Ok( instance )
     }
 
-    fn run( &mut self ) -> Result< (), Box< Error >> {
+    fn run( &mut self ) -> Result< (), Box< dyn Error >> {
         nes::Interface::execute_until_vblank( self )
     }
 

@@ -38,15 +38,15 @@ pub trait Interface: Sized + Context {
         Private::copy_into_memory( self, offset, data )
     }
 
-    fn execute_until_vblank( &mut self ) -> Result< (), Box< Error > > {
+    fn execute_until_vblank( &mut self ) -> Result< (), Box< dyn Error > > {
         Private::execute_until_vblank( self )
     }
 
-    fn execute_for_a_frame( &mut self ) -> Result< (), Box< Error > > {
+    fn execute_for_a_frame( &mut self ) -> Result< (), Box< dyn Error > > {
         Private::execute_for_a_frame( self )
     }
 
-    fn execute_cycle( &mut self ) -> Result< bool, Box< Error > > {
+    fn execute_cycle( &mut self ) -> Result< bool, Box< dyn Error > > {
         Private::execute_cycle( self )
     }
 
@@ -88,8 +88,8 @@ pub struct State {
     ppu_state: rp2c02::State,
     apu_state: virtual_apu::State,
     dma_state: dma::State,
-    mapper: Box< Mapper >,
-    error: Option< Box< Error > >,
+    mapper: Box< dyn Mapper >,
+    error: Option< Box< dyn Error > >,
     ready: bool,
     cpu_cycle: u32,
     frame_counter: u32,
@@ -310,12 +310,12 @@ trait Private: Sized + Context {
     }
 
     fn load_rom( &mut self, buffer: &[u8] ) -> Result< (), LoadError > {
-        let rom = try!( NesRom::load( buffer ) );
+        let rom = NesRom::load( buffer )?;
 
         #[cfg(feature = "log")]
         info!( "Loaded ROM: {:?}", rom );
 
-        let mapper = try!( create_mapper( rom ) );
+        let mapper = create_mapper( rom )?;
 
         self.state_mut().mapper = mapper;
         self.state_mut().ready = true;
@@ -325,7 +325,7 @@ trait Private: Sized + Context {
     }
 
     fn hard_reset( &mut self ) {
-        let mut mapper: Box< Mapper + 'static > = Box::new( MapperNull );
+        let mut mapper: Box< dyn Mapper + 'static > = Box::new( MapperNull );
         mem::swap( &mut mapper, &mut self.state_mut().mapper );
         let ready = self.state().ready;
 
@@ -351,7 +351,7 @@ trait Private: Sized + Context {
         copy_memory( data, &mut self.state_mut().ram[ offset as usize.. ] );
     }
 
-    fn execute_until_vblank( &mut self ) -> Result< (), Box< Error > > {
+    fn execute_until_vblank( &mut self ) -> Result< (), Box< dyn Error > > {
         if !self.state().ready {
             return Ok(());
         }
@@ -373,7 +373,7 @@ trait Private: Sized + Context {
         }
     }
 
-    fn execute_for_a_frame( &mut self ) -> Result< (), Box< Error > > {
+    fn execute_for_a_frame( &mut self ) -> Result< (), Box< dyn Error > > {
         if !self.state().ready {
             return Ok(());
         }
@@ -395,7 +395,7 @@ trait Private: Sized + Context {
         }
     }
 
-    fn execute_cycle( &mut self ) -> Result< bool, Box< Error > > {
+    fn execute_cycle( &mut self ) -> Result< bool, Box< dyn Error > > {
         let last_counter_value = self.state().full_frame_counter;
         mos6502::Interface::execute( self.newtype_mut() )?;
 

@@ -29,7 +29,7 @@ impl LoadError {
 impl fmt::Display for LoadError {
     fn fmt( &self, fmt: &mut fmt::Formatter ) -> fmt::Result {
         match *self {
-            LoadError::Custom( ref message ) => try!( write!( fmt, "Unable to load ROM - {}", decapitalize( message ))),
+            LoadError::Custom( ref message ) => write!( fmt, "Unable to load ROM - {}", decapitalize( message ))?,
         }
 
         Ok(())
@@ -57,13 +57,13 @@ pub struct NesRom {
 
 impl fmt::Debug for NesRom {
     fn fmt( &self, fmt: &mut fmt::Formatter ) -> fmt::Result {
-        try!( write!( fmt, "<NesRom mapper={}, rom={}k, video_rom={}k, ram={}k, mirroring={:?}>",
+        write!( fmt, "<NesRom mapper={}, rom={}k, video_rom={}k, ram={}k, mirroring={:?}>",
             self.mapper,
             self.rom.len() / 1024,
             self.video_rom.len() / 1024,
             self.save_ram_length / 1024,
             self.mirroring
-        ));
+        )?;
 
         Ok(())
     }

@@ -6,8 +6,8 @@ use std::io::{self, Read, Write};
 fn list_files< P: AsRef< Path > >( path: P ) -> io::Result< Vec< PathBuf > > {
     let mut output = Vec::new();
     for entry_opt in try!( fs::read_dir( path.as_ref() ) ) {
-        let entry = try!( entry_opt );
-        let metadata = try!( fs::metadata( entry.path() ) );
+        let entry = entry_opt?;
+        let metadata = fs::metadata( entry.path() )?;
 
         if metadata.is_dir() {
             continue;

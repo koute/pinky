@@ -249,7 +249,7 @@ mod tests {
         use std::cmp::min;
         let common_length = min( actual_actions.len(), expected_actions.len() );
         for (index, (actual, expected)) in actual_actions.iter().zip( expected_actions.iter() ).enumerate() {
-            assert!( actual == expected, format!( "Action #{}: expected {:?}, got {:?}", index, expected, actual ) );
+            assert!( actual == expected,  "Action #{}: expected {:?}, got {:?}", index, expected, actual );
         }
 
         if actual_actions.len() > common_length {

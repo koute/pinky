@@ -10,7 +10,7 @@ pub struct MapperUNROM512 {
 impl MapperUNROM512 {
     pub fn from_rom( rom: NesRom ) -> Result< Self, LoadError > {
         let mut mapper = MapperUNROM512 {
-            inner: try!( BankedGenericMapper::from_rom( rom ) )
+            inner: BankedGenericMapper::from_rom( rom )?
         };
 
         let last_bank = mapper.inner.last_rom_16k_bank();

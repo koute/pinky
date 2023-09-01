@@ -991,16 +991,16 @@ trait Private: Sized + Context {
             // to match up with the real PPU behavior so far.
             self.tilemap_address() + (self.tile_y() as u16 / 4 * (32 / 4)) + (self.state().current_address & 0xFF)
         } else {
-            ((self.tilemap_address() + 960) + (self.tile_y() as u16 / 4 * (32 / 4)) + (self.tile_x() as u16 / 4))
+            (self.tilemap_address() + 960) + (self.tile_y() as u16 / 4 * (32 / 4)) + (self.tile_x() as u16 / 4)
         }
     }
 
     fn bg_tile_lo_address( &self, index: u8 ) -> u16 {
-        (self.state().ppuctrl.background_pattern_table_address() + index as u16 * 16 + self.local_pixel_coordinate_y() as u16)
+        self.state().ppuctrl.background_pattern_table_address() + index as u16 * 16 + self.local_pixel_coordinate_y() as u16
     }
 
     fn bg_tile_hi_address( &self, index: u8 ) -> u16 {
-        (self.state().ppuctrl.background_pattern_table_address() + index as u16 * 16 + 8 + self.local_pixel_coordinate_y() as u16)
+        self.state().ppuctrl.background_pattern_table_address() + index as u16 * 16 + 8 + self.local_pixel_coordinate_y() as u16
     }
 
     fn background_pixel( &self ) -> (u8, u8) {

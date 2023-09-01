@@ -25,32 +25,32 @@ impl fmt::Debug for GenericMapper {
         fn print_maps( fmt: &mut fmt::Formatter, offsets: &[i32], flags: &[MapFlag::Ty], prebaked_offsets: &[i32] ) -> fmt::Result {
             let increment = -(prebaked_offsets[1] - prebaked_offsets[0]) / 1024;
             for ((offset, flags), prebaked) in offsets.iter().zip( flags.iter() ).zip( prebaked_offsets.iter() ) {
-                try!( write!( fmt, "        0x{:04X}: ", -prebaked ) );
+                write!( fmt, "        0x{:04X}: ", -prebaked )?;
                 if flags.contains( MapFlag::Mapped ) {
                     if flags.contains( MapFlag::Writable ) {
-                        try!( write!( fmt, "[w] " ) );
+                        write!( fmt, "[w] " )?;
                     } else {
-                        try!( write!( fmt, "[-] " ) );
+                        write!( fmt, "[-] " )?;
                     }
                     let offset = (offset - prebaked) / 1024;
-                    try!( writeln!( fmt, "{}k .. {}k", offset, offset + increment ) );
+                    writeln!( fmt, "{}k .. {}k", offset, offset + increment )?;
                 } else {
-                    try!( writeln!( fmt, "[unmapped]" ) );
+                    writeln!( fmt, "[unmapped]" )?;
                 }
             }
 
             Ok(())
         }
 
-        try!( writeln!( fmt, "GenericMapper {{" ) );
-        try!( writeln!( fmt, "    Total memory: {}k,", self.memory.len() / 1024 ) );
-        try!( writeln!( fmt, "    CPU {{" ) );
-        try!( print_maps( fmt, &self.cpu_offsets[..], &self.cpu_flags[..], &PREBAKED_CPU_OFFSETS[..] ) );
-        try!( writeln!( fmt, "    }}," ) );
-        try!( writeln!( fmt, "    PPU {{" ) );
-        try!( print_maps( fmt, &self.ppu_offsets[..], &self.ppu_flags[..], &PREBAKED_PPU_OFFSETS[..] ) );
-        try!( writeln!( fmt, "    }}" ) );
-        try!( write!( fmt, "}}" ) );
+        writeln!( fmt, "GenericMapper {{" )?;
+        writeln!( fmt, "    Total memory: {}k,", self.memory.len() / 1024 )?;
+        writeln!( fmt, "    CPU {{" )?;
+        print_maps( fmt, &self.cpu_offsets[..], &self.cpu_flags[..], &PREBAKED_CPU_OFFSETS[..] )?;
+        writeln!( fmt, "    }}," )?;
+        writeln!( fmt, "    PPU {{" )?;
+        print_maps( fmt, &self.ppu_offsets[..], &self.ppu_flags[..], &PREBAKED_PPU_OFFSETS[..] )?;
+        writeln!( fmt, "    }}" )?;
+        write!( fmt, "}}" )?;
 
         Ok(())
     }

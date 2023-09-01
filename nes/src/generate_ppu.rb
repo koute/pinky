@@ -24,7 +24,7 @@ end
 def write_output_to_file( filename )
     STDERR.puts "Generating #{filename}..."
     File.open( get_path( filename ), "wb" ) do |fp|
-        fp.puts $output
+        fp.puts $output.gsub ";;", ";"
     end
 end
 

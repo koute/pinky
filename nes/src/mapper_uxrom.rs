@@ -14,7 +14,7 @@ pub struct MapperUxROM {
 impl MapperUxROM {
     pub fn from_rom( rom: NesRom ) -> Result< Self, LoadError > {
         let mut mapper = MapperUxROM {
-            inner: try!( BankedGenericMapper::from_rom( rom ) )
+            inner: BankedGenericMapper::from_rom( rom )?
         };
 
         let last_bank = mapper.inner.last_rom_16k_bank();
