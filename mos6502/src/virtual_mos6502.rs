@@ -1,7 +1,6 @@
 use self::Register8::*;
 use self::Direction::*;
 
-use core::mem::transmute;
 use core::fmt;
 use core::ops::Deref;
 
@@ -1070,7 +1069,7 @@ trait Private: Sized + Context {
     #[inline]
     fn set_pcl( &mut self, value: u8 ) {
         unsafe {
-            let ppc: *mut u8 = transmute( &self.state().pc );
+            let ppc: *mut u8 = (&mut self.state_mut().pc) as *mut u16 as *mut u8;
             *ppc = value;
         }
     }
@@ -1078,8 +1077,8 @@ trait Private: Sized + Context {
     #[inline]
     fn set_pch( &mut self, value: u8 ) {
         unsafe {
-            let ppc: *mut u8 = transmute( &self.state().pc );
-            *(ppc.offset( 1 )) = value;
+            let ppc: *mut u8 = (&mut self.state_mut().pc) as *mut u16 as *mut u8;
+            *(ppc.add( 1 )) = value;
         }
     }
 
