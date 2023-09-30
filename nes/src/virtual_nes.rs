@@ -58,6 +58,10 @@ pub trait Interface: Sized + Context {
         Private::swap_framebuffer( self, other )
     }
 
+    fn set_all_buttons( &mut self, port: ControllerPort, buttons: Button ) {
+        Private::set_all_buttons( self, port, buttons )
+    }
+
     fn set_button_state( &mut self, port: ControllerPort, button: Button, is_pressed: bool ) {
         Private::set_button_state( self, port, button, is_pressed )
     }
@@ -407,6 +411,10 @@ trait Private: Sized + Context {
 
     fn swap_framebuffer( &mut self, other: rp2c02::Framebuffer ) -> rp2c02::Framebuffer {
         rp2c02::Interface::swap_framebuffer( self.newtype_mut(), other )
+    }
+
+    fn set_all_buttons( &mut self, port: ControllerPort, buttons: Button ) {
+        *self.gamepad( port ) = buttons;
     }
 
     fn set_button_state( &mut self, port: ControllerPort, button: Button, is_pressed: bool ) {

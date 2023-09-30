@@ -93,7 +93,11 @@ pub struct UserInterface {
     is_emulating: bool,
     palette: Palette,
     nes: VirtualNES,
-    rom_filename: PathBuf
+    rom_filename: PathBuf,
+    replaying: bool,
+    recording: Vec< Button >,
+    recording_position: usize,
+    no_limiter: bool,
 }
 
 impl UserInterface {
@@ -130,7 +134,11 @@ impl UserInterface {
                 state: nes::State::new(),
                 audio_buffer: Vec::new()
             },
-            rom_filename: PathBuf::new()
+            rom_filename: PathBuf::new(),
+            replaying: false,
+            recording: Vec::new(),
+            recording_position: 0,
+            no_limiter: false,
         }
 
     }
@@ -222,14 +230,18 @@ impl UserInterface {
             },
             Event::KeyDown { keycode: keycode @ Some( .. ), .. } => {
                 if let Some( button ) = keycode_to_button( keycode.unwrap() ) {
-                    self.nes.press( ControllerPort::First, button );
+                    if !self.replaying {
+                        self.nes.press( ControllerPort::First, button );
+                    }
                 } else if keycode == Some( Keycode::F10 ) {
                     self.generate_testfile();
                 }
             },
             Event::KeyUp { keycode: keycode @ Some( .. ), .. } => {
-                if let Some( button ) = keycode_to_button( keycode.unwrap() ) {
-                    self.nes.release( ControllerPort::First, button );
+                if !self.replaying {
+                    if let Some( button ) = keycode_to_button( keycode.unwrap() ) {
+                        self.nes.release( ControllerPort::First, button );
+                    }
                 }
             }
             _ => {}
@@ -263,23 +275,103 @@ impl UserInterface {
 
     pub fn run( &mut self ) {
         self.renderer.set_logical_size( 256, 240 ).unwrap();
-        self.open_audio();
 
-        if let Some( filename ) = env::args().skip(1).next() {
-            println!( "Loading '{}'...", filename );
-            self.rom_filename = PathBuf::from( &filename );
-            let data = std::fs::read( filename ).unwrap();
-            self.nes.load_rom( &data ).unwrap();
+        let mut no_audio = false;
+        for arg in env::args().skip(1) {
+            if arg == "--no-limiter" {
+                self.no_limiter = true;
+                continue;
+            }
 
-            self.is_emulating = true;
-            self.image_buffer.clear();
-            self.texture.update( &self.image_buffer );
+            if arg == "--no-audio" {
+                no_audio = true;
+                continue;
+            }
+
+            println!( "Loading '{}'...", arg );
+            let data = std::fs::read( &arg ).unwrap();
+            if data.len() >= 16 && u32::from_le_bytes( [data[0], data[1], data[2], data[3]] ) == 0x1a53454e {
+                self.rom_filename = PathBuf::from( &arg );
+                self.nes.load_rom( &data ).unwrap();
+
+                self.is_emulating = true;
+                self.image_buffer.clear();
+                self.texture.update( &self.image_buffer );
+            } else if data.starts_with( b"[Input]" ) || arg.ends_with( "Input Log.txt" ) {
+                let mut input = Vec::new();
+                for line in std::str::from_utf8( &data ).unwrap().trim().lines().skip(2) {
+                    if line == "[/Input]" {
+                        break;
+                    }
+
+                    let mut button = Button::empty();
+                    for ch in line.chars() {
+                        if ch == '|' || ch == '.' {
+                            continue;
+                        }
+
+                        button |= match ch {
+                            'U' => Button::Up,
+                            'D' => Button::Down,
+                            'L' => Button::Left,
+                            'R' => Button::Right,
+                            'S' => Button::Start,
+                            's' => Button::Select,
+                            'B' => Button::B,
+                            'A' => Button::A,
+                            _ => panic!("unknown key: '{}'", ch)
+                        };
+                    }
+
+                    input.push( button );
+                }
+
+                self.replaying = true;
+                self.recording = input;
+            } else if arg.ends_with( ".fm2" ) {
+                let mut input = Vec::new();
+                for line in std::str::from_utf8( &data ).unwrap().trim().lines().skip(2) {
+                    if !line.starts_with( '|' ) {
+                        continue;
+                    }
+
+                    let mut button = Button::empty();
+                    for ch in line.chars() {
+                        if ch == '|' || ch == '.' || ch == '0' {
+                            continue;
+                        }
+
+                        button |= match ch {
+                            'U' => Button::Up,
+                            'D' => Button::Down,
+                            'L' => Button::Left,
+                            'R' => Button::Right,
+                            'T' => Button::Start,
+                            'S' => Button::Select,
+                            'B' => Button::B,
+                            'A' => Button::A,
+                            _ => panic!("unknown key: '{}'", ch)
+                        };
+                    }
+
+                    input.push( button );
+                }
+
+                self.replaying = true;
+                self.recording = input;
+            } else {
+                panic!( "unhandled argument: {}", arg );
+            }
+        }
+
+        if !no_audio {
+            self.open_audio();
         }
 
         while self.running {
             self.handle_events();
 
-            let force = self.audio_device.as_ref().map( |device| device.size() < 44100 / 2 ).unwrap_or( false );
+            let force = self.no_limiter || self.audio_device.as_ref().map( |device| device.size() < 44100 / 2 ).unwrap_or( false );
             if force {
                 self.run_for_a_frame();
             } else if self.frame_limiter.begin() {
@@ -290,6 +382,12 @@ impl UserInterface {
     }
 
     fn run_for_a_frame( &mut self ) {
+        if self.replaying && self.recording_position < self.recording.len() {
+            let buttons = self.recording[ self.recording_position ];
+            self.recording_position += 1;
+            self.nes.set_all_buttons( ControllerPort::First, buttons );
+        }
+
         self.emulate();
 
         self.renderer.clear();
