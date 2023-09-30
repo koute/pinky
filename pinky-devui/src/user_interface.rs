@@ -70,7 +70,6 @@ impl nes::Context for VirtualNES {
 }
 
 fn md5sum< T: AsRef< [u8] > >( data: T ) -> String {
-    use md5;
     let raw_digest = md5::compute( data.as_ref() );
     let mut digest = String::with_capacity( 2 * 16 );
     for byte in raw_digest.iter() {

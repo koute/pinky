@@ -2,7 +2,6 @@ use std::thread;
 use std::time::Duration;
 
 fn get_time() -> u64 {
-    use clock_ticks;
     clock_ticks::precise_time_ns() / 1000
 }
 
