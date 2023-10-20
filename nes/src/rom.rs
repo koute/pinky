@@ -1,6 +1,5 @@
 use core::cmp::max;
 use core::fmt;
-use core::error;
 use alloc::string::String;
 use alloc::vec::Vec;
 use alloc::format;
@@ -36,13 +35,8 @@ impl fmt::Display for LoadError {
     }
 }
 
-impl error::Error for LoadError {
-    fn description( &self ) -> &str {
-        match *self {
-            LoadError::Custom( ref message ) => &message[..],
-        }
-    }
-}
+#[cfg(feature = "std")]
+impl std::error::Error for LoadError {}
 
 pub const ROM_BANK_SIZE: usize = 16 * 1024;
 pub const VROM_BANK_SIZE: usize = 8 * 1024;

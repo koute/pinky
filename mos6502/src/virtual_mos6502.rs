@@ -224,7 +224,8 @@ impl fmt::Display for EmulationError {
     }
 }
 
-impl core::error::Error for EmulationError {
+#[cfg(feature = "std")]
+impl std::error::Error for EmulationError {
     fn description( &self ) -> &str {
         use self::EmulationError::*;
         match *self {

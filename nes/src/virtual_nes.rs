@@ -1,4 +1,3 @@
-use core::error::Error;
 use core::mem;
 use alloc::boxed::Box;
 
@@ -10,6 +9,31 @@ use mappers::{Mapper, MapperNull, create_mapper};
 use rom::{NesRom, LoadError};
 use emumisc::{WrappingExtra, PeekPoke, copy_memory};
 use memory_map::{translate_address_ram, translate_address_ioreg_ppu, translate_address_ioreg_other};
+
+#[derive(Debug)]
+pub struct Error( ErrorKind );
+
+impl core::fmt::Display for Error {
+    fn fmt( &self, fmt: &mut core::fmt::Formatter ) -> core::fmt::Result {
+        match self.0 {
+            ErrorKind::EmulationError( error ) => error.fmt( fmt )
+        }
+    }
+}
+
+#[derive(Debug)]
+enum ErrorKind {
+    EmulationError( mos6502::EmulationError )
+}
+
+impl From< mos6502::EmulationError > for Error {
+    fn from( error: mos6502::EmulationError ) -> Self {
+        Error( ErrorKind::EmulationError( error ) )
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}
 
 pub trait Context: Sized {
     fn state_mut( &mut self ) -> &mut State;
@@ -38,15 +62,15 @@ pub trait Interface: Sized + Context {
         Private::copy_into_memory( self, offset, data )
     }
 
-    fn execute_until_vblank( &mut self ) -> Result< (), Box< dyn Error > > {
+    fn execute_until_vblank( &mut self ) -> Result< (), Error > {
         Private::execute_until_vblank( self )
     }
 
-    fn execute_for_a_frame( &mut self ) -> Result< (), Box< dyn Error > > {
+    fn execute_for_a_frame( &mut self ) -> Result< (), Error > {
         Private::execute_for_a_frame( self )
     }
 
-    fn execute_cycle( &mut self ) -> Result< bool, Box< dyn Error > > {
+    fn execute_cycle( &mut self ) -> Result< bool, Error > {
         Private::execute_cycle( self )
     }
 
@@ -94,7 +118,7 @@ pub struct State {
     apu_state: virtual_apu::State,
     dma_state: dma::State,
     mapper: Option< Box< dyn Mapper > >,
-    error: Option< Box< dyn Error > >,
+    error: Option< Error >,
     ready: bool,
     cpu_cycle: u32,
     frame_counter: u32,
@@ -366,7 +390,7 @@ trait Private: Sized + Context {
         copy_memory( data, &mut self.state_mut().ram[ offset as usize.. ] );
     }
 
-    fn execute_until_vblank( &mut self ) -> Result< (), Box< dyn Error > > {
+    fn execute_until_vblank( &mut self ) -> Result< (), Error > {
         if !self.state().ready {
             return Ok(());
         }
@@ -375,7 +399,7 @@ trait Private: Sized + Context {
         while self.state().frame_counter == last_counter_value {
             let result = mos6502::Interface::execute( self.newtype_mut() );
             if let Err( error ) = result {
-                self.state_mut().error = Some( Box::new( error ) );
+                self.state_mut().error = Some( error.into() );
                 break;
             }
         }
@@ -388,7 +412,7 @@ trait Private: Sized + Context {
         }
     }
 
-    fn execute_for_a_frame( &mut self ) -> Result< (), Box< dyn Error > > {
+    fn execute_for_a_frame( &mut self ) -> Result< (), Error > {
         if !self.state().ready {
             return Ok(());
         }
@@ -397,7 +421,7 @@ trait Private: Sized + Context {
         while self.state().full_frame_counter == last_counter_value {
             let result = mos6502::Interface::execute( self.newtype_mut() );
             if let Err( error ) = result {
-                self.state_mut().error = Some( Box::new( error ) );
+                self.state_mut().error = Some( error.into() );
                 break;
             }
         }
@@ -410,7 +434,7 @@ trait Private: Sized + Context {
         }
     }
 
-    fn execute_cycle( &mut self ) -> Result< bool, Box< dyn Error > > {
+    fn execute_cycle( &mut self ) -> Result< bool, Error > {
         let last_counter_value = self.state().full_frame_counter;
         mos6502::Interface::execute( self.newtype_mut() )?;
 
