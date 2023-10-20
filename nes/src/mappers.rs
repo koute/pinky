@@ -12,26 +12,26 @@ pub trait Mapper {
     fn peek_rom( &self, address: u16 ) -> u8;
     fn poke_rom( &mut self, address: u16, value: u8 );
 
-    fn peek_sram( &self, address: u16 ) -> u8 {
+    fn peek_sram( &self, _address: u16 ) -> u8 {
         #[cfg(feature = "log")]
-        warn!( "Unhandled read from the save RAM at 0x{:04X}", address );
+        warn!( "Unhandled read from the save RAM at 0x{:04X}", _address );
         0
     }
 
-    fn poke_sram( &mut self, address: u16, value: u8 ) {
+    fn poke_sram( &mut self, _address: u16, _value: u8 ) {
         #[cfg(feature = "log")]
-        warn!( "Unhandled write to the save RAM at 0x{:04X} (value=0x{:02X})", address, value );
+        warn!( "Unhandled write to the save RAM at 0x{:04X} (value=0x{:02X})", _address, _value );
     }
 
-    fn peek_expansion_rom( &self, address: u16 ) -> u8 {
+    fn peek_expansion_rom( &self, _address: u16 ) -> u8 {
         #[cfg(feature = "log")]
-        warn!( "Unhandled read from the expansion ROM at 0x{:04X}", address );
+        warn!( "Unhandled read from the expansion ROM at 0x{:04X}", _address );
         0
     }
 
-    fn poke_expansion_rom( &self, address: u16, value: u8 ) {
+    fn poke_expansion_rom( &self, _address: u16, _value: u8 ) {
         #[cfg(feature = "log")]
-        warn!( "Unhandled write to the expansion ROM at 0x{:04X} (value=0x{:02X})", address, value );
+        warn!( "Unhandled write to the expansion ROM at 0x{:04X} (value=0x{:02X})", _address, _value );
     }
 
     fn peek_video_memory( &self, address: u16 ) -> u8;
@@ -41,26 +41,26 @@ pub trait Mapper {
 pub struct MapperNull;
 
 impl Mapper for MapperNull {
-    fn peek_rom( &self, address: u16 ) -> u8 {
+    fn peek_rom( &self, _address: u16 ) -> u8 {
         #[cfg(feature = "log")]
-        warn!( "Unhandled read from the ROM at 0x{:04X}", address );
+        warn!( "Unhandled read from the ROM at 0x{:04X}", _address );
         0
     }
 
-    fn poke_rom( &mut self, address: u16, value: u8 ) {
+    fn poke_rom( &mut self, _address: u16, _value: u8 ) {
         #[cfg(feature = "log")]
-        warn!( "Unhandled write to the ROM at 0x{:04X} (value=0x{:02X})", address, value );
+        warn!( "Unhandled write to the ROM at 0x{:04X} (value=0x{:02X})", _address, _value );
     }
 
-    fn peek_video_memory( &self, address: u16 ) -> u8 {
+    fn peek_video_memory( &self, _address: u16 ) -> u8 {
         #[cfg(feature = "log")]
-        warn!( "Unhandled read from the VROM at 0x{:04X}", address );
+        warn!( "Unhandled read from the VROM at 0x{:04X}", _address );
         0
     }
 
-    fn poke_video_memory( &mut self, address: u16, value: u8 ) {
+    fn poke_video_memory( &mut self, _address: u16, _value: u8 ) {
         #[cfg(feature = "log")]
-        warn!( "Unhandled write to the VROM at 0x{:04X} (value=0x{:02X})", address, value );
+        warn!( "Unhandled write to the VROM at 0x{:04X} (value=0x{:02X})", _address, _value );
     }
 }
 
