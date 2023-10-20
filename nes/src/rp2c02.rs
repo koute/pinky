@@ -1,7 +1,6 @@
 use core::mem;
 use core::default::Default;
 use core::slice;
-use alloc::vec::Vec;
 
 use emumisc::{WrappingExtra, BitExtra, HiLoAccess, PeekPoke, At, is_b5_set, is_b6_set, is_b7_set, reverse_bits};
 
@@ -18,7 +17,7 @@ pub trait Context: Sized {
 
 pub trait Interface: Sized + Context {
     #[inline]
-    fn framebuffer( &self ) -> &Framebuffer {
+    fn framebuffer( &mut self ) -> &Framebuffer {
         Private::framebuffer( self )
     }
 
@@ -95,7 +94,7 @@ pub struct State {
     palette_ram: [u8; 32],
     sprite_list_ram: [u8; 256],
     secondary_sprite_list_ram: [u8; 32],
-    framebuffer: Framebuffer,
+    framebuffer: Option< Framebuffer >,
     odd_frame_flag: bool,
     vblank_flag_was_cleared: bool,
 
@@ -151,12 +150,17 @@ pub struct State {
 }
 
 impl State {
-    pub fn new() -> State {
+    pub const fn new() -> State {
+        let last_scanline = match SCANLINES_CONST.last() {
+            Some(value) => value,
+            None => unreachable!()
+        };
+
         State {
             palette_ram: [0; 32],
             sprite_list_ram: [0; 64 * 4],
             secondary_sprite_list_ram: [0;  8 * 4],
-            framebuffer: Framebuffer::new(),
+            framebuffer: None,
             odd_frame_flag: false,
             vblank_flag_was_cleared: false,
 
@@ -173,7 +177,7 @@ impl State {
             bg_palette_index_lo_shift_register: 0,
             bg_palette_index_hi_shift_register: 0,
 
-            sprites: [Sprite::default(); 8],
+            sprites: [Sprite::new(); 8],
 
             sprite_list_address: 0,
             ppudata_read_buffer: 0,
@@ -192,11 +196,11 @@ impl State {
             background_palette_index_latch: 0,
             tile_lo_latch: 0,
             tile_hi_latch: 0,
-            scanline_index: SCANLINES.len() as u8 - 1, // Point at the prerender scanline.
+            scanline_index: SCANLINES_CONST.len() as u8 - 1, // Point at the prerender scanline.
             scanline_counter: 0,
-            chunk_index: SCANLINES.last().unwrap().first_chunk_index,
+            chunk_index: last_scanline.first_chunk_index,
             chunk_counter: 0,
-            action_index: CHUNKS[ SCANLINES.last().unwrap().first_chunk_index as usize ].first_action_index,
+            action_index: CHUNKS_CONST[ last_scanline.first_chunk_index as usize ].first_action_index,
             auxiliary_sprite_list_address: 0,
             secondary_sprite_list_address: 0,
             sprite_list_data_latch: 0,
@@ -210,9 +214,12 @@ impl State {
         }
     }
 
+    fn initialize_framebuffer_if_needed( &mut self ) {
+    }
+
     #[inline]
-    pub fn framebuffer( &self ) -> &Framebuffer {
-        &self.framebuffer
+    pub fn framebuffer( &mut self ) -> &mut Framebuffer {
+        self.framebuffer.get_or_insert_with( Framebuffer::default )
     }
 }
 
@@ -220,7 +227,7 @@ impl State {
 struct PpuCtrl(u8);
 
 impl PpuCtrl {
-    fn new() -> PpuCtrl {
+    const fn new() -> PpuCtrl {
         PpuCtrl(0)
     }
 
@@ -273,7 +280,7 @@ impl PpuCtrl {
 struct PpuMask(u8);
 
 impl PpuMask {
-    fn new() -> PpuMask {
+    const fn new() -> PpuMask {
         PpuMask(0)
     }
 
@@ -296,7 +303,7 @@ impl PpuMask {
 struct PpuStatus(u8);
 
 impl PpuStatus {
-    fn new() -> PpuStatus {
+    const fn new() -> PpuStatus {
         PpuStatus(0)
     }
 
@@ -455,17 +462,10 @@ impl PpuStatus {
     Each scanline takes 341 PPU cycles, with each cycle producing one pixel.
 */
 
+#[derive(PartialEq, Eq)]
 pub struct Framebuffer {
-    buffer: Vec< u16 >
+    buffer: alloc::boxed::Box<[u16; 256 * 240]>
 }
-
-impl PartialEq for Framebuffer {
-    fn eq( &self, other: &Framebuffer ) -> bool {
-        &self.buffer[..] == &other.buffer[..]
-    }
-}
-
-impl Eq for Framebuffer {}
 
 impl Framebuffer {
     fn new() -> Framebuffer {
@@ -534,11 +534,8 @@ impl< 'a > Iterator for FramebufferIterator< 'a > {
 
 impl Default for Framebuffer {
     fn default() -> Self {
-        let mut buffer = Vec::new();
-        buffer.resize( 256 * 240, 0 );
-
         Framebuffer {
-            buffer
+            buffer: alloc::boxed::Box::new([0; 256 * 240])
         }
     }
 }
@@ -650,6 +647,16 @@ struct Sprite {
 
 impl Sprite {
     #[inline]
+    const fn new() -> Self {
+        Sprite {
+            pattern_lo_shift_register: 0,
+            pattern_hi_shift_register: 0,
+            attributes_latch: 0,
+            dots_until_is_displayed: 0
+        }
+    }
+
+    #[inline]
     fn display_sprite_behind_background( &self ) -> bool {
         is_b5_set( self.attributes_latch )
     }
@@ -662,12 +669,7 @@ impl Sprite {
 
 impl Default for Sprite {
     fn default() -> Self {
-        Sprite {
-            pattern_lo_shift_register: 0,
-            pattern_hi_shift_register: 0,
-            attributes_latch: 0,
-            dots_until_is_displayed: 0
-        }
+        Self::new()
     }
 }
 
@@ -883,12 +885,12 @@ trait Private: Sized + Context {
         (self.sprite_tile_hi_address() >> 8) as u8
     }
 
-    fn framebuffer( &self ) -> &Framebuffer {
-        &self.state().framebuffer
+    fn framebuffer( &mut self ) -> &Framebuffer {
+        self.state_mut().framebuffer()
     }
 
     fn swap_framebuffer( &mut self, mut other: Framebuffer ) -> Framebuffer {
-        mem::swap( &mut self.state_mut().framebuffer, &mut other );
+        mem::swap( self.state_mut().framebuffer(), &mut other );
         other
     }
 
@@ -1077,7 +1079,13 @@ trait Private: Sized + Context {
         // let color_in_system_palette_index = self.state_mut().palette_ram.peek( (palette_index as usize * 4) + color_in_palette_index as usize );
         let nth = self.state().n_pixel;
         let pixel = ((self.state().ppumask.color_emphasize_bits() as u16) << 6) | (color_in_system_palette_index as u16);
-        self.state_mut().framebuffer.buffer.poke( nth, pixel );
+        {
+            let framebuffer = match self.state_mut().framebuffer {
+                Some( ref mut framebuffer ) => framebuffer,
+                None => unsafe { core::hint::unreachable_unchecked() }
+            };
+            framebuffer.buffer.poke( nth, pixel );
+        }
         self.state_mut().n_pixel += 1;
     }
 
@@ -1093,6 +1101,8 @@ trait Private: Sized + Context {
     }
 
     fn execute( &mut self ) {
+        self.state_mut().framebuffer(); // Make sure the framebuffer is initialized.
+
         self.execute_next_action();
         self.on_cycle();
 

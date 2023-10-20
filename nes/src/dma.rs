@@ -41,7 +41,7 @@ pub struct State {
 }
 
 impl State {
-    pub fn new() -> State {
+    pub const fn new() -> State {
         State {
             dmc_dma_requested: false,
             dmc_dma_source_address: 0,

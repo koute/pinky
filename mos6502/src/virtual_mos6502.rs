@@ -115,14 +115,14 @@ pub struct State {
 }
 
 impl State {
-    pub fn new() -> State {
+    pub const fn new() -> State {
         State {
             pc: 0,
             a: 0,
             x: 0,
             y: 0,
             sp: 0xFD,
-            status: (StatusFlag::Unused | StatusFlag::IRQDisable).bits(),
+            status: StatusFlag::Unused.bits() | StatusFlag::IRQDisable.bits(),
             irq_line_state: false,
             nmi_latch_state: false,
             nmi_pending: false,

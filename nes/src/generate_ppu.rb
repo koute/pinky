@@ -255,7 +255,8 @@ end
 
 def generate_scanlines( constant_name, chunks_per_scanline )
 
-    output "static #{constant_name}: &'static [Scanline] = &["
+    output "static #{constant_name}: &'static [Scanline] = #{constant_name}_CONST;"
+    output "const #{constant_name}_CONST: &'static [Scanline] = &["
 
     index = 0
     chunks_per_scanline.each do |scanline|
@@ -278,7 +279,8 @@ end
 
 def generate_chunks( constant_name, chunks_per_scanline )
 
-    output "static #{constant_name}: &'static [Chunk] = &["
+    output "static #{constant_name}: &'static [Chunk] = #{constant_name}_CONST;"
+    output "const #{constant_name}_CONST: &'static [Chunk] = &["
 
     index = 0
     chunks_per_scanline.flat_map { |scanline| scanline[:chunks] }.each do |chunk|

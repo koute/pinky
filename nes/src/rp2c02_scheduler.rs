@@ -16,7 +16,8 @@ macro_rules! ppu_scheduling_logic {
             last_action_index: u16
         }
 
-        static SCANLINES: &'static [Scanline] = &[
+        static SCANLINES: &'static [Scanline] = SCANLINES_CONST;
+        const SCANLINES_CONST: &'static [Scanline] = &[
             Scanline {
                 times: 1,
                 first_chunk_index: 0,
@@ -59,7 +60,8 @@ macro_rules! ppu_scheduling_logic {
             },
         ];
 
-        static CHUNKS: &'static [Chunk] = &[
+        static CHUNKS: &'static [Chunk] = CHUNKS_CONST;
+        const CHUNKS_CONST: &'static [Chunk] = &[
             Chunk {
                 times: 1,
                 first_action_index: 0,

@@ -303,7 +303,7 @@ def generate_opcode_attributes
         }
 
         impl OpcodeAttributes {
-            fn empty() -> OpcodeAttributes {
+            const fn empty() -> OpcodeAttributes {
                 OpcodeAttributes {
                     attr: 0
                 }

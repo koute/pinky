@@ -160,11 +160,11 @@ pub struct State {
 }
 
 impl State {
-    pub fn new() -> State {
+    pub const fn new() -> State {
         State {
-            cycles_to_next_step: SEQUENCER_STEPS_MODE_0[ 2 ].0,
+            cycles_to_next_step: SEQUENCER_STEPS_MODE_0_CONST[ 2 ].0,
             sequencer_reconfigured: None,
-            sequencer_table: SEQUENCER_STEPS_MODE_0,
+            sequencer_table: SEQUENCER_STEPS_MODE_0_CONST,
             sequencer_current_step: 2,
             sequencer_mode: SequencerMode::Mode0,
             inhibit_interrupts: false,
@@ -250,7 +250,7 @@ impl Sequence {
     fn clk_volume_generator( &self ) -> bool { self.6 }
 }
 
-static SEQUENCER_STEPS_MODE_0: &'static [Sequence] = &[
+const SEQUENCER_STEPS_MODE_0_CONST: &'static [Sequence] = &[
     Sequence(    1, 1, false, false, false, false, false ),
     Sequence(    1, 2, false, false, false, false, false ),
     Sequence(    1, 3, false, false, false, false, false ),
@@ -261,6 +261,8 @@ static SEQUENCER_STEPS_MODE_0: &'static [Sequence] = &[
     Sequence(    1, 8,  true,  true,  true,  true,  true ),
     Sequence(    1, 3,  true, false, false, false, false )
 ];
+
+static SEQUENCER_STEPS_MODE_0: &'static [Sequence] = SEQUENCER_STEPS_MODE_0_CONST;
 
 static SEQUENCER_STEPS_MODE_1: &'static [Sequence] = &[
     Sequence(     1, 1, false, false, false, false, false ),
@@ -313,7 +315,7 @@ struct Channel {
 }
 
 impl Channel {
-    fn new() -> Channel {
+    const fn new() -> Channel {
         Channel {
             length_counter: 0,
             length_counter_disabled: false,
@@ -365,7 +367,7 @@ struct VolumeGenerator {
 }
 
 impl VolumeGenerator {
-    fn new() -> VolumeGenerator {
+    const fn new() -> VolumeGenerator {
         VolumeGenerator {
             is_manually_controlled: false,
             should_loop: false,
@@ -445,7 +447,7 @@ struct ChannelSquare {
 }
 
 impl ChannelSquare {
-    fn new( is_second_channel: bool ) -> ChannelSquare {
+    const fn new( is_second_channel: bool ) -> ChannelSquare {
         ChannelSquare {
             base: Channel::new(),
             duty: SquareChannelDuty::Duty125,
@@ -592,7 +594,7 @@ struct ChannelTriangle {
 }
 
 impl ChannelTriangle {
-    fn new() -> ChannelTriangle {
+    const fn new() -> ChannelTriangle {
         ChannelTriangle {
             base: Channel::new(),
             period: 0,
@@ -699,7 +701,7 @@ struct ChannelNoise {
 }
 
 impl ChannelNoise {
-    fn new() -> ChannelNoise {
+    const fn new() -> ChannelNoise {
         ChannelNoise {
             base: Channel::new(),
             volume_generator: VolumeGenerator::new(),
@@ -786,7 +788,7 @@ struct ChannelDeltaModulation {
 // The DMC channel plays back DPCM samples stored in memory as 1-bit deltas.
 // A bit of 1 will increment the output; a bit of 0 will decrement the output.
 impl ChannelDeltaModulation {
-    fn new() -> ChannelDeltaModulation {
+    const fn new() -> ChannelDeltaModulation {
         ChannelDeltaModulation {
             enabled: false,
 

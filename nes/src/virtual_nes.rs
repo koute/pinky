@@ -50,7 +50,7 @@ pub trait Interface: Sized + Context {
         Private::execute_cycle( self )
     }
 
-    fn framebuffer( &self ) -> &rp2c02::Framebuffer {
+    fn framebuffer( &mut self ) -> &rp2c02::Framebuffer {
         Private::framebuffer( self )
     }
 
@@ -87,12 +87,13 @@ impl< T: Context > Interface for T {}
 impl< T: Context > Private for T {}
 
 pub struct State {
+    mapper_null: MapperNull,
     ram: [u8; 2048],
     cpu_state: mos6502::State,
     ppu_state: rp2c02::State,
     apu_state: virtual_apu::State,
     dma_state: dma::State,
-    mapper: Box< dyn Mapper >,
+    mapper: Option< Box< dyn Mapper > >,
     error: Option< Box< dyn Error > >,
     ready: bool,
     cpu_cycle: u32,
@@ -107,14 +108,15 @@ pub struct State {
 }
 
 impl State {
-    pub fn new() -> State {
+    pub const fn new() -> State {
         State {
+            mapper_null: MapperNull,
             ram: [0; 2048],
             cpu_state: mos6502::State::new(),
             ppu_state: rp2c02::State::new(),
             apu_state: virtual_apu::State::new(),
             dma_state: dma::State::new(),
-            mapper: Box::new( MapperNull ),
+            mapper: None,
             error: None,
             ready: false,
             cpu_cycle: 0,
@@ -130,8 +132,18 @@ impl State {
     }
 
     #[inline]
-    pub fn framebuffer( &self ) -> &rp2c02::Framebuffer {
+    pub fn framebuffer( &mut self ) -> &rp2c02::Framebuffer {
         self.ppu_state.framebuffer()
+    }
+
+    #[inline]
+    fn mapper( &self ) -> &dyn Mapper {
+        self.mapper.as_ref().map( |mapper| &**mapper ).unwrap_or( &self.mapper_null )
+    }
+
+    #[inline]
+    fn mapper_mut( &mut self ) -> &mut dyn Mapper {
+        self.mapper.as_mut().map( |mapper| &mut **mapper ).unwrap_or( &mut self.mapper_null )
     }
 }
 
@@ -221,12 +233,12 @@ impl< C: Context > rp2c02::Context for Orphan< C > {
 
     #[inline]
     fn peek_video_memory( &self, address: u16 ) -> u8 {
-        self.as_ref().state().mapper.peek_video_memory( address )
+        self.as_ref().state().mapper().peek_video_memory( address )
     }
 
     #[inline]
     fn poke_video_memory( &mut self, address: u16, value: u8 ) {
-        self.as_mut().state_mut().mapper.poke_video_memory( address, value );
+        self.as_mut().state_mut().mapper_mut().poke_video_memory( address, value );
     }
 }
 
@@ -320,7 +332,7 @@ trait Private: Sized + Context {
 
         let mapper = create_mapper( rom )?;
 
-        self.state_mut().mapper = mapper;
+        self.state_mut().mapper = Some( mapper );
         self.state_mut().ready = true;
         self.hard_reset();
 
@@ -328,7 +340,7 @@ trait Private: Sized + Context {
     }
 
     fn hard_reset( &mut self ) {
-        let mut mapper: Box< dyn Mapper + 'static > = Box::new( MapperNull );
+        let mut mapper: Option< Box< dyn Mapper + 'static > > = None;
         mem::swap( &mut mapper, &mut self.state_mut().mapper );
         let ready = self.state().ready;
 
@@ -405,8 +417,8 @@ trait Private: Sized + Context {
         Ok( self.state().full_frame_counter != last_counter_value )
     }
 
-    fn framebuffer( &self ) -> &rp2c02::Framebuffer {
-        rp2c02::Interface::framebuffer( self.newtype() )
+    fn framebuffer( &mut self ) -> &rp2c02::Framebuffer {
+        rp2c02::Interface::framebuffer( self.newtype_mut() )
     }
 
     fn swap_framebuffer( &mut self, other: rp2c02::Framebuffer ) -> rp2c02::Framebuffer {
@@ -461,11 +473,11 @@ trait Private: Sized + Context {
                     _ => unsafe { fast_unreachable!() }
                 }
             }, {
-                self.state().mapper.peek_expansion_rom( address )
+                self.state().mapper().peek_expansion_rom( address )
             }, {
-                self.state().mapper.peek_sram( address )
+                self.state().mapper().peek_sram( address )
             }, {
-                self.state().mapper.peek_rom( address )
+                self.state().mapper().peek_rom( address )
             }
         )
     }
@@ -533,11 +545,11 @@ trait Private: Sized + Context {
                     }
                 }
             }, {
-                self.state().mapper.poke_expansion_rom( address, value );
+                self.state().mapper().poke_expansion_rom( address, value );
             }, {
-                self.state_mut().mapper.poke_sram( address, value );
+                self.state_mut().mapper_mut().poke_sram( address, value );
             }, {
-                self.state_mut().mapper.poke_rom( address, value );
+                self.state_mut().mapper_mut().poke_rom( address, value );
             }
         )
     }

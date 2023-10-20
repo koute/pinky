@@ -14,7 +14,7 @@ pub struct Filter {
 }
 
 impl Filter {
-    pub fn new() -> Filter {
+    pub const fn new() -> Filter {
         Filter {
             delay_00: 0.0,
             delay_01: 0.0,
