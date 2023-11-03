@@ -34,6 +34,24 @@ extern crate nes_testsuite;
 #[macro_use]
 extern crate rp2c02_testsuite;
 
+#[cfg(feature = "softfloat")]
+#[macro_use]
+extern crate softfloat;
+
+#[cfg(feature = "softfloat")]
+#[macro_use]
+mod float_softfloat;
+
+#[cfg(feature = "softfloat")]
+use float_softfloat as float;
+
+#[cfg(not(feature = "softfloat"))]
+#[macro_use]
+mod float_native;
+
+#[cfg(not(feature = "softfloat"))]
+use float_native as float;
+
 mod memory_map;
 mod rp2c02_scheduler;
 mod rp2c02;

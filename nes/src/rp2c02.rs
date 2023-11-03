@@ -4,6 +4,8 @@ use core::slice;
 
 use emumisc::{WrappingExtra, BitExtra, HiLoAccess, PeekPoke, At, is_b5_set, is_b6_set, is_b7_set, reverse_bits};
 
+use crate::float::{u8_to_f32, f32_to_u32};
+
 pub trait Context: Sized {
     fn state_mut( &mut self ) -> &mut State;
     fn state( &self ) -> &State;
@@ -552,34 +554,34 @@ fn generate_emphasis_colors( palette: &mut Palette ) {
         let pixel = FramebufferPixel( index );
         // TODO: This isn't really accurate.
         let (r, g, b) = palette.get_rgb( pixel.base_color_index() as u16 );
-        let mut r = r as f32 / 255.0;
-        let mut g = g as f32 / 255.0;
-        let mut b = b as f32 / 255.0;
+        let mut r = u8_to_f32(r) / f32!(255.0);
+        let mut g = u8_to_f32(g) / f32!(255.0);
+        let mut b = u8_to_f32(b) / f32!(255.0);
         if pixel.is_red_emphasized() {
-            r *= 1.1;
-            g *= 0.85;
-            b *= 0.85;
+            r *= f32!(1.1);
+            g *= f32!(0.85);
+            b *= f32!(0.85);
         }
         if pixel.is_green_emphasized() {
-            r *= 0.85;
-            g *= 1.1;
-            b *= 0.85;
+            r *= f32!(0.85);
+            g *= f32!(1.1);
+            b *= f32!(0.85);
         }
         if pixel.is_blue_emphasized() {
-            r *= 0.85;
-            g *= 0.85;
-            b *= 1.1;
+            r *= f32!(0.85);
+            g *= f32!(0.85);
+            b *= f32!(1.1);
         }
-        if r > 1.0 { r = 1.0; }
-        if g > 1.0 { g = 1.0; }
-        if b > 1.0 { b = 1.0; }
-        let r = r * 255.0;
-        let g = g * 255.0;
-        let b = b * 255.0;
+        if r > f32!(1.0) { r = f32!(1.0); }
+        if g > f32!(1.0) { g = f32!(1.0); }
+        if b > f32!(1.0) { b = f32!(1.0); }
+        let r = r * f32!(255.0);
+        let g = g * f32!(255.0);
+        let b = b * f32!(255.0);
         palette.0[ index as usize ] =
-            r as u32 |
-            (g as u32) << 8 |
-            (b as u32) << 16;
+            f32_to_u32(r) |
+            f32_to_u32(g) << 8 |
+            f32_to_u32(b) << 16;
     }
 }
 

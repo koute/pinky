@@ -10,6 +10,8 @@ use rom::{NesRom, LoadError};
 use emumisc::{WrappingExtra, PeekPoke, copy_memory};
 use memory_map::{translate_address_ram, translate_address_ioreg_ppu, translate_address_ioreg_other};
 
+use crate::float::F32;
+
 #[derive(Debug)]
 pub struct Error( ErrorKind );
 
@@ -283,13 +285,13 @@ impl< C: Context > virtual_apu::Context for Orphan< C > {
     }
 
     #[inline]
-    fn on_sample( &mut self, sample: f32 ) {
+    fn on_sample( &mut self, sample: F32 ) {
         self.as_mut().state_mut().audio_samples_counter += 1;
         if self.as_ref().state().audio_samples_counter >= (virtual_apu::Interface::sample_rate( self ) / 60) {
             self.as_mut().state_mut().audio_samples_counter = 0;
             self.as_mut().state_mut().full_frame_counter += 1;
         }
-        Context::on_audio_sample( self.as_mut(), sample );
+        Context::on_audio_sample( self.as_mut(), sample.into() );
     }
 
     #[inline]

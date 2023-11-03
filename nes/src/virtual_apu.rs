@@ -1,5 +1,6 @@
 use emumisc::{WrappingExtra, PeekPoke, BitExtra, is_b7_set, is_b6_set, is_b5_set, is_b4_set, is_b3_set, is_b2_set, is_b1_set, is_b0_set, to_bit};
 use filter::Filter;
+use float::{F64, F32, u8_to_f32};
 
 pub trait Context: Sized {
     fn state_mut( &mut self ) -> &mut State;
@@ -7,7 +8,7 @@ pub trait Context: Sized {
 
     fn is_on_odd_cycle( &self ) -> bool;
 
-    fn on_sample( &mut self, sample: f32 );
+    fn on_sample( &mut self, sample: F32 );
     fn set_irq_line( &mut self, state: bool );
     fn activate_dma( &mut self, address: u16 );
 }
@@ -155,7 +156,7 @@ pub struct State {
     channel_delta_modulation: ChannelDeltaModulation,
 
     filter: Filter,
-    sampling_counter: f64,
+    sampling_counter: F64,
     decimation_counter: u8
 }
 
@@ -176,7 +177,7 @@ impl State {
             channel_delta_modulation: ChannelDeltaModulation::new(),
 
             filter: Filter::new(),
-            sampling_counter: 0.0,
+            sampling_counter: f64!(0.0),
             decimation_counter: 0
         }
     }
@@ -959,7 +960,7 @@ trait Private: Sized + Context {
         }
     }
 
-    fn get_output( &self ) -> f32 {
+    fn get_output( &self ) -> F32 {
         let raw_sample_square_1 = self.state().channel_square_1.output();
         let raw_sample_square_2 = self.state().channel_square_2.output();
         let raw_sample_triangle = self.state().channel_triangle.output();
@@ -967,26 +968,26 @@ trait Private: Sized + Context {
         let raw_sample_dmc = self.state().channel_delta_modulation.output();
 
         let output_square = if raw_sample_square_1 == 0 && raw_sample_square_2 == 0 {
-            0.0
+            f32!(0.0)
         } else {
-            95.88 / (8128.0 / (raw_sample_square_1 as f32 + raw_sample_square_2 as f32) + 100.0)
+            f32!(95.88) / (f32!(8128.0) / (u8_to_f32( raw_sample_square_1 ) + u8_to_f32( raw_sample_square_2 )) + f32!(100.0))
         };
 
         let output_rest = if raw_sample_triangle == 0 && raw_sample_noise == 0 && raw_sample_dmc == 0 {
-            0.0
+            f32!(0.0)
         } else {
-            159.79 / (1.0 / ((raw_sample_triangle as f32 / 8227.0) + (raw_sample_noise as f32 / 12241.0) + (raw_sample_dmc as f32 / 22638.0)) + 100.0)
+            f32!(159.79) / (f32!(1.0) / ((u8_to_f32( raw_sample_triangle ) / f32!(8227.0)) + (u8_to_f32( raw_sample_noise ) / f32!(12241.0)) + (u8_to_f32( raw_sample_dmc ) / f32!(22638.0))) + f32!(100.0))
         };
 
         return output_square + output_rest;
     }
 
     fn clock_output( &mut self ) {
-        let native_sampling_rate: f64 = 21477.272 / 12.0; // TODO: PAL support.
-        let internal_sampling_rate: f64 = 352.8; // TODO: This is closely related to the filter used; make the filter configurable.
-        let sample_every: f64 = native_sampling_rate / internal_sampling_rate;
+        let native_sampling_rate: F64 = f64!(21477.272) / f64!(12.0); // TODO: PAL support.
+        let internal_sampling_rate: F64 = f64!(352.8); // TODO: This is closely related to the filter used; make the filter configurable.
+        let sample_every: F64 = native_sampling_rate / internal_sampling_rate;
 
-        self.state_mut().sampling_counter += 1.0;
+        self.state_mut().sampling_counter += f64!(1.0);
         if self.state().sampling_counter < sample_every {
             return;
         }
