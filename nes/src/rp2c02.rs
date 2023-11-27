@@ -4,8 +4,6 @@ use core::slice;
 
 use emumisc::{WrappingExtra, BitExtra, HiLoAccess, PeekPoke, At, is_b5_set, is_b6_set, is_b7_set, reverse_bits};
 
-use crate::float::{u8_to_f32, f32_to_u32};
-
 pub trait Context: Sized {
     fn state_mut( &mut self ) -> &mut State;
     fn state( &self ) -> &State;
@@ -496,7 +494,7 @@ pub struct FramebufferPixel( u16 );
 
 impl FramebufferPixel {
     #[inline]
-    pub fn base_color_index( &self ) -> u8 {
+    pub const fn base_color_index( &self ) -> u8 {
         (self.0 & 0b111111) as u8
     }
 
@@ -506,18 +504,18 @@ impl FramebufferPixel {
     }
 
     #[inline]
-    pub fn is_red_emphasized( &self ) -> bool {
-        self.0.get_bits( 0b00000000_01000000 ) != 0
+    pub const fn is_red_emphasized( &self ) -> bool {
+        (self.0 & 0b00000000_01000000) != 0
     }
 
     #[inline]
-    pub fn is_green_emphasized( &self ) -> bool {
-        self.0.get_bits( 0b00000000_10000000 ) != 0
+    pub const fn is_green_emphasized( &self ) -> bool {
+        (self.0 & 0b00000000_10000000) != 0
     }
 
     #[inline]
-    pub fn is_blue_emphasized( &self ) -> bool {
-        self.0.get_bits( 0b00000001_00000000 ) != 0
+    pub const fn is_blue_emphasized( &self ) -> bool {
+        (self.0 & 0b00000001_00000000) != 0
     }
 }
 
@@ -546,74 +544,89 @@ impl Default for Framebuffer {
     The NES doesn't output an RGB signal; it directly outputs analog video signal, hence
     there is a multitude of ways of interpreting the colors it generates.
 */
+#[derive(Clone)]
 #[repr(transparent)]
 pub struct Palette( [u32; 512] );
 
-fn generate_emphasis_colors( palette: &mut Palette ) {
-    for index in 64..512 {
+const fn generate_emphasis_colors( mut palette: Palette ) -> Palette {
+    use crate::float_softfloat::*;
+
+    let mut index = 64;
+    while index < 512 {
         let pixel = FramebufferPixel( index );
         // TODO: This isn't really accurate.
         let (r, g, b) = palette.get_rgb( pixel.base_color_index() as u16 );
-        let mut r = u8_to_f32(r) / f32!(255.0);
-        let mut g = u8_to_f32(g) / f32!(255.0);
-        let mut b = u8_to_f32(b) / f32!(255.0);
+        let mut r = u8_to_f32(r).div( softfloat::f32!(255.0) );
+        let mut g = u8_to_f32(g).div( softfloat::f32!(255.0) );
+        let mut b = u8_to_f32(b).div( softfloat::f32!(255.0) );
         if pixel.is_red_emphasized() {
-            r *= f32!(1.1);
-            g *= f32!(0.85);
-            b *= f32!(0.85);
+            r = r.mul( softfloat::f32!(1.1) );
+            g = g.mul( softfloat::f32!(0.85) );
+            b = b.mul( softfloat::f32!(0.85) );
         }
         if pixel.is_green_emphasized() {
-            r *= f32!(0.85);
-            g *= f32!(1.1);
-            b *= f32!(0.85);
+            r = r.mul( softfloat::f32!(0.85) );
+            g = g.mul( softfloat::f32!(1.1) );
+            b = b.mul( softfloat::f32!(0.85) );
         }
         if pixel.is_blue_emphasized() {
-            r *= f32!(0.85);
-            g *= f32!(0.85);
-            b *= f32!(1.1);
+            r = r.mul( softfloat::f32!(0.85) );
+            g = g.mul( softfloat::f32!(0.85) );
+            b = b.mul( softfloat::f32!(1.1) );
         }
-        if r > f32!(1.0) { r = f32!(1.0); }
-        if g > f32!(1.0) { g = f32!(1.0); }
-        if b > f32!(1.0) { b = f32!(1.0); }
-        let r = r * f32!(255.0);
-        let g = g * f32!(255.0);
-        let b = b * f32!(255.0);
+
+        const fn clamp(value: F32) -> F32 {
+            if matches!( value.cmp( softfloat::f32!(1.0) ), None | Some( core::cmp::Ordering::Greater ) ) {
+                softfloat::f32!(1.0)
+            } else {
+                value
+            }
+        }
+
+        let r = clamp(r).mul( softfloat::f32!(255.0) );
+        let g = clamp(g).mul( softfloat::f32!(255.0) );
+        let b = clamp(b).mul( softfloat::f32!(255.0) );
         palette.0[ index as usize ] =
             f32_to_u32(r) |
             f32_to_u32(g) << 8 |
             f32_to_u32(b) << 16;
+
+        index += 1;
     }
+
+    palette
 }
 
 impl Palette {
     #[inline(always)]
-    pub fn new( data: &[u8] ) -> Palette {
-        let mut output = Palette( [0; 512] );
-        Self::new_inplace( data, &mut output );
-        output
-    }
-
-    fn new_inplace( data: &[u8], palette: &mut Palette ) {
+    pub const fn new( data: &[u8] ) -> Palette {
         assert!( data.len() == 192 || data.len() == 1536 );
 
-        for (index, components) in data.chunks( 3 ).enumerate() {
-            let r = components[0] as u32;
-            let g = components[1] as u32;
-            let b = components[2] as u32;
-            palette.0[ index ] = r | g << 8 | b << 16 | 0xFF << 24;
+        let mut palette = Palette( [0; 512] );
+        let mut index_in = 0;
+        let mut index_out = 0;
+        while index_in < data.len() {
+            let r = data[ index_in ] as u32;
+            let g = data[ index_in + 1 ] as u32;
+            let b = data[ index_in + 2 ] as u32;
+            palette.0[ index_out ] = r | g << 8 | b << 16 | 0xFF << 24;
+            index_in += 3;
+            index_out += 1;
         }
 
         if data.len() == 192 {
-            generate_emphasis_colors( palette );
+            palette = generate_emphasis_colors( palette );
         }
+
+        palette
     }
 
-    pub fn get_packed_abgr( &self, index: u16 ) -> u32 {
+    pub const fn get_packed_abgr( &self, index: u16 ) -> u32 {
         debug_assert!( index < 512 );
-        self.0.peek( index )
+        self.0[ index as usize ]
     }
 
-    pub fn get_rgb( &self, index: u16 ) -> (u8, u8, u8) {
+    pub const fn get_rgb( &self, index: u16 ) -> (u8, u8, u8) {
         let value = self.get_packed_abgr( index );
         let r = (value & 0x000000FF) as u8;
         let g = ((value & 0x0000FF00) >> 8) as u8;
@@ -623,13 +636,18 @@ impl Palette {
     }
 }
 
-// Source: http://forums.nesdev.com/viewtopic.php?p=150239#p150239
-static DEFAULT_PALETTE: &'static [u8] = include_bytes!( "../data/FBX-Final.pal" );
+impl Palette {
+    pub fn get_default() -> &'static Palette {
+        // Source: http://forums.nesdev.com/viewtopic.php?p=150239#p150239
+        static DEFAULT: Palette = Palette::new( include_bytes!( "../data/FBX-Final.pal" ) );
+        &DEFAULT
+    }
+}
 
 impl Default for Palette {
     #[inline(always)]
     fn default() -> Palette {
-        Palette::new( DEFAULT_PALETTE )
+        Self::get_default().clone()
     }
 }
 

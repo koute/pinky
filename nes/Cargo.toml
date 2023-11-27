@@ -6,7 +6,7 @@ authors = ["Jan Bujak <j@exia.io>"]
 [dependencies]
 log = { version = "0.4", default-features = false, optional = true }
 bitflags = "2.4.0"
-softfloat = { version = "1.0.0", optional = true }
+softfloat = { version = "1.0.0" }
 
 [dependencies.emumisc]
 path = "../emumisc"
@@ -24,4 +24,4 @@ path = "../rp2c02-testsuite"
 [features]
 default = ["std"]
 std = ["mos6502/std", "log", "log/std"]
-softfloat = ["dep:softfloat"]
+softfloat = []
