@@ -371,11 +371,9 @@ trait Private: Sized + Context {
         let ready = self.state().ready;
 
         // FIXME: This doesn't reset the mapper.
-        *self.state_mut() = State {
-            mapper: mapper,
-            ready: ready,
-            .. State::new()
-        };
+        *self.state_mut() = State::new();
+        self.state_mut().mapper = mapper;
+        self.state_mut().ready = ready;
         self.soft_reset();
     }
 
