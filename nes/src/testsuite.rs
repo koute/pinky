@@ -44,7 +44,7 @@ impl nes_testsuite::EmulatorInterface for Instance {
     }
 
     fn run( &mut self ) -> Result< (), Box< dyn Error >> {
-        nes::Interface::execute_until_vblank( self )
+        Ok(nes::Interface::execute_until_vblank( self )?)
     }
 
     fn peek_memory( &mut self, address: u16 ) -> u8 {
